@@ -1,0 +1,84 @@
+#### This file is used in order to avoid modifying [python_scripts/mains/main_from_existing_ROM.py] file, before running python
+
+#### Excepted COMMENT lines (which begin with a [#] character), each line must have at least two words
+###  1) the parameter name (without blank)
+###  2) the parameter value 
+###     NOTE : if the parameter is a list, values in the list are separated by a comma
+
+
+#### ------------------------------------------------------------------------------------------------
+#### parameters for [super_main_from_existing_ROM.py] file
+
+### vect_nb_modes : list of nb_modes values separated by a comma (for example 8,6,4,2)
+# vect_nb_modes 4,2
+vect_nb_modes 4
+
+### type_data : DATASET
+### for example :
+###   dataset to debug : 'incompact3D_noisy2D_40dt_subsampl_truncated'
+###   dataset at Reynolds 100 : 'DNS100_inc3d_2D_2018_11_16_blocks_truncated'
+###   dataset at Reynolds 300 : 'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_truncated'
+#type_data incompact3D_noisy2D_40dt_subsampl_truncated
+#type_data DNS100_inc3d_2D_2018_11_16_blocks_truncated
+type_data DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_truncated
+
+### simulation time duration in seconds
+SECONDS_OF_SIMU 12.05
+
+### Eddy viscosity : 
+###   if EV=2 : Eddy Viscosity model with random IC only 
+###   if EV=1 : Eddy Viscosity model with noise and random IC 
+###   if EV=0 : no Eddy Viscosity model
+EV 0
+
+#### ------------------------------------------------------------------------------------------------
+#### parameters for [main_from_existing_ROM.py] file
+
+### Openfoam dataset
+type_data_C  DNS300-D1_Lz1pi  
+#type_data_C  DNS300-GeoLES3900
+#type_data_C  StationnaryRegime_TestSeparated_Re300
+
+### bool_PFD = True if the ROM correct for pressure
+### (using Leray projection : Proj. onto the space of Free Divergence functions)
+### command redlumcpp-fullOrderPressure
+### command redlumcpp-neglectedOrderPressure otherwise
+bool_PFD True
+
+### test basis parameter : if True, MatLab data is used, else openfoam/C++ data is used
+code_DATA_from_matlab False
+#code_DATA_from_matlab True
+
+### learning basis parameter : if True, MatLab result for ROM is used, else openfoam/C++ result is used
+code_ROM_from_matlab False
+#code_ROM_from_matlab True
+
+### test with assimilation : if False, beta_2=0, beta_3=1, init_centred_on_ref=True and assimilation_period>=SECONDS_OF_SIMU-1
+#code_Assimilation False
+code_Assimilation True
+
+### If True, does not simulate but load existing (matlab or C++) run instead
+code_load_run False
+#code_load_run True
+
+### if True, INIT condition centered on real condition
+init_centred_on_ref False
+
+### Version of the code redlumcpp used (ROMDNS, ROMDNS-v1.0, ROMDNS-v1.1, ...) : 
+redlumcpp_code_version ROMDNS-v1  
+#redlumcpp_code_version ROMDNS-vNewCleanDEIMTest
+
+### openfoam_data PATH
+PATH_openfoam_data /media/laurence.wallian/Val4To/RedLUM/data_red_lum_cpp
+
+### beta_2 : controls the  noise in the initialization of the filter, if =0, NO noise added to INIT condition
+beta_2 1.
+
+### beta_3 : controls the impact in the model noise -> beta_3 * pchol_cov_noises, if =0, NO noise during simulation
+beta_3 1.
+
+### other parameters used during running the python code
+
+## plot debug
+plot_debug False
+#plot_debug True

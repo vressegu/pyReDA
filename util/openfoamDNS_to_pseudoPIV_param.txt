@@ -1,0 +1,36 @@
+#
+# parameters used to define pseudo PIV
+#
+
+mean           # case_dir
+2.	           # noise_MAX : max(noise) value in percent
+0              # code_adim
+1.             # Zslice
+TEST t=0       # DNS_info
+util/B0001.dat # PIV file model
+1	             # IsValid_ON : if=1, column IsValid like in PIV file
+
+#
+# other file parameters  : 
+#
+
+PIV_info.txt            # PIV conditions
+DNS_info.txt            # DNS conditions
+DNS_to_FakePIV_info.txt # crop and smoothing conditions for creating FakePIV form DNS
+
+#
+# parameters for Python script (pvbatch) : 
+#
+
+0	#    code_view_withGrid : =1 if PNG file view with grid 
+1	#    code_view_slice_Ux1 : =1 if PNG file showing Ux(Z=Lz/2) openfoam result
+1	#    code_view_slice_Uy1 : =1 if PNG file showing Uy(Z=Lz/2) openfoam result
+0	#    code_view_pointVolumeInterpolator_Ux : =1 if PNG file showing Ux openfoam after smoothing
+0	#    code_view_pointVolumeInterpolator_Uy : =1 if PNG file showing Uy openfoam after smoothing
+1	#    code_view_slice_Ux2 : =1 if PNG file showing Ux(Z=Lz/2) openfoam after smoothing
+1	#    code_view_slice_Uy2 : =1 if PNG file showing Uy(Z=Lz/2) openfoam after smoothing
+0	#    code_csv_slice_Ux1 : =1 if CSV file showing Ux(Z=Lz/2) openfoam result
+0	#    code_csv_slice_Uy1 : =1 if CSV file showing Uy(Z=Lz/2) openfoam result
+1	#    code_csv_slice_Ux2 : =1 if CSV file showing Ux(Z=Lz/2) openfoam after smoothing
+1	#    code_csv_slice_Uy2 : =1 if CSV file showing Uy(Z=Lz/2) openfoam after smoothing
+
