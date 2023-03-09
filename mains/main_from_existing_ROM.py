@@ -103,7 +103,10 @@ param_ref = {}
 #          if beta_3=0, there is NO noise during simulation
 #   example : beta_3 = 1.
     
-param_file = Path(__file__).parents[2].joinpath('run_info.txt')
+MORAANE_PATH = Path(__file__).parents[2]
+
+param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
+
 print("     Cf. run_file [", str(param_file)+"]")
 type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   code_Assimilation, code_load_run, init_centred_on_ref, \
@@ -248,22 +251,24 @@ color_quantile_EV = 'paleturquoise'
 color_mean_LU = 'orangered'
 color_quantile_LU = 'sandybrown'
 
-#plot_debug = False
-param_file = Path(__file__).parents[2].joinpath('run_info.txt')
+param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
 print("     Cf. run_file [", str(param_file)+"]")
+
+#plot_debug = False
 plot_debug = main_optionalParam_from_info_txt_file(param_file)
 
 pos_Mes = -7
 
-#import matplotlib.pyplot as plt
+# #import matplotlib.pyplot as plt
 path_functions = Path(__file__).parents[1].joinpath('functions')
 sys.path.insert(0, str(path_functions))
+
 #from scipy import sparse as svds
 
 # writting INFO file
 
-current_pwd = Path(__file__).parents[2]  # Select the path
-file_info = current_pwd.parents[0].joinpath('3rdresult').joinpath('test.info')
+file_info = Path(MORAANE_PATH).joinpath('3rdresult').joinpath('test.info')
+
 # print("\n---> Cf. INFO file = ", str(file_info), "------\n" ) 
 
 f_info = open(file_info,'w')
@@ -600,8 +605,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write("  - Re                          = " + str(Re) + "\n")
     f_info.write(str("\n"))   
 
-    PATH_up = Path(__file__).parents[2]  # Select the path
-    PATH_output = PATH_up.parents[0].joinpath('3rdresult')
+    PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
 
     if assimilate == 'real_data':
         switcher = {
@@ -639,7 +643,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         PATH_ROM_PIV = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ROM_PIV')
         PATH_DATA = Path(PATH_input).joinpath(Path('FakePIV_noise2'))
         
-        param_file = Path(__file__).parents[2].joinpath('run_info.txt')
+        param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
         if not PATH_ROM.exists():
             print('\n!!! ERROR: directory ['+str(PATH_ROM)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
             sys.exit()
@@ -754,9 +758,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
 # code_ROM_from_matlab = learning basis parameter : if True, MatLab result for ROM is used, else openfoam/C++ result is used
 # code_DATA_from_matlab = test basis parameter : if True, MatLab data is used, else openfoam/C++ data is used
-    current_pwd = Path(__file__).parents[1]  # Select the path
-    folder_current_results = current_pwd.parents[0].joinpath('resultats').joinpath(
-        'current_results')  # Select the current results path
+
+    folder_current_results = Path(MORAANE_PATH).joinpath('podfs2').joinpath('resultats').joinpath('current_results')   
     folder_current_results = str(folder_current_results)
     if code_ROM_from_matlab:
         folder_results = folder_current_results
@@ -771,9 +774,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     if code_DATA_from_matlab:
         folder_nrj = folder_current_results
-        current_pwd = Path(__file__).parents[1]  # Select the path
-        folder_data = current_pwd.parents[1].joinpath(
-            'data')  # Select the data path
+        folder_data = Path(MORAANE_PATH).joinpath('data')
     else:
         folder_nrj = 'Nan'
         #print("data=f(C++) => folder_data unknown")
@@ -835,9 +836,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
           file = file + '_DFSPN'
       file = file + '.mat'
       
-      current_pwd = Path(__file__).parents[1]  # Select the path
-      folder_param = current_pwd.parents[0].joinpath('resultats').joinpath(
-          'current_results')
+      folder_param = Path(MORAANE_PATH).joinpath('podfs2').joinpath('resultats').joinpath('current_results')
+
       file_param = folder_param / Path(file)
 
       param = convert_mat_to_python_param(str(file_param))
@@ -1087,9 +1087,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         file_plots = file_plots + '_EVnoNoise'
     if LeastSquare:
         file_plots = file_plots + '_LS'
-        
-    folder_results_plot = Path(__file__).parents[3]    
-    file_plots_res = os.path.join(folder_results_plot, file_plots)
+    
+    file_plots_res = os.path.join(MORAANE_PATH, file_plots)
+    
     if not os.path.exists(file_plots_res):
         os.makedirs(file_plots_res)
 
@@ -1098,22 +1098,19 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     if plot_Q_crit:
         # File to save Q cirterion for real time 3D plots
-        path_Q_crit = Path(__file__).parents[3].\
-            joinpath('data_after_filtering').joinpath('Q_RedLUM')
+        path_Q_crit = Path(MORAANE_PATH).joinpath('data_after_filtering').joinpath('Q_RedLUM')
         if os.path.exists(path_Q_crit):
             shutil.rmtree(path_Q_crit)
             plt.pause(1)
         os.makedirs(path_Q_crit)
         if EV:
             # File to save Q cirterion for real time 3D plots
-            path_Q_crit_EV = Path(__file__).parents[3].\
-                joinpath('data_after_filtering').joinpath('Q_EV')
+            path_Q_crit_EV = Path(MORAANE_PATH).joinpath('data_after_filtering').joinpath('Q_EV')
             if not os.path.exists(path_Q_crit_EV):
                 os.makedirs(path_Q_crit_EV)
         if plot_ref:
             # File to save Q cirterion for real time 3D plots
-            path_Q_crit_ref = Path(__file__).parents[3].\
-                joinpath('data_after_filtering').joinpath('Q_ref')
+            path_Q_crit_ref = Path(MORAANE_PATH).joinpath('data_after_filtering').joinpath('Q_ref')
             if not os.path.exists(path_Q_crit_ref):
                 os.makedirs(path_Q_crit_ref)
 
@@ -1145,13 +1142,13 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         N_tot = N_tot_max
     if not reconstruction:
         if assimilate == 'fake_real_data':
-            current_pwd = Path(__file__).parents[1]
             # code_DATA_from_matlab = test basis parameter : if True, MatLab data is used, else openfoam/C++ data is used
             # code_ROM_from_matlab = learning basis parameter : if True, MatLab result for ROM is used, else openfoam/C++ result is used
             if code_DATA_from_matlab:
-               name_file_data = current_pwd.parents[1].joinpath('data').\
+               name_file_data = Path(MORAANE_PATH).joinpath('data').\
                    joinpath(type_data + '_' + str(nb_modes) + '_modes' +
                             '_subsample_1_nb_period_test_NaN_Chronos_test_basis.mat')
+               
                if name_file_data.exists():
                    mat = hdf5storage.loadmat(str(name_file_data))
                    bt_tot = mat['bt']
@@ -1201,7 +1198,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 time_bt_tot = time_bt_tot[0, :]
             quantiles_PIV = np.zeros((2, bt_tot.shape[0], bt_tot.shape[1]))
         else:
-            file = (Path(__file__).parents[3]).joinpath('data_PIV').\
+            file = Path(MORAANE_PATH).joinpath('data_PIV').\
                 joinpath('bt_tot_PIV_Re'+str(int(Re)) +
                          '_n'+str(nb_modes)+'.mat')
             print(file)
@@ -1256,7 +1253,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         print('\nLoading H_PIV @ Topos...')
     
         if code_DATA_from_matlab:
-            # path_topos = Path(pwd).parents[0].joinpath('data_PIV').\
             path_topos = Path(folder_data).parents[0].joinpath('data_PIV').\
                 joinpath('mode_'+type_data+'_'+str(nb_modes) +
                          '_modes_PIV')  # Topos path
@@ -1313,7 +1309,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         '''
     
         if code_DATA_from_matlab:
-            path_Sigma_inverse = Path(__file__).parents[3].joinpath('data_PIV').\
+            path_Sigma_inverse = Path(MORAANE_PATH).joinpath('data_PIV').\
                 joinpath('HSigSigH_PIV_'+type_data+'_'+str(nb_modes)
                          + '_modes_a_cst_threshold_NaN')  # Load Sigma_inverse
             Sigma_inverse_data = hdf5storage.loadmat(
@@ -1531,7 +1527,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         
         if assimilate == 'real_data':
     
-            file = (Path(__file__).parents[3]).joinpath('data_PIV').joinpath(
+            file = Path(MORAANE_PATH).joinpath('data_PIV').joinpath(
                 'wake_Re'+str(Re)).joinpath('B'+str(1).zfill(4)+'.dat')   # The path to load PIV data
             # Open the PIV data
             data = open(str(file))
@@ -1561,7 +1557,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 # Loading the other files as defined in the start of this function
                 for nb_file in range(1, (number_of_PIV_files+1), factor_of_PIV_time_subsampling)[1:]:
                     print(nb_file)
-                    file = (Path(__file__).parents[3]).joinpath('data_PIV').joinpath(
+                    file = Path(MORAANE_PATH).joinpath('data_PIV').joinpath(
                         'wake_Re'+str(Re)).joinpath('B'+str(nb_file).zfill(4)+'.dat')  # Path to file
                     # Open the file
                     data = open(str(file))
@@ -1601,7 +1597,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             
             if code_DATA_from_matlab:
                 i = 1
-                file = (Path(__file__).parents[3]).joinpath('data_PIV')\
+                file = Path(MORAANE_PATH).joinpath('data_PIV')\
                     .joinpath('wake_Re'+str(Re)+'_fake')\
                     .joinpath('strat'+str(nb_file_learning_basis+i)+'_U_temp_PIV')   # The path to load PIV data
                 data = hdf5storage.loadmat(str(file))
@@ -1625,7 +1621,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
                 if number_of_FAKE_PIV_files > 1:
                     for i in range(1, number_of_FAKE_PIV_files+1, 1)[1:]:
-                        file = (Path(__file__).parents[3]).joinpath('data_PIV')\
+                        file = Path(MORAANE_PATH).joinpath('data_PIV')\
                             .joinpath('wake_Re'+str(Re)+'_fake')\
                             .joinpath('strat'+str(nb_file_learning_basis+i)+'_U_temp_PIV')  # The path to load PIV data
     
@@ -1736,8 +1732,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     #%% Pre-processing for plotting Q cirterion
     if plot_Q_crit:
         file = 'tensor_mode_' + type_data + '_'+str(nb_modes)+'_modes'
-        name_file_data = Path(__file__).parents[3].joinpath(
-            'data').joinpath(file)
+        name_file_data = Path(MORAANE_PATH).joinpath('data').joinpath(file)
         mat = hdf5storage.loadmat(str(name_file_data))
         Omega_phi_m_U = mat['Omega_phi_m_U']
         S_phi_m_U = mat['S_phi_m_U']
@@ -2212,7 +2207,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                     time_phy = index*param['dt']
                     time_CPU_phy = np.array([time_CPU, time_phy])
                     
-    #                file = Path(__file__).parents[3].joinpath('data_after_filtering').joinpath('aurore')
                     name_file_data_temp = path_Q_crit_EV.joinpath(
                         str(index)+'_temp.txt')
                     name_file_data = path_Q_crit_EV.joinpath(str(index)+'.txt')
@@ -2493,7 +2487,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         plt.legend(fontsize=10)
         plt.xticks(fontsize=10)
         plt.yticks(fontsize=10)
-        path_img_name = Path(__file__).parents[3]
+        path_img_name = Path(MORAANE_PATH)
         if code_ROM_from_matlab:
             plt.savefig(str(path_img_name)+"/diff_bt"+str(index+1) +
                         "_ROMmatlabA.png", dpi=200, transparent=False)
@@ -2627,7 +2621,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
                                                   param, bt_tot_interp, struct_bt_MCMC, time)
  ##################### A CORRIGER ###########################
-        path_img_name = Path(__file__).parents[3]
+        path_img_name = Path(MORAANE_PATH)
         if code_ROM_from_matlab:
             plt.savefig(str(path_img_name)+"/diff_bt_ROMmatlabB.png",
                         dpi=200, transparent=False)
