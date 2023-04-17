@@ -955,7 +955,7 @@ if -e slice_Uxy2.csv then
 
   \mv ${PIV_file_model_new} tmp.txt; touch  ${PIV_file_model_new}
   foreach y ( ${All_PIV_new_yinv} )
-    cat tmp.txt | awk -v y=${y} '{ if ($2==y) print $0 }'  >> ${PIV_file_model_new}
+    cat tmp.txt | awk -v y=${y} '{ if ($2==y) print $0 }' | sort -r | uniq  >> ${PIV_file_model_new}
   end
 
   # according [isValid] parameter with PIV model, and changing Ux,Uy to Ux=0, Uy=0 if isValid=0
