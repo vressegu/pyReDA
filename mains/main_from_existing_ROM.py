@@ -137,7 +137,7 @@ if not code_Assimilation:
 if type_data_C == 'DNS300-D1_Lz1pi':
     vect_num_mode_to_reverse = [1,2]
 elif type_data_C == 'DNS300-GeoLES3900':
-    vect_num_mode_to_reverse = [1]
+    vect_num_mode_to_reverse = [1,4,6,8]
 elif type_data_C == 'LESRe100-openFoam2106-forYvhan-newSnap':
     vect_num_mode_to_reverse = []
 elif type_data_C == 'StationnaryRegime_TestSeparated_Re300':
@@ -197,7 +197,7 @@ if not code_Assimilation:
     sub_sampling_PIV_data_temporaly = False
 
 # It can be chosen to plot chronos evolution in real time or only at the end of the simulation
-plt_real_time = True
+plt_real_time = False
 if code_load_run:
     plt_real_time = False
 plot_period = 2 * float(5/10)/2
@@ -961,9 +961,14 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     sq_lambda = np.sqrt(lambda_values)
     
     # figure limits
-    lim_fig = [0] * len(sq_lambda)
-    for i in range (len(sq_lambda)):
+    lim_fig = [0] * 16
+    # for i in range (len(sq_lambda)):
+    if ((nb_modes > 2) & (nb_modes <= 16)) :
+        for i in range (2,16):
+            lim_fig[i] = 4.*sq_lambda[2]
+    for i in range (nb_modes):
         lim_fig[i] = 4.*sq_lambda[i]
+        
         
     if svd_pchol > 0:
 
@@ -1031,7 +1036,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     else:
         file_plots = file_plots + type_data_C
     file_plots = file_plots + '_' + str(nb_modes) + '_modes'
-    if not code_load_run :
+    if code_load_run :
         file_plots = file_plots + '_loaded'
     if not code_Assimilation :
         file_plots = file_plots + '_noDA'
@@ -1040,7 +1045,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if not code_DATA_from_matlab :
         file_plots = file_plots + '_Cpptestbasis'
     if not code_ROM_from_matlab or not code_DATA_from_matlab:
-        file_plots = file_plots + '/' + type_data_C \
+        # file_plots = file_plots + '/' + type_data_C \
+        file_plots = file_plots \
                      + '/' + redlumcpp_code_version + '/'
     else:
         file_plots = file_plots + '_' + choice_n_subsample 
@@ -1066,17 +1072,18 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             file_plots = file_plots + '_DFSPN'       
     file_plots = file_plots + '/' + assimilate + \
                               '/_DADuration_' + str(int(SECONDS_OF_SIMU)) + '_'
-    if sub_sampling_PIV_data_temporaly:
-        file_plots = file_plots + 'ObsSubt_' + \
-            str(int(factor_of_PIV_time_subsampling)) + '_'
-    if mask_obs:
-        file_plots = file_plots + 'ObsMaskyy_sub_' + str(int(subsampling_PIV_grid_factor)) \
-            + '_from_' + str(int(x0_index)) + '_to_' \
-            + str(int(x0_index + nbPoints_x*subsampling_PIV_grid_factor)) \
-            + '_from_' + str(int(y0_index)) + '_to_' \
-            + str(int(y0_index+nbPoints_y*subsampling_PIV_grid_factor)) + '_'
-    else:
-        file_plots = file_plots + 'no_mask_'
+    file_plots = file_plots + 'ObsCase_' + str(case_choice) + '_'
+    # if sub_sampling_PIV_data_temporaly:
+    #     file_plots = file_plots + 'ObsSubt_' + \
+    #         str(int(factor_of_PIV_time_subsampling)) + '_'
+    # if mask_obs:
+    #     file_plots = file_plots + 'ObsMaskyy_sub_' + str(int(subsampling_PIV_grid_factor)) \
+    #         + '_from_' + str(int(x0_index)) + '_to_' \
+    #         + str(int(x0_index + nbPoints_x*subsampling_PIV_grid_factor)) \
+    #         + '_from_' + str(int(y0_index)) + '_to_' \
+    #         + str(int(y0_index+nbPoints_y*subsampling_PIV_grid_factor)) + '_'
+    # else:
+    #     file_plots = file_plots + 'no_mask_'
     if init_centred_on_ref:
         file_plots = file_plots + 'initOnRef_'
     file_plots = file_plots + 'beta_2_' + str(int(beta_2))
@@ -1175,7 +1182,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             param['decor_by_subsampl']['n_subsampl_decor']
             print("#### truncated_error2"+str(truncated_error2.shape))
             print("#### bt_tot"+str(bt_tot.shape))
-
+            
             #    Change the sign of spatial mode for mode=num_mode_to_reverse
             # mode1 -> -mode1
             # num_mode = 1
@@ -1197,6 +1204,18 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             if len(time_bt_tot.shape) > 1:
                 time_bt_tot = time_bt_tot[0, :]
             quantiles_PIV = np.zeros((2, bt_tot.shape[0], bt_tot.shape[1]))
+
+            # print bt_tot in file for critQ visualisation
+            
+            file_temporalModeSimulation_name = 'temporalModeSimulation.txt'
+            file_temporalModeSimulation = Path(PATH_output).joinpath(str(file_temporalModeSimulation_name))
+            f_txt = open(file_temporalModeSimulation,'w')
+            for i in range(len(bt_tot)):
+                for j in range(nb_modes-1):
+                    f_txt.write(str(bt_tot[i][j])+" ")                        
+                f_txt.write(str(bt_tot[i][-1])+"\n")                        
+            f_txt.close()    
+        
         else:
             file = Path(MORAANE_PATH).joinpath('data_PIV').\
                 joinpath('bt_tot_PIV_Re'+str(int(Re)) +
@@ -2513,6 +2532,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 #            plt.savefig(file_res_mode,dpi=500 )
 #            plt.savefig(file_res_mode,quality = 95)
 
+        # PNG file
+        file_res_mode = file_plots_res / Path(str(index+1)+'_case'+str(case_choice)+'_DATA'+str(code_DATA_from_matlab)+'_ROM'+str(code_ROM_from_matlab)+'.png')
+        plt.savefig(file_res_mode, dpi=200)
+    
+
     if 'threshold_effect_on_tau_corrected' \
             in param['decor_by_subsampl']:
         param['decor_by_subsampl']['thrDtCorrect'] = \
@@ -2542,6 +2566,36 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         dict_python['quantiles_EV'] = quantiles_EV
     file_res = file_plots_res / Path('chronos.mat')
     sio.savemat(file_res,dict_python)
+    
+    # file for post traitment critQ
+    
+    npTime = np.array(time)
+    # time_DA = np.array(time)[np.array(index_pf)[1:]]
+    # plt.figure(22)
+    # plt.plot(npTime[1:-1]-npTime[0:-2], 'r.')
+    # #temporalModeDAresult = particles_mean[::n_simu]
+    
+    print("size(time)="+str(len(npTime)))
+    
+    n_simu_for_file = n_simu
+    file_temporalModeDAresult_name = 'temporalModeDAresult.txt'
+    file_temporalModeDAresult = Path(PATH_output).joinpath(str(file_temporalModeDAresult_name))    
+    f_txt = open(file_temporalModeDAresult,'w')
+    N=0
+    for i in range(len(npTime)-1):
+        d = npTime[i] - npTime[i+1]; d=math.sqrt(d*d)
+        if ( d <= 0.000001 ):
+            N=N+1
+            print("i="+str(i)+" -> save value for i+1 only")
+        else:
+            for j in range(nb_modes-1):
+                f_txt.write(str(particles_mean[i][j])+" ")                        
+            f_txt.write(str(particles_mean[i][-1])+"\n")                        
+    N=len(npTime)-N
+    for j in range(nb_modes-1):
+        f_txt.write(str(particles_mean[-1][j])+" ")
+    f_txt.write(str(particles_mean[-1][-1])+"\n")
+    f_txt.close()  
     
     if EV:
         param['truncated_error2'] = param['truncated_error2'][0:(
@@ -2611,15 +2665,27 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             interpolant_bt_tot_k = interpolate.interp1d(
                 time_bt_tot, bt_tot[:, index])
             bt_tot_interp[:, index] = interpolant_bt_tot_k(time)
- ##################### A CORRIGER ###########################
-        if code_DATA_from_matlab:
-            interpolant_error = interpolate.interp1d(
-                time_bt_tot, param['truncated_error2'][:, 0])
-            param['truncated_error2'] = interpolant_error(time)
-            param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
+ # ##################### A CORRIGER ###########################
+ #        if code_DATA_from_matlab:
+ #            interpolant_error = interpolate.interp1d(
+ #                time_bt_tot, param['truncated_error2'][:, 0])
+ #            param['truncated_error2'] = interpolant_error(time)
+ #            param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
 
-            plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
-                                                  param, bt_tot_interp, struct_bt_MCMC, time)
+ #            plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
+ #                                                  param, bt_tot_interp, struct_bt_MCMC, time)
+ # ##################### A CORRIGER ###########################
+ 
+ ##################### A CORRIGER ###########################
+        # if code_DATA_from_matlab:
+        interpolant_error = interpolate.interp1d(
+            time_bt_tot, param['truncated_error2'][:, 0])
+        param['truncated_error2'] = interpolant_error(time)
+        param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
+        param['nb_modes']=nb_modes
+        param['code_DATA_from_matlab'] = code_DATA_from_matlab
+        plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
+                                              param, bt_tot_interp, struct_bt_MCMC, time)
  ##################### A CORRIGER ###########################
         path_img_name = Path(MORAANE_PATH)
         if code_ROM_from_matlab:
@@ -2697,7 +2763,15 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
       png_file = PATH_output / Path("diff_mean_WAKE_mode0_Uy.png")
       png_file_copy = file_plots_res / Path("diff_mean_WAKE_mode0_Uy.png")
       shutil.copyfile(str(png_file), str(png_file_copy))
+    
+    txt_file = file_temporalModeSimulation
+    txt_file_copy = file_plots_res / Path (str(file_temporalModeSimulation_name))
+    shutil.copyfile(str(txt_file), str(txt_file_copy))
+
+    txt_file = file_temporalModeDAresult
+    txt_file_copy = file_plots_res / Path (str(file_temporalModeDAresult_name))
+    shutil.copyfile(str(txt_file), str(txt_file_copy))
 
     print('\n\nCf. files in directory : \n   ' + str(file_plots_res) + '\n\n')
 
-    return 0  # var
+ 
