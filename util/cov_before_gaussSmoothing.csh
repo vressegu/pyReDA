@@ -28,10 +28,10 @@ set All_D = ( residualSpeed_2 )
 # D folder : input value
 if ( $1 != "" ) set All_D = ( $1 )
 
-# DIR0 folder :  for example .../RedLum_from_OpenFoam/D1_Lz*pi_Re*/ROMDNS
+# DIR0 folder :  for example .../RedLum_from_OpenFoam/D1_Lz*pi_Re*/ROM-v1
 
 # DIR0 folder : default value
-set DIR0 = ~/Bureau/MORAANE/data_red_lum_cpp/DNS300-D1_Lz1pi
+set DIR0 = /media/laurence.wallian/Val4To/RedLUM/data_red_lum_cpp/DNS300-GeoLES3900/ROM-v3.1.2
 
 # DIR0 folder : input value
 if ( $2 != "" ) set DIR0 = $2
@@ -87,10 +87,10 @@ foreach D ( ${All_D} )
   set fic_src = ${DIR0}/system/ITHACAdict
   set t_first = ` cat ${fic_src} | \
                             awk 'BEGIN{code=0}{if ($1=="{") code=code+1; if ($1=="}") code=code-1; if (code==0) print $0 }' | \
-                            sed s/";"//g | awk '{ if ($1=="FinalTime") print  $2 }' `
+                            sed s/";"//g | awk '{ if ($1=="InitialTime") print  $2 }' `
   set t_last = ` cat ${fic_src} | \
                             awk 'BEGIN{code=0}{if ($1=="{") code=code+1; if ($1=="}") code=code-1; if (code==0) print $0 }' | \
-                            sed s/";"//g | awk '{ if ($1=="FinalTimeSimulation") print  $2 }' `
+                            sed s/";"//g | awk '{ if ($1=="FinalTime") print  $2 }' `
                                   
   # first and last time : input values
 
@@ -220,11 +220,13 @@ foreach D ( ${All_D} )
     awk '{ x=$1+0. ; printf("%.6f\n",x/1000000.)}' > PIV_new_yinv.txt
   set All_PIV_new_yinv = ` cat PIV_new_yinv.txt | sed s/"-"/"\\-"/g`
 
-  \mv ${PIV_file_new} tmp.txt; #touch  ${PIV_file_new}
+  if -e tmp.txt \rm tmp.txt
+  cat ${PIV_file_new} | grep -v "#" | awk '{ for (i=1; i<=NF; i++) printf("%s ",$i); print "" }' > tmp.txt
+  \rm ${PIV_file_new}
   echo "# x   y   inv(cov_xx+A2)   inv(cov_yy+A2)   inv(cov_xy)" > ${PIV_file_new}
   echo "# with A2 = ${A_mat_diag}**2" >> ${PIV_file_new}
   foreach y ( ${All_PIV_new_yinv} )
-    cat tmp.txt | grep "${y}" >> ${PIV_file_new}
+    cat tmp.txt | awk -v y=${y} '{ if ($2==y) print $0 }' | sort -r | uniq >> ${PIV_file_new}
   end
     
   # visu gnuplot
