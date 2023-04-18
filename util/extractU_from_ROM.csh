@@ -83,21 +83,21 @@ set vect_num_mode_to_reverse = ()
 
 set code_CppROM = ` echo ${temporal_file} | grep "_CppROM" | grep -v "_CppROM_Cpptestbasis" | wc -l `
 if ( ${code_CppROM} == 1 ) then
-    set test_info_file = ` echo ${temporal_file} | awk -F'/' '{ for (i=1;i<NF;i++) printf("%s/",$i); print "text.info" }' `
+    set test_info_file = ` echo ${temporal_file} | awk -F'/' '{ for (i=1;i<NF;i++) printf("%s/",$i); print "test.info" }' `
     if -e ${test_info_file} then
         set vect_num_mode_to_reverse = ` cat ${test_info_file} |  grep "\-mode" | head -1 | awk -F'[' '{ print $NF }' | sed s/"]"/" "/g | sed s/","/" "/g `
     endif
 endif
 
 # non inverse value
-set vect_num_mode_to_reverse = ()
+#set vect_num_mode_to_reverse = ()
 
-if -e vect_num_mode_to_reverse.txt \rm vect_num_mode_to_reverse.txt; touch vect_num_mode_to_reverse.txt
+if -e ${dir_ici}/vect_num_mode_to_reverse.txt \rm ${dir_ici}/vect_num_mode_to_reverse.txt; touch ${dir_ici}/vect_num_mode_to_reverse.txt
 set n=0
 while ( ${n} != 16 )
     set n = ` echo ${n} | awk '{ print 1+$1 }' `
     echo ${vect_num_mode_to_reverse} | \
-    awk -v n=${n} '{ C=1; for (i=1;i<=NF;i++) {if ($i==n) C=-1}}END{ print n,C }'  >> vect_num_mode_to_reverse.txt
+    awk -v n=${n} '{ C=1; for (i=1;i<=NF;i++) {if ($i==n) C=-1}}END{ print n,C }'  >> ${dir_ici}/vect_num_mode_to_reverse.txt
 end
 
 # dir_extractU = TrueState or RedLumPart
@@ -204,7 +204,7 @@ if ( ${code} != 0 ) then
       endif
        
       set C = ` awk -v mode=${mode} '{ if ($1==mode) print $2 }' ${dir_ici}/vect_num_mode_to_reverse.txt `
-      
+
       if (!( -e ${mode})) mkdir ${mode}
       cat SOS/${mode}/U | sed s/"("/"( "/g | sed s/")"/" )"/g | \
         awk -v C=${C} -v bt=${bt} '{ \
