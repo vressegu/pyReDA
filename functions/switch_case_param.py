@@ -66,7 +66,16 @@ def switch_case(case_number):
     nbPoints_y_gl = 1
     assimilation_period = float(5/10)
     
+  #if case_number == 7:
   if case_number == 2:
+    subsampling_PIV_grid_factor_gl = 30
+    x0_index_gl = 10
+    nbPoints_x_gl = 3
+    y0_index_gl = 10
+    nbPoints_y_gl = 3
+    assimilation_period = float(5/10)
+    
+  if case_number == 102:
     subsampling_PIV_grid_factor_gl = 3
     x0_index_gl = 10
     nbPoints_x_gl = 3
@@ -74,7 +83,16 @@ def switch_case(case_number):
     nbPoints_y_gl = 3
     assimilation_period = float(5)
     
+  #if case_number == 10:
   if case_number == 3:
+    subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 10
+    nbPoints_x_gl = 1
+    y0_index_gl = 40
+    nbPoints_y_gl = 1
+    assimilation_period = float(5/10)
+    
+  if case_number == 103:
     subsampling_PIV_grid_factor_gl = 10
     x0_index_gl = 10
     nbPoints_x_gl = 3
@@ -82,7 +100,16 @@ def switch_case(case_number):
     nbPoints_y_gl = 3
     assimilation_period = float(5/10)
     
+  #if case_number == 8:
   if case_number == 4:
+    subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 0
+    nbPoints_x_gl = 1
+    y0_index_gl = 0
+    nbPoints_y_gl = 1
+    assimilation_period = float(5/10)
+    
+  if case_number == 104:
     subsampling_PIV_grid_factor_gl = 10
     x0_index_gl = 10
     nbPoints_x_gl = 3
@@ -90,12 +117,13 @@ def switch_case(case_number):
     nbPoints_y_gl = 3
     assimilation_period = float(5/20)
     
+  #if case_number == 9:
   if case_number == 5:
     subsampling_PIV_grid_factor_gl = 3
-    x0_index_gl = 10
-    nbPoints_x_gl = 10
+    x0_index_gl = 200
+    nbPoints_x_gl = 1
     y0_index_gl = 10
-    nbPoints_y_gl = 10
+    nbPoints_y_gl = 1
     assimilation_period = float(5/10)
     
   if case_number == 6:
@@ -106,36 +134,12 @@ def switch_case(case_number):
     nbPoints_y_gl = 1
     assimilation_period = float(5/10)
     
-  if case_number == 7:
-    subsampling_PIV_grid_factor_gl = 30
-    x0_index_gl = 10
-    nbPoints_x_gl = 3
-    y0_index_gl = 10
-    nbPoints_y_gl = 3
-    assimilation_period = float(5/10)
-    
-  if case_number == 8:
-    subsampling_PIV_grid_factor_gl = 3
-    x0_index_gl = 0
-    nbPoints_x_gl = 1
-    y0_index_gl = 0
-    nbPoints_y_gl = 1
-    assimilation_period = float(5/10)
-    
-  if case_number == 9:
-    subsampling_PIV_grid_factor_gl = 3
-    x0_index_gl = 200
-    nbPoints_x_gl = 1
-    y0_index_gl = 10
-    nbPoints_y_gl = 1
-    assimilation_period = float(5/10)
-    
-  if case_number == 10:
+  if case_number == 105:
     subsampling_PIV_grid_factor_gl = 3
     x0_index_gl = 10
-    nbPoints_x_gl = 1
-    y0_index_gl = 40
-    nbPoints_y_gl = 1
+    nbPoints_x_gl = 10
+    y0_index_gl = 10
+    nbPoints_y_gl = 10
     assimilation_period = float(5/10)
     
   if case_number == 11:
