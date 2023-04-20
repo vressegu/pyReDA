@@ -514,187 +514,191 @@ def plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res, \
     
     
     #%%
-    
-    if param['type_data'] == 'LES_3D_tot_sub_sample_blurred':
-        nrj_varying_tot = 18.2705
-        current_pwd = Path(__file__).parents[1]
-        folder_results = current_pwd.parents[0].joinpath('resultats').joinpath('nrj_mean_LES3900')
-        variables = hdf5storage.loadmat(str(folder_results))
-        
-    
-    elif (param['type_data'] == 'inc3D_Re300_40dt_blocks_truncated') or (param['type_data'] == 'inc3D_Re300_40dt_blocks'):
-        folder_Path = Path(param['folder_results']).joinpath('_nrj_mU_' + param['type_data'] + '0.mat')
-#        param['file_nrj_mU'] =  param['folder_results'] + '_nrj_mU_' + param['type_data'] + '0.mat'
-#        load(param.file_nrj_mU, 'nrj_mU')
-        variables = hdf5storage.loadmat(str(folder_Path))
-        norm0 = nrj_mU
-#        param['name_file_pre_c'] = param['folder_data'] + param['type_data'] + '_pre_c'
-        param_ref = param
-        
-        folder_Path = Path(param['folder_data']).joinpath(param['type_data'] + '_pre_c')
-        param['name_file_pre_c'] = str(folder_Path)
-        variables = hdf5storage.loadmat(str(folder_Path))
-#        load(param.name_file_pre_c,'c','param')
-        param_c = param
-        param = param_ref
-        del param_ref
-        
-        c = c*np.prod(param.dX)/param_c.N_tot;
-        
-        nrj_varying_tot=np.matrix.trace(c)
-        
-        
-        
-        
-    
-    
-    elif param['type_data'] ==  'inc3D_Re3900_blocks' or param['type_data'] == 'inc3D_Re3900_blocks119':
-        current_pwd = Path(__file__).parents[1]
-        folder_results = current_pwd.parents[0].joinpath('resultats').joinpath('nrj_mean_DNS3900blurred')
-        variables = hdf5storage.loadmat(str(folder_results))
-        
-        
-        
-        folder_Path = Path(param['folder_data']).joinpath(param['type_data'] + '_pre_c')
-        param['name_file_pre_c'] = str(folder_Path)
-        param_ref = param
-#        load(param.name_file_pre_c,'c','param');
-        variables = hdf5storage.loadmat(str(folder_Path))
-        param_c = param
-        param = param_ref
-        del param_ref
-        c = c*np.prod(param['dX'])/param_c['N_tot']
-        nrj_varying_tot = np.matrix.trace(c)
-    
-    
-    
-    
-    elif param['type_data'] == 'incompact3d_wake_episode3_cut':
-        
-        folder_Path = Path(param['folder_data']).joinpath('_nrj_mU_' + param['type_data'] + '.mat')
-        param['file_nrj_mU'] = str(folder_Path)
-        variables = hdf5storage.loadmat(str(folder_Path))
-        
-#        load(param.file_nrj_mU, 'nrj_mU');
-        norm0 = nrj_mU
-        
-        folder_Path = Path(param['folder_data']).joinpath(param['type_data'] + '_pre_c')
-        param['name_file_pre_c'] = str(folder_Path)
-        param_ref = param
-        
-        variables = hdf5storage.loadmat(str(folder_Path))
-#        load(param.name_file_pre_c,'c','param');
-        param_c = param
-        param = param_ref
-        del param_ref
-        c = c*np.prod(param['dX'])/param_c['N_tot']
-        nrj_varying_tot = np.matrix.trace(c)
-        
-    
-    
-    else:  
-        
-        folder_Path = Path(param['folder_nrj']).joinpath('_nrj_mU_' + param['type_data'] + '0.mat')
-        # folder_Path = Path(param['folder_results']).joinpath('_nrj_mU_' + param['type_data'] + '0.mat')
-        param['file_nrj_mU'] = str(folder_Path)
-        
-        
-        if os.path.isfile(param['file_nrj_mU']):
-            nrj_mU = load_mat(param['file_nrj_mU'],'nrj_mU')
+    if param['code_DATA_from_matlab']:
+        if param['type_data'] == 'LES_3D_tot_sub_sample_blurred':
+            nrj_varying_tot = 18.2705
+            current_pwd = Path(__file__).parents[1]
+            folder_results = current_pwd.parents[0].joinpath('resultats').joinpath('nrj_mean_LES3900')
+            variables = hdf5storage.loadmat(str(folder_results))
             
-#            
-        else:
-#    
-            type_data_mU = param['type_data'] + str(0)
-            folder_Path = Path(param['folder_data']).joinpath(type_data_mU + '_U_centered')
+        
+        elif (param['type_data'] == 'inc3D_Re300_40dt_blocks_truncated') or (param['type_data'] == 'inc3D_Re300_40dt_blocks'):
+            folder_Path = Path(param['folder_results']).joinpath('_nrj_mU_' + param['type_data'] + '0.mat')
+    #        param['file_nrj_mU'] =  param['folder_results'] + '_nrj_mU_' + param['type_data'] + '0.mat'
+    #        load(param.file_nrj_mU, 'nrj_mU')
+            variables = hdf5storage.loadmat(str(folder_Path))
+            norm0 = nrj_mU
+    #        param['name_file_pre_c'] = param['folder_data'] + param['type_data'] + '_pre_c'
+            param_ref = param
             
-# #0_U_centered => _2_modes_subsample_1_nb_period_test_NaN_Chronos_test_basis
-#             nb_modes=2
-#             type_data_mU = param['type_data'] +"_" + str(nb_modes)
-#             folder_Path = Path(param['folder_data']).joinpath(type_data_mU + '_modes_subsample_1_nb_period_test_NaN_Chronos_test_basis')
-
-            print("folder_Path="+str(folder_Path))
-            param['name_file_mU'] = str(folder_Path)
+            folder_Path = Path(param['folder_data']).joinpath(param['type_data'] + '_pre_c')
+            param['name_file_pre_c'] = str(folder_Path)
+            variables = hdf5storage.loadmat(str(folder_Path))
+    #        load(param.name_file_pre_c,'c','param')
+            param_c = param
+            param = param_ref
+            del param_ref
+            
+            c = c*np.prod(param.dX)/param_c.N_tot;
+            
+            nrj_varying_tot=np.matrix.trace(c)
+            
+            
+            
+            
+        
+        
+        elif param['type_data'] ==  'inc3D_Re3900_blocks' or param['type_data'] == 'inc3D_Re3900_blocks119':
+            current_pwd = Path(__file__).parents[1]
+            folder_results = current_pwd.parents[0].joinpath('resultats').joinpath('nrj_mean_DNS3900blurred')
+            variables = hdf5storage.loadmat(str(folder_results))
+            
+            
+            
+            folder_Path = Path(param['folder_data']).joinpath(param['type_data'] + '_pre_c')
+            param['name_file_pre_c'] = str(folder_Path)
+            param_ref = param
+    #        load(param.name_file_pre_c,'c','param');
+            variables = hdf5storage.loadmat(str(folder_Path))
+            param_c = param
+            param = param_ref
+            del param_ref
+            c = c*np.prod(param['dX'])/param_c['N_tot']
+            nrj_varying_tot = np.matrix.trace(c)
+        
+        
+        
+        
+        elif param['type_data'] == 'incompact3d_wake_episode3_cut':
+            
+            folder_Path = Path(param['folder_data']).joinpath('_nrj_mU_' + param['type_data'] + '.mat')
+            param['file_nrj_mU'] = str(folder_Path)
+            variables = hdf5storage.loadmat(str(folder_Path))
+            
+    #        load(param.file_nrj_mU, 'nrj_mU');
+            norm0 = nrj_mU
+            
+            folder_Path = Path(param['folder_data']).joinpath(param['type_data'] + '_pre_c')
+            param['name_file_pre_c'] = str(folder_Path)
+            param_ref = param
             
             variables = hdf5storage.loadmat(str(folder_Path))
-            m_U = variables['m_U']
-#            
-            names_list = ['incompact3d_wake_episode3_cut_truncated',\
-                            'incompact3D_noisy2D_40dt_subsampl',\
-                            'incompact3D_noisy2D_40dt_subsampl_truncated',\
-                            'inc3D_Re300_40dt_blocks',\
-                            'inc3D_Re300_40dt_blocks_truncated',\
-                            'inc3D_Re300_40dt_blocks_test_basis',\
-                            'inc3D_Re3900_blocks',\
-                            'inc3D_Re3900_blocks_truncated',\
-                            'inc3D_Re3900_blocks_test_basis',\
-                            'DNS300_inc3d_3D_2017_04_02_blocks',\
-                            'DNS300_inc3d_3D_2017_04_02_blocks_truncated',\
-                            'DNS300_inc3d_3D_2017_04_02_blocks_test_basis',\
-                            'test2D_blocks',\
-                            'test2D_blocks_truncated',\
-                            'test2D_blocks_test_basis',\
-                            'small_test_in_blocks',\
-                            'small_test_in_blocks_truncated',\
-                            'small_test_in_blocks_test_basis',\
-                            'DNS100_inc3d_2D_2018_11_16_blocks',\
-                            'DNS100_inc3d_2D_2018_11_16_blocks_truncated',\
-                            'DNS100_inc3d_2D_2018_11_16_blocks_test_basis',\
-                            'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks',\
-                            'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_truncated',\
-                            'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_test_basis',\
-                            'inc3D_HRLESlong_Re3900_blocks',\
-                            'inc3D_HRLESlong_Re3900_blocks_truncated',\
-                            'inc3D_HRLESlong_Re3900_blocks_test_basis']
-    
-            if param['type_data'] in names_list:
-                m_U[:,:,0] = m_U[:,:,0] - 1
+    #        load(param.name_file_pre_c,'c','param');
+            param_c = param
+            param = param_ref
+            del param_ref
+            c = c*np.prod(param['dX'])/param_c['N_tot']
+            nrj_varying_tot = np.matrix.trace(c)
             
+        
+        
+        else:  
+            
+            folder_Path = Path(param['folder_nrj']).joinpath('_nrj_mU_' + param['type_data'] + '0.mat')
+            # folder_Path = Path(param['folder_results']).joinpath('_nrj_mU_' + param['type_data'] + '0.mat')
+            param['file_nrj_mU'] = str(folder_Path)
+            
+            
+            if os.path.isfile(param['file_nrj_mU']):
+                nrj_mU = load_mat(param['file_nrj_mU'],'nrj_mU')
+                
+    #            
+            else:
+    #    
+                type_data_mU = param['type_data'] + str(0)
+                folder_Path = Path(param['folder_data']).joinpath(type_data_mU + '_U_centered')
+                
+    # #0_U_centered => _2_modes_subsample_1_nb_period_test_NaN_Chronos_test_basis
+    #             nb_modes=2
+    #             type_data_mU = param['type_data'] +"_" + str(nb_modes)
+    #             folder_Path = Path(param['folder_data']).joinpath(type_data_mU + '_modes_subsample_1_nb_period_test_NaN_Chronos_test_basis')
     
-            nrj_mU = np.sum(np.power(m_U[:],2))*np.prod(param['dX'])
-            param['file_nrj_mU'] = param['folder_results'] + '_nrj_mU_' + param['type_data'] + '.mat'
-#            mkdir(param.folder_results)
-#            save(param.file_nrj_mU, 'nrj_mU')
+                print("folder_Path="+str(folder_Path))
+                param['name_file_mU'] = str(folder_Path)
+                
+                variables = hdf5storage.loadmat(str(folder_Path))
+                m_U = variables['m_U']
+    #            
+                names_list = ['incompact3d_wake_episode3_cut_truncated',\
+                                'incompact3D_noisy2D_40dt_subsampl',\
+                                'incompact3D_noisy2D_40dt_subsampl_truncated',\
+                                'inc3D_Re300_40dt_blocks',\
+                                'inc3D_Re300_40dt_blocks_truncated',\
+                                'inc3D_Re300_40dt_blocks_test_basis',\
+                                'inc3D_Re3900_blocks',\
+                                'inc3D_Re3900_blocks_truncated',\
+                                'inc3D_Re3900_blocks_test_basis',\
+                                'DNS300_inc3d_3D_2017_04_02_blocks',\
+                                'DNS300_inc3d_3D_2017_04_02_blocks_truncated',\
+                                'DNS300_inc3d_3D_2017_04_02_blocks_test_basis',\
+                                'test2D_blocks',\
+                                'test2D_blocks_truncated',\
+                                'test2D_blocks_test_basis',\
+                                'small_test_in_blocks',\
+                                'small_test_in_blocks_truncated',\
+                                'small_test_in_blocks_test_basis',\
+                                'DNS100_inc3d_2D_2018_11_16_blocks',\
+                                'DNS100_inc3d_2D_2018_11_16_blocks_truncated',\
+                                'DNS100_inc3d_2D_2018_11_16_blocks_test_basis',\
+                                'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks',\
+                                'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_truncated',\
+                                'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_test_basis',\
+                                'inc3D_HRLESlong_Re3900_blocks',\
+                                'inc3D_HRLESlong_Re3900_blocks_truncated',\
+                                'inc3D_HRLESlong_Re3900_blocks_test_basis']
         
+                if param['type_data'] in names_list:
+                    m_U[:,:,0] = m_U[:,:,0] - 1
+                
         
-        norm0 = nrj_mU[0,0]
-        folder_Path = Path(param['folder_data']).joinpath(param['type_data'] + '_pre_c')
-        param['name_file_pre_c'] = str(folder_Path)
+                nrj_mU = np.sum(np.power(m_U[:],2))*np.prod(param['dX'])
+                param['file_nrj_mU'] = param['folder_results'] + '_nrj_mU_' + param['type_data'] + '.mat'
+    #            mkdir(param.folder_results)
+    #            save(param.file_nrj_mU, 'nrj_mU')
+            
+            
+            norm0 = nrj_mU[0,0]
+            folder_Path = Path(param['folder_data']).joinpath(param['type_data'] + '_pre_c')
+            param['name_file_pre_c'] = str(folder_Path)
+            
+            param_ref = param
+            variables = hdf5storage.loadmat(param['name_file_pre_c'])
+            c = variables['c']
+            
+            
+            param = load_param_c(variables['param'])
+            
+    #        load(param.name_file_pre_c,'c','param');
+            param_c = param
+            param = param_ref
+            del param_ref
+            c = c*np.prod(param['dX'])/param_c['N_tot'][0,0]
+            nrj_varying_tot = np.matrix.trace(c)
+    #    
+    #    
+        nrj_mean = norm0
         
-        param_ref = param
-        variables = hdf5storage.loadmat(param['name_file_pre_c'])
-        c = variables['c']
+        del norm0
         
+        nrj_tot = nrj_mean + nrj_varying_tot
+    #    
+    #    if param['reconstruction']:
+    #        err_fix = ((nrj_varying_tot - np.sum(param['lambda'],axis=0)) /nrj_tot) * np.ones(param.N_test,1) 
+    #    else:
+        err_fix =  param['truncated_error2']/nrj_tot 
+    #    
+        bt_0 = np.sum(np.power(bt_tot,2),axis=1)[...,np.newaxis]/nrj_tot + err_fix
+    #    
+    #    bt_forecast_deter = np.sum( np.power(bt_forecast_deter-bt_tot , 2) , axis=1)[...,np.newaxis]/nrj_tot + err_fix
+    #    bt_sans_coef1 =     np.sum( np.power(bt_sans_coef1-bt_tot, 2) , axis=1)[...,np.newaxis]/nrj_tot + err_fix
+        struct_bt_MCMC['mean'] = np.sum(np.power(struct_bt_MCMC['mean']-bt_tot,2), axis=1)[...,np.newaxis]/nrj_tot + err_fix
+    #    struct_bt_MCMC['one_realiz'] = np.sum(np.power(struct_bt_MCMC['one_realiz']-bt_tot,2), axis=1)[...,np.newaxis]/nrj_tot + err_fix
         
-        param = load_param_c(variables['param'])
-        
-#        load(param.name_file_pre_c,'c','param');
-        param_c = param
-        param = param_ref
-        del param_ref
-        c = c*np.prod(param['dX'])/param_c['N_tot'][0,0]
-        nrj_varying_tot = np.matrix.trace(c)
-#    
-#    
-    nrj_mean = norm0
-    
-    del norm0
-    
-    nrj_tot = nrj_mean + nrj_varying_tot
-#    
-#    if param['reconstruction']:
-#        err_fix = ((nrj_varying_tot - np.sum(param['lambda'],axis=0)) /nrj_tot) * np.ones(param.N_test,1) 
-#    else:
-    err_fix =  param['truncated_error2']/nrj_tot 
-#    
-    bt_0 = np.sum(np.power(bt_tot,2),axis=1)[...,np.newaxis]/nrj_tot + err_fix
-#    
-#    bt_forecast_deter = np.sum( np.power(bt_forecast_deter-bt_tot , 2) , axis=1)[...,np.newaxis]/nrj_tot + err_fix
-#    bt_sans_coef1 =     np.sum( np.power(bt_sans_coef1-bt_tot, 2) , axis=1)[...,np.newaxis]/nrj_tot + err_fix
-    struct_bt_MCMC['mean'] = np.sum(np.power(struct_bt_MCMC['mean']-bt_tot,2), axis=1)[...,np.newaxis]/nrj_tot + err_fix
-#    struct_bt_MCMC['one_realiz'] = np.sum(np.power(struct_bt_MCMC['one_realiz']-bt_tot,2), axis=1)[...,np.newaxis]/nrj_tot + err_fix
-    
-    struct_bt_MCMC['var'] = struct_bt_MCMC['var']/nrj_tot
+        struct_bt_MCMC['var'] = struct_bt_MCMC['var']/nrj_tot
+    else:
+        err_fix =  param['truncated_error2'] 
+        bt_0 = np.sum(np.power(bt_tot,2),axis=1)[...,np.newaxis]
+        struct_bt_MCMC['mean'] = np.sum(np.power(struct_bt_MCMC['mean']-bt_tot,2), axis=1)[...,np.newaxis]        
     
     #%% Plots
     
@@ -721,38 +725,43 @@ def plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res, \
     
     
     #%%
-    if param['type_data'] == 'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_truncated':
-        err_min = 0.4
-    elif np.logical_not(logscale):
-        err_min = 0
-    elif param['type_data'] == 'incompact3d_wake_episode3_cut':
-        err_min = 0.15
+    if param['code_DATA_from_matlab']:
+        if param['type_data'] == 'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_truncated':
+            err_min = 0.4
+        elif np.logical_not(logscale):
+            err_min = 0
+        elif param['type_data'] == 'incompact3d_wake_episode3_cut':
+            err_min = 0.15
+                
+        elif  param['type_data'] == 'incompact3d_wake_episode3_cut_truncated':
+            err_min = 0.005;
             
-    elif  param['type_data'] == 'incompact3d_wake_episode3_cut_truncated':
-        err_min = 0.005;
+            if param.nb_modes > 16:
+                err_min = 0.005
+            
+            
+            if np.logical_not(logscale):
+                err_min = 0
+            
+                
+        elif  param['type_data'] == 'LES_3D_tot_sub_sample_blurred':
+            err_min = 0.3
         
-        if param.nb_modes > 16:
-            err_min = 0.005
+        elif  param['type_data'] in [ 'inc3D_Re3900_blocks','inc3D_Re3900_blocks119']:
+            err_min = 0.4
+    
+        elif  param['type_data'] == 'inc3D_Re3900_blocks_truncated':
+            err_min=0.4
         
-        
-        if np.logical_not(logscale):
+        else:
             err_min = 0
         
-            
-    elif  param['type_data'] == 'LES_3D_tot_sub_sample_blurred':
-        err_min = 0.3
-    
-    elif  param['type_data'] in [ 'inc3D_Re3900_blocks','inc3D_Re3900_blocks119']:
-        err_min = 0.4
-
-    elif  param['type_data'] == 'inc3D_Re3900_blocks_truncated':
-        err_min=0.4
-    
+    if param['code_DATA_from_matlab']:
+        plt.ylim(err_min, 1)
     else:
-        err_min = 0
-    
-    
-    plt.ylim(err_min, 1)
+        axes=plt.gca()
+        ylim=axes.get_ylim()
+        plt.ylim(0, 2.0*ylim[1])
     plt.ylabel('Normalized velocity error',fontsize=20)
     plt.xlabel('Time',fontsize=20)
     plt.legend(fontsize=20)
