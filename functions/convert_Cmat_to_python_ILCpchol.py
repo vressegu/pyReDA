@@ -16,7 +16,7 @@ from pathlib import Path
 import os
 
 
-def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True):
+def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,code_adv_cor=True):
  
     
     ############### FIRST PART ####################################
@@ -64,20 +64,21 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True):
     
     nx=nb_modes; ny=1;
     I_sto = np.zeros( (nx,ny), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/L' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
-    coeff=1.
-    f = open(file_name,'r')
-    i = 0
-    while True:
-      line = f.readline()
-      if not line: 
-        break
-      else:            
-       a = np.fromstring(line, dtype=float, sep=' ')
-       for j in range(len(a)):
-           I_sto[i][j]=a[j]*coeff
-       i=i+1
-    f.close()    
+    if code_adv_cor:
+        file_name = PATH_MAT+'/L' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
+        coeff=1.
+        f = open(file_name,'r')
+        i = 0
+        while True:
+          line = f.readline()
+          if not line: 
+            break
+          else:            
+           a = np.fromstring(line, dtype=float, sep=' ')
+           for j in range(len(a)):
+               I_sto[i][j]=a[j]*coeff
+           i=i+1
+        f.close()    
     file_name = PATH_MAT+'/S' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
     coeff=1.
     f = open(file_name,'r')
@@ -98,20 +99,21 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True):
 
     nx=nb_modes; ny=nx;
     L_sto = np.zeros( (nx,ny), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/L' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
-    coeff=1.
-    f = open(file_name,'r')
-    i = 0
-    while True:
-      line = f.readline()
-      if not line: 
-        break
-      else:            
-       a = np.fromstring(line, dtype=float, sep=' ')
-       for j in range(len(a)):
-           L_sto[i][j]=a[j]*coeff
-       i=i+1
-    f.close()    
+    if code_adv_cor:
+        file_name = PATH_MAT+'/L' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
+        coeff=1.
+        f = open(file_name,'r')
+        i = 0
+        while True:
+          line = f.readline()
+          if not line: 
+            break
+          else:            
+           a = np.fromstring(line, dtype=float, sep=' ')
+           for j in range(len(a)):
+               L_sto[i][j]=a[j]*coeff
+           i=i+1
+        f.close()    
     file_name = PATH_MAT+'/S' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
     coeff=1.
     f = open(file_name,'r')

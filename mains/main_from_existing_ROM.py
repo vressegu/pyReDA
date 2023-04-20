@@ -63,6 +63,9 @@ import re # for grep search in param file
 # Parameters choice : not erased
 param_ref = {}
 
+# # Corrected advection
+# adv_corrected = True
+
 ### Parameters often modified which are defined in function [main_globalParam_from_info_txt_file]
 
 # type_data_C : Openfoam dataset
@@ -198,6 +201,7 @@ if not code_Assimilation:
 
 # It can be chosen to plot chronos evolution in real time or only at the end of the simulation
 plt_real_time = False
+# plt_real_time = True
 if code_load_run:
     plt_real_time = False
 plot_period = 2 * float(5/10)/2
@@ -870,7 +874,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if not code_ROM_from_matlab:
         svd_pchol = False
         I_sto, L_sto, C_sto, I_deter, L_deter, C_deter, pchol_cov_noises = convert_Cmat_to_python_ILCpchol(
-            os.path.join(folder_results, 'Matrices'), str(Re), str(nb_modes), bool_PFD)
+            os.path.join(folder_results, 'Matrices'), str(Re), str(nb_modes), bool_PFD, adv_corrected)
 
         # changing sign values for certain modes : value -> -values
         if code_change_mode_sign_ILC:
@@ -1048,6 +1052,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         # file_plots = file_plots + '/' + type_data_C \
         file_plots = file_plots \
                      + '/' + redlumcpp_code_version + '/'
+        if not adv_corrected:
+            file_plots = file_plots + '_no_correct_drift'
     else:
         file_plots = file_plots + '_' + choice_n_subsample 
         if choice_n_subsample == 'auto_shanon':

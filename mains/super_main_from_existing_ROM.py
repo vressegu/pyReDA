@@ -36,6 +36,7 @@ if __name__ == '__main__':
 
     no_subampl_in_forecast = False 
     vect_reconstruction = [False] # for the super_main_from_existing_ROM
+    #vect_adv_corrected = [False,True]
     vect_adv_corrected = [True]
     test_fct = 'b'
     svd_pchol = 2
