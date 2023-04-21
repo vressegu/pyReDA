@@ -630,36 +630,37 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             vector_of_assimilation_time = []
     elif assimilate == 'fake_real_data':
         plot_ref = plot_ref_gl                     # Plot bt_tot
-               
-        # input PATH = directory containing subdirectories [ITHACAoutput], [ROM_PIV], [util] and [FakePIV_noise2]
-        PATH_input = PATH_openfoam_data.joinpath(type_data_C)
-        
-        if not PATH_input.exists():
-            print('\n!!! ERROR: input directory ['+str(PATH_input)+'] not found !!!')
-            sys.exit()        
-        
-        PATH_ROM = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ITHACAoutput')
-        PATH_util = Path(PATH_input).joinpath('util')
-        PATH_ROM_PIV = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ROM_PIV')
-        PATH_DATA = Path(PATH_input).joinpath(Path('FakePIV_noise2'))
-        
-        param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
-        if not PATH_ROM.exists():
-            print('\n!!! ERROR: directory ['+str(PATH_ROM)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
-            sys.exit()
-        if not PATH_util.exists():
-            print('\n!!! ERROR: directory ['+str(PATH_util)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
-            sys.exit()
-        if code_Assimilation :
-            if not PATH_ROM_PIV.exists():
-                print('\n!!! ERROR: directory ['+str(PATH_ROM_PIV)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
-                sys.exit()
-            if not PATH_DATA.exists():
-                print('\n!!! ERROR: directory ['+str(PATH_DATA)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
-                sys.exit()
         
         if not code_DATA_from_matlab or not code_ROM_from_matlab:
-       
+                   
+            # input PATH = directory containing subdirectories [ITHACAoutput], [ROM_PIV], [util] and [FakePIV_noise2]
+            PATH_input = PATH_openfoam_data.joinpath(type_data_C)
+            
+            if not PATH_input.exists():
+                print('\n!!! ERROR: input directory ['+str(PATH_input)+'] not found !!!')
+                sys.exit()        
+            
+            PATH_ROM = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ITHACAoutput')
+            PATH_util = Path(PATH_input).joinpath('util')
+            PATH_ROM_PIV = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ROM_PIV')
+            PATH_DATA = Path(PATH_input).joinpath(Path('FakePIV_noise2'))
+            
+            param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
+            if not PATH_ROM.exists():
+                print('\n!!! ERROR: directory ['+str(PATH_ROM)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
+                sys.exit()
+            if not PATH_util.exists():
+                print('\n!!! ERROR: directory ['+str(PATH_util)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
+                sys.exit()
+            if code_Assimilation :
+                if not PATH_ROM_PIV.exists():
+                    print('\n!!! ERROR: directory ['+str(PATH_ROM_PIV)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
+                    sys.exit()
+                if not PATH_DATA.exists():
+                    print('\n!!! ERROR: directory ['+str(PATH_DATA)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
+                    sys.exit()
+            
+           
             Cparam = namedtuple('Cparam', ['Re', 'nb_modes','SECONDS_OF_SIMU',
                                           'x1_PIV', 'x2_PIV',  'x0_cyl', 
                                           'y1_PIV', 'y2_PIV',  'y0_cyl',
