@@ -549,10 +549,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         EV = True
     elif (EV == 1):
         LeastSquare = False
-        EV_withoutNoise = True
-        EV = True
-    elif (EV == 3):
-        LeastSquare = True
         EV_withoutNoise = False
         EV = True
     elif (EV == 0):
