@@ -810,7 +810,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     param = default_param( 0 )
   
     print('############ Default Param (Re='+str(Re) +")\n")
-    print("Cf. podfs2/python_scripts/mains/switch_case_param.py" + "\n")
+    print("Cf. pyReDA/functions/switch_case_param.py" + "\n")
 
     f_info.write("  - Param File (Re=" + str(Re)+") : any \n    parameters are defined by [switch_case_param.py]\n\n")
     
@@ -844,7 +844,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
       param = convert_mat_to_python_param(str(file_param))
       print('############ File Param (Re='+str(Re) +
             ') : [' + str(file_param) + "]\n")
-      print("Cf. podfs2/python_scripts/mains/convert_mat_to_python_param.py" + "\n")
+      print("Cf. pyReDA/functions/convert_mat_to_python_param.py" + "\n")
   
       f_info.write("  - Param File (Re=" + str(Re)+") : \n    " +
                    str(file_param) + "\n\n")
@@ -861,12 +861,12 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             str(file_res))
 
         print('############ File Result (Re='+str(Re)+') : [' + str(file_res))
-        print("Cf. podfs2/python_scripts/mains/convert_mat_to_python_ILCpchol.py]\n\n")
+        print("Cf. pyReDA/functions/convert_mat_to_python_ILCpchol.py]\n\n")
 
         f_info.write("  - Result File (Re=" + str(Re) +
                      ") : \n    " + str(file_res) + "\n\n")
         f_info.write(
-            "    (function used : podfs2/python_scripts/mains/convert_mat_to_python_ILCpchol.py)" + "]\n\n")
+            "    (function used : pyReDA/functions/convert_mat_to_python_ILCpchol.py)" + "]\n\n")
 
     if not code_ROM_from_matlab:
         svd_pchol = False
@@ -881,18 +881,18 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
         print('############ Files Result (Re='+str(Re) +
               ') : [' + os.path.join(folder_results, 'Matrices') + "/*_mat.txt]\n\n")
-        print("Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_ILCpchol.py]\n\n")
+        print("Cf. pyReDA/functions/convert_Cmat_to_python_ILCpchol.py]\n\n")
 
         f_info.write("  - Result Files (Re=" + str(Re)+") : \n    " +
                      os.path.join(folder_results, 'Matrices') + "/*_mat.txt\n\n")
         f_info.write(
-            "    (function used : podfs2/python_scripts/mains/convert_Cmat_to_python_ILCpchol.py)" + "\n\n")
+            "    (function used : pyReDA/functions/convert_Cmat_to_python_ILCpchol.py)" + "\n\n")
 
     if not code_DATA_from_matlab :
         param['dt'] = dt_DNS
         param['N_tot'] = int((t1_testBase-t0_testBase)/dt_DNS)+1
     else:
-        #if code_DATA_from_matlab: Cf. podfs2/python_scripts/mains/convert_mat_to_python_param.py
+        #if code_DATA_from_matlab: Cf. pyReDA/functions/convert_mat_to_python_param.py
         # Define the constant
         param['dt'] = float(param['dt'])
         param['decor_by_subsampl']['no_subampl_in_forecast'] = no_subampl_in_forecast
@@ -913,7 +913,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             file_EV_res = folder_results / Path(file_EV)
             # Call the function and load the matlab data calculated before in matlab scripts.
             ILC_EV = convert_mat_to_python_EV(str(file_EV_res))
-        print("Cf. podfs2/python_scripts/mains/convert_mat_to_python_EV.py")
+        print("Cf. pyReDA/functions/convert_mat_to_python_EV.py")
 
     else:
         print('############ [EV] UNDEFINED ################')
@@ -949,11 +949,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     # if not code_DATA_from_matlab:
     if not code_ROM_from_matlab:
         lambda_values = convert_Cmat_to_python_lambda(PARAM)
-        print("\nCf. podfs2/python_scripts/mains/convert_Cmat_to_python_lambda.py]\n\n")
+        print("\nCf. pyReDA/functions/convert_Cmat_to_python_lambda.py]\n\n")
         f_info.write("  - Lambda values (Re=" + str(Re)+") : \n    " +
                      os.path.join(folder_results, 'temporalModes_'+str(nb_modes)+'modes') + "/U_mat.txt\n\n")
         f_info.write(
-            "    (function used : Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
+            "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
     
     print("\nNew     lambda_values="+str(lambda_values)+"\n")
     
@@ -1175,7 +1175,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                f_info.write("  - bt_tot (Re=" + str(Re)+") : \n    " +
                             os.path.join(folder_results, 'temporalModesSimulation_'+str(nb_modes)+'modes') + "/U_mat.txt\n\n")
                f_info.write(
-                   "    (function used : Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
+                   "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
                    bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
                              PARAM, n_simu, n_particles, bool_PFD)
@@ -1302,7 +1302,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             f_info.write("  - Sigma_inverse (Re=" + str(Re)+") : \n    " +
                          os.path.join(folder_results, 'residualSpeed_'+str(nb_modes)) + "/Inv_COVxy.dat\n\n")
             f_info.write(
-                "    (function used : Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
+                "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
     
         # Define the vectorial field dimension
         dim = topos.shape[-1]
@@ -1668,7 +1668,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                     f_info.write("  - data (Re=" + str(Re)+") : \n    " +
                                  str(folder_data) + "/*/B0001_new.dat\n\n")
                     f_info.write(
-                        "    (function used : Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
+                        "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                 
             end = t_exe.time()
             print('Time for loading '+str(number_of_FAKE_PIV_files)+' Fake PIV files : '+str(end -start)+'\n\n')
