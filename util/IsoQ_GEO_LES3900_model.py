@@ -11,6 +11,10 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
 
 # ----------------------------------------------------------------
+
+# for time PNG genration, Cf. http://runinchaos.com/CFD/python_paravew.html
+
+# ----------------------------------------------------------------
 # setup
 # ----------------------------------------------------------------
 IsoQ = Q_VALUE
@@ -161,6 +165,9 @@ contour1 = Contour(registrationName='Contour1', Input=mORAANE_GEO_LES3900foam)
 contour1.ContourBy = ['POINTS', 'Q']
 contour1.Isosurfaces = [IsoQ]
 contour1.PointMergeMethod = 'Uniform Binning'
+
+# time
+tsteps=mORAANE_GEO_LES3900foam.TimestepValues
 
 # ----------------------------------------------------------------
 # setup the visualization in view 'renderView1'
@@ -394,10 +401,23 @@ SetActiveSource(contour1)
 Show(contour1, renderView1)
 
 Render()
+
+#view = GetActiveView()
+#view.ViewSize = [ 1200, 800 ]
+#png_file='IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, time*100)
+#WriteImage(png_file, Magnification=0.5)
+ 
 view = GetActiveView()
 view.ViewSize = [ 1200, 800 ]
-png_file='IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, time*100)
-WriteImage(png_file, Magnification=0.5)
+for n,t in enumerate (tsteps):
+  print ("rendering for time %f"%t)
+  time_text = "t=%6.2f" % (t)
+  title2 = ": "+time_text
+  uLUTColorBar.ComponentTitle = str(title2)
+  view.ViewTime = t
+  png_file='IsoQ/IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, time*100)
+  png_file='IsoQ/IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, t*100)
+  WriteImage(png_file, Magnification=0.5)
 
 
 if __name__ == '__main__':

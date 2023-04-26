@@ -147,9 +147,9 @@ foreach ROM_DATA ( ${All_ROM_DATA} )
         if (!( -e ${DIR0}/TrueState_${nb_modes}modes )) then
 
           set temporal_file = ${dir_pyReDA_result}/temporalModeSimulation.txt
-          tcsh extractU_from_ROM.csh ${t_first} ${t_last} ${dir_data_space} ${temporal_file}
+#          tcsh extractU_from_ROM.csh ${t_first} ${t_last} ${dir_data_space} ${temporal_file}
               
-          tcsh IsoQ.csh ${t_first} ${t_last} ${DIR0}/${TrueState_base_dir}
+#          tcsh IsoQ.csh ${t_first} ${t_last} ${DIR0}/${TrueState_base_dir}
         
         else
 
@@ -164,33 +164,70 @@ foreach ROM_DATA ( ${All_ROM_DATA} )
       # set time_shift=1 
 
         set temporal_file = ${dir_pyReDA_result}/temporalModeDAresult.txt
-        tcsh extractU_from_ROM.csh ${t_first} ${t_last} ${dir_data_space} ${temporal_file} ${time_shift}
+#        tcsh extractU_from_ROM.csh ${t_first} ${t_last} ${dir_data_space} ${temporal_file} ${time_shift}
         
         set RedLumPart_base_dir = RedLumPart_${nb_modes}modes_${ROM_DATA}${dirLast_pyReDA_result}
 
-        # definining time step
-        cd ${DIR0}/${RedLumPart_base_dir}
-        set All_t_default = ` lsd | grep -v '[a-Z;A-Z]' | awk '{ printf("%.0f %s\n",1000.*($1+0.), $1) }' | sort -n | awk '{ print $2 }' `
-        set dt = ` echo ${All_t_default} | awk '{ print $2-$1 }' | head -1 `
-        cd ${dir_ici}
-
-        # redefining first and last time
-        if ( ${time_shift} == 1 ) then
-          set t_last = ` echo ${t_last} ${dt} | awk '{ print $1+$2 }' `
-          set t_first = ` echo ${t_first} ${dt} | awk '{ print $1+$2 }' `        
-        else
-          set t_last = ` echo ${t_last} ${dt} | awk '{ print $1-$2 }' `
-        endif
+#         # definining time step
+#         cd ${DIR0}/${RedLumPart_base_dir}
+#         set All_t_default = ` lsd | grep -v '[a-Z;A-Z]' | awk '{ printf("%.0f %s\n",1000.*($1+0.), $1) }' | sort -n | awk '{ print $2 }' `
+#         set dt = ` echo ${All_t_default} | awk '{ print $2-$1 }' | head -1 `
+#         cd ${dir_ici}
+ 
+#         # redefining first and last time
+#         if ( ${time_shift} == 1 ) then
+#           set t_last = ` echo ${t_last} ${dt} | awk '{ print $1+$2 }' `
+#           set t_first = ` echo ${t_first} ${dt} | awk '{ print $1+$2 }' `        
+#         else
+#           set t_last = ` echo ${t_last} ${dt} | awk '{ print $1-$2 }' `
+#         endif
+#         
+         set RedLumPart_new_dir = ${RedLumPart_base_dir}_correct_drift${correct_drift}
+#         if -e ${DIR0}/${RedLumPart_new_dir} \rm -R ${DIR0}/${RedLumPart_new_dir}
+#         \mv ${DIR0}/${RedLumPart_base_dir} ${DIR0}/${RedLumPart_new_dir} 
         
-        set RedLumPart_new_dir = ${RedLumPart_base_dir}_correct_drift${correct_drift}
-        if -e ${DIR0}/${RedLumPart_new_dir} \rm -R ${DIR0}/${RedLumPart_new_dir}
-        \mv ${DIR0}/${RedLumPart_base_dir} ${DIR0}/${RedLumPart_new_dir} 
-        
-        tcsh IsoQ.csh ${t_first} ${t_last} ${DIR0}/${RedLumPart_new_dir}
+#        tcsh IsoQ.csh ${t_first} ${t_last} ${DIR0}/${RedLumPart_new_dir}
 
         ######### Movie 
 
-        tcsh montage_IsoQ_ROM.csh ${DIR0} ${TrueState_base_dir} ${RedLumPart_new_dir} ${t_first} ${t_last}
+#        tcsh montage_IsoQ_ROM.csh ${DIR0} ${TrueState_base_dir} ${RedLumPart_new_dir} ${t_first} ${t_last}
+
+       set info = ` echo ${RedLumPart_new_dir} | awk -F'/' '{ print $NF }' | sed s/"RedLumPart_"//g `
+       set dir_montage = ${DIR0}/IsoQ_${info}
+       
+        echo ""; echo "creating MP4 movie for t=[${t_first}:${t_last}]"; echo ""
+        
+        cd ${dir_montage}
+        
+        if -e tmp_movie \rm -R tmp_movie; mkdir tmp_movie
+
+        set mp4_file = ${dir_montage}_t${t_first}_t${t_last}.mp4
+        
+        cd ${DIR0}/../openfoam_data
+        set All_t = ` lsd | grep -v '[a-Z;A-Z]' `
+        cd ${dir_ici}
+        set All_t = ` echo ${All_t} | awk -v t1=${t_first} -v t2=${t_last} '{ for (i=1;i<=NF; i++) { t=$i+0; if ((t>=t1+0.) && (t<=t2+0.)) print $i } }' `
+
+        set i = 1
+        foreach t ( ${All_t} )
+
+          set t_IsoQ = ` echo ${t} | awk '{ printf("%5.0f",$1*100.) }' `
+          set png_file = t${t_IsoQ}.png
+          set nom = `echo ${i} | awk '{ printf("%04d",$1) }' `
+          \cp ${dir_montage}/${png_file} ${dir_montage}/tmp_movie/${nom}.png
+          
+          set i = ` echo ${i} | awk '{ print $1+1}' `
+          
+        end
+
+        if -e ${mp4_file} \rm ${mp4_file}
+        #ffmpeg -r 10 -i ${dir_montage}/tmp_movie/%04d.png ${mp4_file}
+        
+        ffmpeg -r 18 -i ${dir_montage}/tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p  ${mp4_file}
+        
+        cd ${dir_ici}
+        
+        echo ""; echo "Cf. file ${mp4_file}\n (mplayer -speed 0.5 ${mp4_file}) "; echo ""
 
       end
 

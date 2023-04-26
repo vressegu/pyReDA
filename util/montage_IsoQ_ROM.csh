@@ -132,7 +132,9 @@ if ((-e ${dir_ROM}/${dir_TrueState}) && (-e ${dir_ROM}/${dir_RedLumPart})) then
     
   end
 
-  ffmpeg -r 10 -i tmp_movie/%04d.png ${mp4_file}
+  if -e ${mp4_file} \rm ${mp4_file}
+  #ffmpeg -r 10 -i tmp_movie/%04d.png ${mp4_file}
+  ffmpeg -r 18 -i tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p  ${mp4_file}
   
   cd ${dir_ici}
   
@@ -140,8 +142,8 @@ if ((-e ${dir_ROM}/${dir_TrueState}) && (-e ${dir_ROM}/${dir_RedLumPart})) then
  
 else
 
-  echo "!\!\!\ ${dir_TrueState} or ${dir_RedLumPart} NOT FOUND \!\!\!"
-  echo "!\!\!\ You should use script IsoQ_all.csh before !\!\!"
+  echo "\!\!\! ${dir_TrueState} or ${dir_RedLumPart} NOT FOUND \!\!\!"
+  echo "\!\!\! You should use script IsoQ_all.csh before \!\!\!"
   echo ""
 
 endif

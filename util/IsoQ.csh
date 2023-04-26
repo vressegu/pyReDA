@@ -195,34 +195,14 @@ if ( ${code} == 1 ) then
   set IsoQ = 0.2
   
   if -e IsoQ \rm -R IsoQ; mkdir IsoQ
-  if -e tmp_dir \rm -R tmp_dir; mkdir tmp_dir
-  if (!( -e tmp_dir/constant)) \cp -R constant tmp_dir
-  if (!( -e tmp_dir/system)) \cp -R \system tmp_dir
-  
-  foreach t ( ${All_t} )
-
-    echo ""; echo "t=${t} :  IsoQ for Q=${IsoQ} (grey plane drawn for Z=${Zplan}) "; echo ""
-    
-    \cp -R ${t} tmp_dir
-    \cp -R ${t} tmp_dir/0
-    cd tmp_dir
-    
-    if -e IsoQ.py \rm IsoQ.py
-    cat ${IsoQ_model} | \
-      sed s/"PATH_to_DATA"/"${dir_data_SED}\/tmp_dir"/g | \
-      sed s/"Q_VALUE"/"${IsoQ}"/g | \
-      sed s/"Z_VALUE"/"${Zplan}"/g | \
-      sed s/"TIME_VALUE"/"${t}"/g > IsoQ.py
-        
-    pvbatch IsoQ.py
-    
-    mv IsoQ*.png ../IsoQ
-    
-    \rm -R 0 ${t}
-    
-    cd ..
-
-  end
+  set t = ${t_first}
+  if -e IsoQ.py \rm IsoQ.py
+  cat ${IsoQ_model} | \
+    sed s/"PATH_to_DATA"/"${dir_data_SED}"/g | \
+    sed s/"Q_VALUE"/"${IsoQ}"/g | \
+    sed s/"Z_VALUE"/"${Zplan}"/g | \
+    sed s/"TIME_VALUE"/"${t}"/g > IsoQ.py
+  pvbatch IsoQ.py
 
 endif
 
