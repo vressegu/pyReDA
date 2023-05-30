@@ -218,7 +218,8 @@ foreach D ( ${All_D} )
   cat ${PIV_file_new} | grep -v "#" | \
     awk '{ x=$2+0. ; if (NF!=0) printf("%.0f\n", 1000000.*x) }' | sort -n -r  | uniq | \
     awk '{ x=$1+0. ; printf("%.6f\n",x/1000000.)}' > PIV_new_yinv.txt
-  set All_PIV_new_yinv = ` cat PIV_new_yinv.txt | sed s/"-"/"\\-"/g`
+  #set All_PIV_new_yinv = ` cat PIV_new_yinv.txt | sed s/"-"/"\\-"/g`
+  set All_PIV_new_yinv = ` cat PIV_new_yinv.txt `
 
   if -e tmp.txt \rm tmp.txt
   cat ${PIV_file_new} | grep -v "#" | awk '{ for (i=1; i<=NF; i++) printf("%s ",$i); print "" }' > tmp.txt
@@ -226,9 +227,9 @@ foreach D ( ${All_D} )
   echo "# x   y   inv(cov_xx+A2)   inv(cov_yy+A2)   inv(cov_xy)" > ${PIV_file_new}
   echo "# with A2 = ${A_mat_diag}**2" >> ${PIV_file_new}
   foreach y ( ${All_PIV_new_yinv} )
-    cat tmp.txt | awk -v y=${y} '{ if ($2==y) print $0 }' | sort -r | uniq >> ${PIV_file_new}
+    cat tmp.txt | awk -v y=${y} '{ if ($2==y) print $0 }' | sort -n | uniq >> ${PIV_file_new}
   end
-    
+
   # visu gnuplot
   set fic_gnp = Inv_COVxy.gnp
   if -e ${fic_gnp} \rm ${fic_gnp}; touch ${fic_gnp}
