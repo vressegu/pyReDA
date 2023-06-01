@@ -214,6 +214,15 @@ foreach D ( ${All_D} )
    
   #  same order (x,y) as  PIV model
   
+  if -e PIV_new_x.txt \rm PIV_new_x.txt
+  cat ${PIV_file_new} | grep -v "#" | \
+    awk '{ x=$1+0. ; if (NF!=0) printf("%.0f\n", 1000000.*x) }' | sort -n  | uniq | \
+    awk '{ x=$1+0. ; printf("%.6f\n",x/1000000.)}' > PIV_new_x.txt
+  #set All_PIV_yinv = ` cat All_PIV_x.txt | sed s/"-"/"\\-"/g`
+  set All_PIV_x = ` cat PIV_new_x.txt `
+  
+  set dx_max = ` echo ${All_PIV_x} | sort -n | awk '{ d=$NF-$1; d=sqrt(d*d); print d }' `
+  
   if -e PIV_new_yinv.txt \rm PIV_new_yinv.txt
   cat ${PIV_file_new} | grep -v "#" | \
     awk '{ x=$2+0. ; if (NF!=0) printf("%.0f\n", 1000000.*x) }' | sort -n -r  | uniq | \
@@ -227,7 +236,9 @@ foreach D ( ${All_D} )
   echo "# x   y   inv(cov_xx+A2)   inv(cov_yy+A2)   inv(cov_xy)" > ${PIV_file_new}
   echo "# with A2 = ${A_mat_diag}**2" >> ${PIV_file_new}
   foreach y ( ${All_PIV_new_yinv} )
-    cat tmp.txt | awk -v y=${y} '{ if ($2==y) print $0 }' | sort -n | uniq >> ${PIV_file_new}
+    cat tmp.txt | awk -v y=${y} -v dx_max=${dx_max} '{ if ($2==y) print $1+dx_max, $0 }' | \
+    sort -n | uniq | \
+    awk '{ for (i=2;i<NF; i++) printf("%s ",$i); print $NF }' >> ${PIV_file_new}
   end
 
   # visu gnuplot
@@ -374,7 +385,7 @@ foreach D ( ${All_D} )
   \cp Inv_COVxy.* cov_before_gaussSmoothing
   \cp PIV_new_covInv_*.png  cov_before_gaussSmoothing
   
-  echo ""; echo "Cf cov_before_gaussSmoothing/cov_mean_*.png (in ${dir_ici}/${D})"; echo ""
+  echo ""; echo "Cf. cov_before_gaussSmoothing/cov_mean_*.png (in ${dir_ici}/${D})"; echo ""
  
 end
 

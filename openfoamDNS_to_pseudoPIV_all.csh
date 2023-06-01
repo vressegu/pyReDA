@@ -412,13 +412,13 @@ foreach CASE ( ${All_CASE} )
 
   foreach D ( ${All_D} ) 
   
-   if (! (-d ${DIR0}/${DIR1}/${D} )) then
+    if (! (-d ${DIR0}/${DIR1}/${D} )) then
    
       set error = "directory ${DIR0}/${DIR1}/${D} NOT FOUND"
       WRITE_LINE; WRITE_ERROR "${error}"; WRITE_LINE
       exit()
       
-   endif
+    endif
   
     set code_mean = ` echo ${D} | grep "mean" | wc -l `
     set code_spatialModes = ` echo ${D} | grep "spatialModes_" | grep "modes" | wc -l `
@@ -985,13 +985,13 @@ foreach CASE ( ${All_CASE} )
         #                                         if there is more than min_Nb_t (=5) time directories (i.e. when D=residualSpeed_*)
         #                                         (for example [residualSpeed_2/750.25/PIV_new_Ux.png] is copied in [tmp_movie/75025.png])
         
-        if -e tmp_movie \rm -R tmp_movie
+        if -e ${dir_work_up}/tmp_movie \rm -R ${dir_work_up}/tmp_movie
 
         set min_Nb_t = 8
         set code_Nb_t = ` echo ${All_t} | awk -v min_N=${min_Nb_t} '{ if (NF>min_N) print 1; else print 0 }' `
         if ( ${code_Nb_t} == 1 ) then
 
-          if (!(-e tmp_movie)) mkdir tmp_movie
+          if (!(-e ${dir_work_up}/tmp_movie)) mkdir ${dir_work_up}/tmp_movie
 
           set All_png = ( \
             Ux_calculator_pointVolumeInterpolator_slice_withoutGrid.png \
@@ -1011,7 +1011,7 @@ foreach CASE ( ${All_CASE} )
             foreach t ( ${All_t} )
 
               set nom = `echo ${i} | awk '{ printf("%04d",$1) }' `
-              if -e ${dir_work}/${t}/${png_file} \cp ${dir_work}/${t}/${png_file} tmp_movie/${nom}.png
+              if -e ${dir_work}/${t}/${png_file} \cp ${dir_work}/${t}/${png_file} ${dir_work_up}/tmp_movie/${nom}.png
               
               set i = ` echo ${i} | awk '{ print $1+1}' `
               
@@ -1019,14 +1019,14 @@ foreach CASE ( ${All_CASE} )
             
             if ( ${movie_type} == "mp4" ) then
             
-              ffmpeg -r 10 -i tmp_movie/%04d.png ${dir_work}/${mp4_file}
+              ffmpeg -r 10 -i ${dir_work_up}/tmp_movie/%04d.png ${dir_work}/${mp4_file}
               set info = "Cf. file ${dir_work}/${mp4_file}\n (mplayer -speed 0.5 ${dir_work}/${mp4_file}) "
            
             else
            
               # creating AVI movie
               
-              mencoder "mf://tmp_movie/????.png" -o frame.avi -ovc lavc -lavcopts vcodec=mjpeg
+              mencoder "mf://${dir_work_up}/tmp_movie/????.png" -o frame.avi -ovc lavc -lavcopts vcodec=mjpeg
               #mplayer -speed 0.1 frame.avi
 
               if  ( ${movie_type} == "avi" ) then
@@ -1045,6 +1045,8 @@ foreach CASE ( ${All_CASE} )
                 if -e frame.flv \mv frame.flv ${dir_work}/${flv_file}
                 
                 set info = "Cf. file ${dir_work}/${flv_file}\n (mplayer -speed 0.5 ${dir_work}/${flv_file}) "
+                
+              endif
           
             endif
 

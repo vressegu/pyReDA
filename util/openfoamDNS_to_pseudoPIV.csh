@@ -946,6 +946,15 @@ if -e slice_Uxy2.csv then
 
   #  same order (x,y) as  PIV model : file ordered from ymin to ymax
   
+  if -e PIV_new_x.txt \rm PIV_new_x.txt
+  cat ${PIV_file_model_new} | grep -v "#" | \
+    awk '{ x=$1+0. ; if (NF!=0) printf("%.0f\n", 1000000.*x) }' | sort -n  | uniq | \
+    awk '{ x=$1+0. ; printf("%.6f\n",x/1000000.)}' > PIV_new_x.txt
+  #set All_PIV_yinv = ` cat All_PIV_x.txt | sed s/"-"/"\\-"/g`
+  set All_PIV_x = ` cat PIV_new_x.txt `
+  
+  set dx_max = ` echo ${All_PIV_x} | sort -n | awk '{ d=$NF-$1; d=sqrt(d*d); print d }' `
+
   if -e PIV_new_yinv.txt \rm PIV_new_yinv.txt
   cat ${PIV_file_model_new} | grep -v "#" | grep -v "=" | \
     awk '{ x=$2+0. ; if (NF!=0) printf("%.0f\n", 1000000.*x) }' | sort -n -r  | uniq | \
@@ -955,7 +964,9 @@ if -e slice_Uxy2.csv then
 
   \mv ${PIV_file_model_new} tmp.txt; touch  ${PIV_file_model_new}
   foreach y ( ${All_PIV_new_yinv} )
-    cat tmp.txt | awk -v y=${y} '{ if ($2==y) print $0 }' | sort -n | uniq  >> ${PIV_file_model_new}
+    cat tmp.txt | awk -v y=${y} -v dx_max=${dx_max} '{ if ($2==y) print $1+dx_max, $0 }' | \
+    sort -n | uniq | \
+    awk '{ for (i=2;i<NF; i++) printf("%s ",$i); print $NF }' >> ${PIV_file_model_new}
   end
 
   # according [isValid] parameter with PIV model, and changing Ux,Uy to Ux=0, Uy=0 if isValid=0
