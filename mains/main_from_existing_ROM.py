@@ -154,6 +154,7 @@ elif type_data_C == 'LES100-test':
 else:
     if (not code_load_run):
         print('ERROR: unknown type_data_C')
+              
 if (not code_load_run) & (code_ROM_from_matlab == False):
     if code_DATA_from_matlab == True:
         # modif spatial mode sign for mode=num_mode_to_reverse => 2 choices
@@ -1341,56 +1342,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             print("\nSigma_inverse already defined with [convert_Cmat_to_python_Topos] function\n")
         topos_new_coordinates = np.reshape(topos,
                                            MX_PIV + tuple(np.array([data_assimilate_dim, (nb_modes+1)])), order='F')    
-        
-        # Plots for debug
-        if plot_debug:
-            matrix_H_plot = topos_new_coordinates.copy()
-            fig = plt.figure(20)
-            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, -1]),
-                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                               coordinates_y_PIV[0], coordinates_y_PIV[-1]])
-            plt.title("mean : Ux")
-            fig.colorbar(imgplot, orientation="horizontal")
-            plt.pause(1)
-            plt.savefig(PATH_output.joinpath("mode0_Ux.png"),
-                        dpi=100, transparent=False)
-            plt.close()
-    
-            fig = plt.figure(21)
-            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, -1]),
-                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                               coordinates_y_PIV[0], coordinates_y_PIV[-1]])
-            plt.title("mean : Uy")
-            fig.colorbar(imgplot, orientation="horizontal")
-            plt.pause(1)
-            plt.savefig(PATH_output.joinpath("mode0_Uy.png"),
-                        dpi=100, transparent=False)
-            plt.close()
-    
-            for n in range(nb_modes):
-    
-                fig = plt.figure(int(20+n+1))
-                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, n]),
-                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                                   coordinates_y_PIV[0], coordinates_y_PIV[-1]])
-                plt.title("mode "+str(n+1)+" : Ux")
-                fig.colorbar(imgplot, orientation="horizontal")
-                plt.pause(1)
-                plt.savefig(PATH_output.joinpath("mode"+str(n+1) +
-                            "_Ux.png"), dpi=100, transparent=False)
-                plt.close()
-    
-                fig = plt.figure(int(21+n+1))
-                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, n]),
-                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                                   coordinates_y_PIV[0], coordinates_y_PIV[-1]])
-                plt.title("mode "+str(n+1)+" : Uy")
-                fig.colorbar(imgplot, orientation="horizontal")
-                plt.pause(1)
-                plt.savefig(PATH_output.joinpath("mode"+str(n+1) +
-                            "_Uy.png"), dpi=100, transparent=False)
-                plt.close()
-    
+            
         # The topos that we have estimated reshaped to posterior matrix multiplications
         Hpiv_Topos = np.reshape(topos_new_coordinates, (int(
             topos_new_coordinates.shape[0]*topos_new_coordinates.shape[1]*topos_new_coordinates.shape[2]), topos_new_coordinates.shape[3]), order='F')
@@ -1481,6 +1433,72 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         print('\nThe points that will be observed (with MASK): ')
         print('  The x coordinates : '+str(coordinates_x_PIV_with_MASK))
         print('  The y coordinates : '+str(coordinates_y_PIV_with_MASK))
+        
+        f_info.write('\nThe points that will be observed (with MASK): \n')
+        f_info.write('  The x coordinates : '+str(coordinates_x_PIV_with_MASK)+'\n')
+        f_info.write('  The y coordinates : '+str(coordinates_y_PIV_with_MASK)+'\n\n')
+
+        # Plots for debug
+        if plot_debug:
+            matrix_H_plot = topos_new_coordinates.copy()
+            fig = plt.figure(20)
+            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, -1]),
+                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
+                                                               coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+            
+            plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
+            
+            plt.title("mean : Ux")
+            fig.colorbar(imgplot, orientation="horizontal")
+            plt.pause(1)
+            plt.savefig(PATH_output.joinpath("mode0_Ux.png"),
+                        dpi=100, transparent=False)
+            plt.close()
+    
+            fig = plt.figure(21)
+            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, -1]),
+                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
+                                                               coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+            
+            plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
+            
+            plt.title("mean : Uy")
+            fig.colorbar(imgplot, orientation="horizontal")
+            plt.pause(1)
+            plt.savefig(PATH_output.joinpath("mode0_Uy.png"),
+                        dpi=100, transparent=False)
+            plt.close()
+    
+            for n in range(nb_modes):
+    
+                fig = plt.figure(int(20+n+1))
+                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, n]),
+                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
+                                                                   coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
+                
+                plt.title("mode "+str(n+1)+" : Ux")
+                fig.colorbar(imgplot, orientation="horizontal")
+                plt.pause(1)
+                plt.savefig(PATH_output.joinpath("mode"+str(n+1) +
+                            "_Ux.png"), dpi=100, transparent=False)
+                plt.close()
+    
+                fig = plt.figure(int(21+n+1))
+                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, n]),
+                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
+                                                                   coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
+                
+                plt.title("mode "+str(n+1)+" : Uy")
+                fig.colorbar(imgplot, orientation="horizontal")
+                plt.pause(1)
+                plt.savefig(PATH_output.joinpath("mode"+str(n+1) +
+                            "_Uy.png"), dpi=100, transparent=False)
+                plt.close()        
+        
         # %%   Calculate Sigma_inverse
     
         if code_DATA_from_matlab:
@@ -1491,7 +1509,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         # SelectSigma inverse in the mask that we observe
         Sigma_inverse = Sigma_inverse[Mask_final_bool[:Sigma_inverse.shape[0]], :, :].copy(
         )
-    
+                
         # Transform this matrix in a square matrix
         # Number of points in the grid
         nb_points = Sigma_inverse.shape[0]
@@ -1682,7 +1700,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
                 fig = plt.figure(10)
                 imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 0]), interpolation='none', extent=[
-                    coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]])
+                    coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("mean(WAKE) : Ux")
                 fig.colorbar(imgplot, orientation="horizontal")
                 plt.pause(1)
@@ -1692,7 +1711,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
                 fig = plt.figure(11)
                 imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 1]), interpolation='none', extent=[
-                    coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]])
+                    coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("mean(WAKE) : Uy")
                 fig.colorbar(imgplot, orientation="horizontal")
                 plt.pause(1)
@@ -1704,7 +1724,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 differ = mean_vector_flow[:, :, 0] - matrix_H_plot[:, :, 0, -1]
                 fig = plt.figure(12)
                 imgplot = plt.imshow(np.transpose(differ), interpolation='none', extent=[
-                                     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]])
+                                     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("diff mean(WAKE)-mode0 : Ux")
                 fig.colorbar(imgplot, orientation="horizontal")
                 plt.pause(1)
@@ -1715,7 +1736,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 differ = mean_vector_flow[:, :, 1] - matrix_H_plot[:, :, 1, -1]
                 fig = plt.figure(13)
                 imgplot = plt.imshow(np.transpose(differ), interpolation='none', extent=[
-                                     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]])
+                                     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("diff mean(WAKE)-mode0 : Uy")
                 fig.colorbar(imgplot, orientation="horizontal")
                 plt.pause(1)
@@ -1967,7 +1989,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if EV:
         time_exe_EV = 0
     n_frame_plots = int(plot_period/param['dt'])
-                   
+
     ################################ Start temporal integration ###################################
     for index in range(param['N_test']*(not code_load_run)): # Set the number of integration steps
 
