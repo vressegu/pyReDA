@@ -2736,9 +2736,12 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         struct_bt_MCMC = {}
         struct_bt_MCMC['mean'] = particles_mean\
             .copy()[:N_:n_simu]
-        struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
-            .copy()[:N_:n_simu]
-            
+ ######### this PART must be REVIEWED for case [code_load_run=True] ######
+        if (not code_load_run):         
+            struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
+                .copy()[:N_:n_simu]
+ #########################################################################
+           
         time = time[:N_:n_simu]
 
         bt_tot_interp = np.zeros(struct_bt_MCMC['mean'].shape)
@@ -2765,8 +2768,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
         param['nb_modes']=nb_modes
         param['code_DATA_from_matlab'] = code_DATA_from_matlab
-        plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
-                                              param, bt_tot_interp, struct_bt_MCMC, time)
+ ######### this PART must be REVIEWED for case [code_load_run=True] ######
+        if (not code_load_run):         
+            plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
+                                                  param, bt_tot_interp, struct_bt_MCMC, time)
+ #########################################################################
  ##################### A CORRIGER ###########################
         path_img_name = Path(MORAANE_PATH)
         if code_ROM_from_matlab:
