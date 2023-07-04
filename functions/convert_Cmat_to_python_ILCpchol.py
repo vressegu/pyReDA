@@ -15,7 +15,26 @@ import numpy as np
 from pathlib import Path
 import os
 
+import re # for grep search in param file
 
+##################################################################################################
+# search "-v" sequencies in [redlumcpp_code_version] and keep last part of the word 
+def recentROM ( redlumcpp_code_version, first_digit, second_digit ):
+    
+   ROM_name = redlumcpp_code_version
+   ROM_name = re.sub('-v', ' ', ROM_name)
+   ROM_split = ROM_name.split(' ')
+   ROM_release = ROM_split[1]
+   bool_recentROM = (len(ROM_release)>=2)
+   if bool_recentROM:
+       bool_recentROM = ( (ROM_release[0].isdigit()) 
+                         & (ROM_release[2].isdigit()) )
+   if bool_recentROM:
+       bool_recentROM = ( (int(ROM_release[0])>=first_digit) 
+                          & (int(ROM_release[2])>=second_digit) )    
+   return bool_recentROM
+
+##################################################################################################
 def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,code_adv_cor=True):
  
     
@@ -33,13 +52,10 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
         path_PFD = ''
     PATH_MAT_test = str(Path(__file__).parents[3]) + '/data_red_lum_cpp/' + \
                                    'StationnaryRegime_TestSeparated_Re300/'
-    bool_recentROM = (len(redlumcpp_code_version)>=8)
-    if bool_recentROM:
-        bool_recentROM = ( (redlumcpp_code_version[5].isdigit()) 
-                         & (redlumcpp_code_version[7].isdigit()) )
-    if bool_recentROM:
-        bool_recentROM = ( (int(redlumcpp_code_version[5])>=3) 
-                           & (int(redlumcpp_code_version[7])>=0) )
+                                   
+    # search "-v" sequencies in [redlumcpp_code_version] and keep last part of the word
+    bool_recentROM = recentROM ( redlumcpp_code_version, 3, 0 )
+        
     if bool_recentROM or \
        PATH_MAT == PATH_MAT_test + \
                     'ROMDNS-branchCleanerDEIMtest/ITHACAoutput/Matrices' \
