@@ -173,6 +173,8 @@ def main_globalParam_from_info_txt_file ( param_file ):
                     if str(a[0]) != '#':
                         if str(a[1]) == 'False':
                             bool_PFD = False
+                        elif str(a[1]) == '2':
+                            bool_PFD = 2
                         else:
                             bool_PFD = True
                 # code_DATA_from_matlab : test basis parameter            

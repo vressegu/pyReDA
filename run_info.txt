@@ -39,9 +39,11 @@ type_data_C  DNS300-D1_Lz1pi
 #type_data_C  DNS300-GeoLES3900
 #type_data_C  StationnaryRegime_TestSeparated_Re300
 
-### bool_PFD = True if the ROM correct for pressure
+### bool_PFD = True if the ROM correct for pressure at full order
 ### (using Leray projection : Proj. onto the space of Free Divergence functions)
 ### command redlumcpp-fullOrderPressure
+### bool_PFD = 2 if the ROM correct for pressure at reduced order
+### command redlumcpp-reducedOrderPressure
 ### command redlumcpp-neglectedOrderPressure otherwise
 bool_PFD True
 

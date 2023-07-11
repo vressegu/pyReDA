@@ -362,10 +362,15 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
 
     file = 'Reduced_coeff_'+str(nb_modes)+'_'+str(dt_run)+ \
           '_'+str(int(n_particles))
-    if bool_PFD:
+    if (bool_PFD==True):
         file = file + '_fullOrderPressure'
-    else:
+    elif (bool_PFD==False):
         file = file + '_neglectedPressure'
+    elif (bool_PFD==2):
+        file = file + '_reducerOrderPressure'
+    else:
+        print('ERROR: unknown case: bool_PFD =', str(bool_PFD))
+        return 0
     if bool_npy:
         file = file + '_centered'
     file = file + '/approx_temporalModes_U_'

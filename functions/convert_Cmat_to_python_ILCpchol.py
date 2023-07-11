@@ -46,10 +46,13 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     redlumcpp_code_version = os.path.basename(os.path.normpath(
                                                 Path(PATH_MAT).parents[1]))
     # Path completion if the ROM is Projected onto the space of Free Divergence functions
-    if bool_PFD:
+    if (bool_PFD==True):
         path_PFD = '_PFD'
-    else:
+    elif (bool_PFD==False):
         path_PFD = ''
+    else:
+        print('ERROR: not coded yet: bool_PFD =', str(bool_PFD))
+        return 0
     PATH_MAT_test = str(Path(__file__).parents[3]) + '/data_red_lum_cpp/' + \
                                    'StationnaryRegime_TestSeparated_Re300/'
                                    
