@@ -117,10 +117,11 @@ type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   beta_2, beta_3 = main_globalParam_from_info_txt_file(param_file)
 
 if code_load_run:
-    if code_Assimilation:
-        print('ERROR: loading previous assimilation results is not code yet')
-        sys.exit()
-    else:
+    # if code_Assimilation:
+    #     print('ERROR: loading previous assimilation results is not code yet')
+    #     sys.exit()
+    # else:
+    if (not code_Assimilation):
         if code_DATA_from_matlab:
             print('ERROR: loading previous matlab-test-basis results is not code yet')
             sys.exit()
@@ -154,7 +155,7 @@ elif type_data_C == 'LES100-test':
 else:
     if (not code_load_run):
         print('ERROR: unknown type_data_C')
-              
+       
 if (not code_load_run) & (code_ROM_from_matlab == False):
     if code_DATA_from_matlab == True:
         # modif spatial mode sign for mode=num_mode_to_reverse => 2 choices
@@ -1443,9 +1444,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         if plot_debug:
             matrix_H_plot = topos_new_coordinates.copy()
             fig = plt.figure(20)
-            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, -1]),
-                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                               coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, -1]),\
+                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],\
+                                                               coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8,\
+                                                               origin='lower')
             
             plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
             
@@ -1457,9 +1459,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             plt.close()
     
             fig = plt.figure(21)
-            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, -1]),
-                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                               coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, -1]),\
+                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],\
+                                                               coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8,\
+                                                               origin='lower')
             
             plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
             
@@ -1473,9 +1476,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             for n in range(nb_modes):
     
                 fig = plt.figure(int(20+n+1))
-                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, n]),
-                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                                   coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, n]),\
+                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],\
+                                                                   coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8,\
+                                                                   origin='lower')
                 
                 plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 
@@ -1487,9 +1491,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 plt.close()
     
                 fig = plt.figure(int(21+n+1))
-                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, n]),
-                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                                   coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, n]),\
+                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],\
+                                                                   coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8,\
+                                                                   origin='lower')
                 
                 plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 
@@ -1510,7 +1515,20 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         # SelectSigma inverse in the mask that we observe
         Sigma_inverse = Sigma_inverse[Mask_final_bool[:Sigma_inverse.shape[0]], :, :].copy(
         )
-                
+        
+        # print ("sigma="+str(Sigma_inverse))
+        
+        # print ("sigma[0][0][0]="+str(Sigma_inverse[0][0][0]))
+        # print ("sigma[0][0][1]="+str(Sigma_inverse[0][0][1]))
+        # print ("sigma[0][1][0]="+str(Sigma_inverse[0][1][0]))
+        # print ("sigma[0][1][1]="+str(Sigma_inverse[0][1][1]))
+        
+        # # DATA matlab values for OBS 3 2modes
+        # Sigma_inverse[0][0][0]=31.9842
+        # Sigma_inverse[0][0][1]=-4.17775
+        # Sigma_inverse[0][1][0]=-4.17775
+        # Sigma_inverse[0][1][1]=19.107
+        
         # Transform this matrix in a square matrix
         # Number of points in the grid
         nb_points = Sigma_inverse.shape[0]
@@ -1700,8 +1718,16 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 mean_vector_flow.shape
     
                 fig = plt.figure(10)
-                imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 0]), interpolation='none', extent=[
-                    coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                # imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 0]), interpolation='none', extent=[
+                #     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8)
+                imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 0]), \
+                    interpolation='none', extent=[
+                    coordinates_x_PIV[0], coordinates_x_PIV[-1], \
+                    coordinates_y_PIV[-1], coordinates_y_PIV[0]],\
+                    alpha=0.8,\
+                    origin='lower')
+                
+                origin='lower'
                 plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("mean(WAKE) : Ux")
                 fig.colorbar(imgplot, orientation="horizontal")
@@ -1711,8 +1737,12 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 # plt.close()
     
                 fig = plt.figure(11)
-                imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 1]), interpolation='none', extent=[
-                    coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 1]),\
+                    interpolation='none', extent=[
+                    coordinates_x_PIV[0], coordinates_x_PIV[-1], \
+                    coordinates_y_PIV[-1], coordinates_y_PIV[0]],\
+                    alpha=0.8,\
+                    origin='lower')
                 plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("mean(WAKE) : Uy")
                 fig.colorbar(imgplot, orientation="horizontal")
@@ -1725,7 +1755,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 differ = mean_vector_flow[:, :, 0] - matrix_H_plot[:, :, 0, -1]
                 fig = plt.figure(12)
                 imgplot = plt.imshow(np.transpose(differ), interpolation='none', extent=[
-                                     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                                    coordinates_x_PIV[0], coordinates_x_PIV[-1], \
+                                    coordinates_y_PIV[-1], coordinates_y_PIV[0]],\
+                                    alpha=0.8,\
+                                     origin='lower')
                 plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("diff mean(WAKE)-mode0 : Ux")
                 fig.colorbar(imgplot, orientation="horizontal")
@@ -1737,7 +1770,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 differ = mean_vector_flow[:, :, 1] - matrix_H_plot[:, :, 1, -1]
                 fig = plt.figure(13)
                 imgplot = plt.imshow(np.transpose(differ), interpolation='none', extent=[
-                                     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]], alpha=0.8)
+                                    coordinates_x_PIV[0], coordinates_x_PIV[-1], \
+                                    coordinates_y_PIV[-1], coordinates_y_PIV[0]],\
+                                    alpha=0.8,\
+                                     origin='lower')
                 plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("diff mean(WAKE)-mode0 : Uy")
                 fig.colorbar(imgplot, orientation="horizontal")
@@ -2474,26 +2510,46 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
     ##############################################################################################################
     #################################---TEST PLOTS---#############################################################
-
+    
     plt.close('all')
-
+    
     dt_tot = param['dt']
     N_test = param['N_test'] 
-    if code_load_run:
-        time = np.arange(bt_MCMC.shape[0])*float(dt_DNS)
-        n_simu=1
-
-    particles_mean = np.mean(bt_MCMC[:, :, :], axis=2)
-    particles_median = np.median(bt_MCMC[:, :, :], axis=2)
-    quantiles = np.quantile(bt_MCMC[:, :, :], q=[0.025, 0.975], axis=2)
-    if EV:
-        particles_mean_EV = np.mean(bt_forecast_EV[:, :, :], axis=2)
-        particles_median_EV = np.median(bt_forecast_EV[:, :, :], axis=2)
-        quantiles_EV = np.quantile(bt_forecast_EV[:, :, :], q=[
-                                   0.025, 0.975], axis=2)
-    n_particles = bt_MCMC.shape[-1]
+    
+    if (not code_load_run):
+        particles_mean = np.mean(bt_MCMC[:, :, :], axis=2)
+        particles_median = np.median(bt_MCMC[:, :, :], axis=2)
+        quantiles = np.quantile(bt_MCMC[:, :, :], q=[0.025, 0.975], axis=2)
+        
+        if EV:
+            particles_mean_EV = np.mean(bt_forecast_EV[:, :, :], axis=2)
+            particles_median_EV = np.median(bt_forecast_EV[:, :, :], axis=2)
+            quantiles_EV = np.quantile(bt_forecast_EV[:, :, :], q=[
+                                       0.025, 0.975], axis=2)
+            
+        n_particles = bt_MCMC.shape[-1]
+    
 #    particles_std_estimate = np.std(bt_MCMC[:,:,1:],axis=2)
 #    erreur = np.abs(particles_mean-ref)
+    
+    # reading values of bt in the case of code_load_run=True
+    if code_load_run:
+        bt_load = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1, nb_modes, n_particles))
+        print ("reading values of bt in the case of [code_load_run=True]")
+        for i_part in range (n_particles):
+            data_file = Path(PATH_ROM).joinpath('Reduced_coeff_2_0.0025_100_neglectedPressure_centered/approx_temporalModes_U_'+str(i_part)+'.npy')                                  
+            print ("file read is "+str(data_file))
+            data = np.load(data_file)
+            for j in range (number_of_FAKE_PIV_files+1):
+                for k in range ( nb_modes ):
+                    bt_load[j][k][i_part] = data[j][k]
+    
+        particles_mean = np.mean(bt_load[:, :, :], axis=2)
+        particles_median = np.median(bt_load[:, :, :], axis=2)
+        quantiles = np.quantile(bt_load[:, :, :], q=[0.025, 0.975], axis=2)
+        print("mean, median and quantiles for case [code_load_run=True]  OK")
+        time = np.arange(bt_load.shape[0])*float(dt_DNS)
+        n_simu=1
 
     for index in range(particles_mean.shape[1]):
         plt.figure(index, figsize=(12, 9))
@@ -2682,9 +2738,12 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         struct_bt_MCMC = {}
         struct_bt_MCMC['mean'] = particles_mean\
             .copy()[:N_:n_simu]
-        struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
-            .copy()[:N_:n_simu]
-            
+ ######### this PART must be REVIEWED for case [code_load_run=True] ######
+        if (not code_load_run):         
+            struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
+                .copy()[:N_:n_simu]
+ #########################################################################
+           
         time = time[:N_:n_simu]
 
         bt_tot_interp = np.zeros(struct_bt_MCMC['mean'].shape)
@@ -2711,8 +2770,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
         param['nb_modes']=nb_modes
         param['code_DATA_from_matlab'] = code_DATA_from_matlab
-        plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
-                                              param, bt_tot_interp, struct_bt_MCMC, time)
+ ######### this PART must be REVIEWED for case [code_load_run=True] ######
+        if (not code_load_run):         
+            plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
+                                                  param, bt_tot_interp, struct_bt_MCMC, time)
+ #########################################################################
  ##################### A CORRIGER ###########################
         path_img_name = Path(MORAANE_PATH)
         if code_ROM_from_matlab:
