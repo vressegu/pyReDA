@@ -853,7 +853,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     plot_bts = False
     # code_ROM_from_matlab = learning basis parameter : if True, MatLab result for ROM is used, else openfoam/C++ result is used
-    if code_ROM_from_matlab:
+    if code_ROM_from_matlab and not code_load_run:
         file_res = folder_results / Path(file)
 
         # The function creates a dictionary with the same structure as the Matlab Struct in the path file_res
@@ -869,7 +869,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         f_info.write(
             "    (function used : pyReDA/functions/convert_mat_to_python_ILCpchol.py)" + "]\n\n")
 
-    if not code_ROM_from_matlab:
+    if not code_ROM_from_matlab and not code_load_run:
         svd_pchol = False
         I_sto, L_sto, C_sto, I_deter, L_deter, C_deter, pchol_cov_noises = convert_Cmat_to_python_ILCpchol(
             os.path.join(folder_results, 'Matrices'), str(Re), str(nb_modes), bool_PFD, adv_corrected)
@@ -972,7 +972,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         lim_fig[i] = 4.*sq_lambda[i]
         
         
-    if svd_pchol > 0:
+    if svd_pchol > 0  and not code_load_run:
 
         pchol_cov_noises_add = pchol_cov_noises[range(nb_modes), :]
         pchol_cov_noises = pchol_cov_noises[nb_modes:, :]
@@ -1127,22 +1127,23 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     # %% Parameters of the ODE of the b(t)
 
-    modal_dt = modal_dt_ref
-
-    tot = {'I': I_sto, 'L': L_sto, 'C': C_sto}
-
-    I_sto = I_sto - I_deter
-    L_sto = L_sto - L_deter
-    C_sto = C_sto - C_deter
-
-    deter = {'I': I_deter, 'L': L_deter, 'C': C_deter}
-
-    sto = {'I': I_sto, 'L': L_sto, 'C': C_sto}
-
-    ILC = {'deter': deter, 'sto': sto, 'tot': tot}
-
-    ILC_a_cst = ILC.copy()   
-    ILC_a_cst = ILC_a_cst['tot']
+    if not code_load_run:
+        modal_dt = modal_dt_ref
+    
+        tot = {'I': I_sto, 'L': L_sto, 'C': C_sto}
+    
+        I_sto = I_sto - I_deter
+        L_sto = L_sto - L_deter
+        C_sto = C_sto - C_deter
+    
+        deter = {'I': I_deter, 'L': L_deter, 'C': C_deter}
+    
+        sto = {'I': I_sto, 'L': L_sto, 'C': C_sto}
+    
+        ILC = {'deter': deter, 'sto': sto, 'tot': tot}
+    
+        ILC_a_cst = ILC.copy()   
+        ILC_a_cst = ILC_a_cst['tot']
     
     #%% Do not temporally subsample, in order to prevent aliasing in the results
     N_tot_max = int(SECONDS_OF_SIMU/param['dt'])+1
@@ -1783,14 +1784,15 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
     #%% Begin propagation and assimilation
     # Cholesky de la matrix de covariance
-    pchol_cov_noises = beta_3*pchol_cov_noises
-    if LeastSquare:
-        ILC_EV['pchol_cov_noises'] = np.zeros(ILC_EV['pchol_cov_noises'].shape)
-        ILC_EV['I'] = np.zeros(ILC_EV['I'].shape)
-        ILC_EV['L'] = np.zeros(ILC_EV['L'].shape)
-        ILC_EV['C'] = np.zeros(ILC_EV['C'].shape)
-        Hpiv_Topos_otimization = Hpiv_Topos[:, :-1].copy()
-#            Hpiv_Topos_otimization[:,j] = Hpiv_Topos_otimization[:,j] / diag_reg[j]
+    if not code_load_run:
+        pchol_cov_noises = beta_3*pchol_cov_noises
+        if LeastSquare:
+            ILC_EV['pchol_cov_noises'] = np.zeros(ILC_EV['pchol_cov_noises'].shape)
+            ILC_EV['I'] = np.zeros(ILC_EV['I'].shape)
+            ILC_EV['L'] = np.zeros(ILC_EV['L'].shape)
+            ILC_EV['C'] = np.zeros(ILC_EV['C'].shape)
+            Hpiv_Topos_otimization = Hpiv_Topos[:, :-1].copy()
+    #            Hpiv_Topos_otimization[:,j] = Hpiv_Topos_otimization[:,j] / diag_reg[j]
     elif EV_withoutNoise:
         ILC_EV['pchol_cov_noises'] = np.zeros(ILC_EV['pchol_cov_noises'].shape)
     elif EV:
