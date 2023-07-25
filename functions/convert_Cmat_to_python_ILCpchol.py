@@ -15,8 +15,27 @@ import numpy as np
 from pathlib import Path
 import os
 
+import re # for grep search in param file
 
-def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True):
+##################################################################################################
+# search "-v" sequencies in [redlumcpp_code_version] and keep last part of the word 
+def recentROM ( redlumcpp_code_version, first_digit, second_digit ):
+    
+   ROM_name = redlumcpp_code_version
+   ROM_name = re.sub('-v', ' ', ROM_name)
+   ROM_split = ROM_name.split(' ')
+   ROM_release = ROM_split[1]
+   bool_recentROM = (len(ROM_release)>=2)
+   if bool_recentROM:
+       bool_recentROM = ( (ROM_release[0].isdigit()) 
+                         & (ROM_release[2].isdigit()) )
+   if bool_recentROM:
+       bool_recentROM = ( (int(ROM_release[0])>=first_digit) 
+                          & (int(ROM_release[2])>=second_digit) )    
+   return bool_recentROM
+
+##################################################################################################
+def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,code_adv_cor=True):
  
     
     ############### FIRST PART ####################################
@@ -27,19 +46,19 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True):
     redlumcpp_code_version = os.path.basename(os.path.normpath(
                                                 Path(PATH_MAT).parents[1]))
     # Path completion if the ROM is Projected onto the space of Free Divergence functions
-    if bool_PFD:
+    if (bool_PFD==True):
         path_PFD = '_PFD'
-    else:
+    elif (bool_PFD==False):
         path_PFD = ''
+    else:
+        print('ERROR: not coded yet: bool_PFD =', str(bool_PFD))
+        return 0
     PATH_MAT_test = str(Path(__file__).parents[3]) + '/data_red_lum_cpp/' + \
                                    'StationnaryRegime_TestSeparated_Re300/'
-    bool_recentROM = (len(redlumcpp_code_version)>=8)
-    if bool_recentROM:
-        bool_recentROM = ( (redlumcpp_code_version[5].isdigit()) 
-                         & (redlumcpp_code_version[7].isdigit()) )
-    if bool_recentROM:
-        bool_recentROM = ( (int(redlumcpp_code_version[5])>=3) 
-                           & (int(redlumcpp_code_version[7])>=0) )
+                                   
+    # search "-v" sequencies in [redlumcpp_code_version] and keep last part of the word
+    bool_recentROM = recentROM ( redlumcpp_code_version, 3, 0 )
+        
     if bool_recentROM or \
        PATH_MAT == PATH_MAT_test + \
                     'ROMDNS-branchCleanerDEIMtest/ITHACAoutput/Matrices' \
@@ -64,20 +83,21 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True):
     
     nx=nb_modes; ny=1;
     I_sto = np.zeros( (nx,ny), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/L' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
-    coeff=1.
-    f = open(file_name,'r')
-    i = 0
-    while True:
-      line = f.readline()
-      if not line: 
-        break
-      else:            
-       a = np.fromstring(line, dtype=float, sep=' ')
-       for j in range(len(a)):
-           I_sto[i][j]=a[j]*coeff
-       i=i+1
-    f.close()    
+    if code_adv_cor:
+        file_name = PATH_MAT+'/L' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
+        coeff=1.
+        f = open(file_name,'r')
+        i = 0
+        while True:
+          line = f.readline()
+          if not line: 
+            break
+          else:            
+           a = np.fromstring(line, dtype=float, sep=' ')
+           for j in range(len(a)):
+               I_sto[i][j]=a[j]*coeff
+           i=i+1
+        f.close()    
     file_name = PATH_MAT+'/S' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
     coeff=1.
     f = open(file_name,'r')
@@ -98,20 +118,21 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True):
 
     nx=nb_modes; ny=nx;
     L_sto = np.zeros( (nx,ny), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/L' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
-    coeff=1.
-    f = open(file_name,'r')
-    i = 0
-    while True:
-      line = f.readline()
-      if not line: 
-        break
-      else:            
-       a = np.fromstring(line, dtype=float, sep=' ')
-       for j in range(len(a)):
-           L_sto[i][j]=a[j]*coeff
-       i=i+1
-    f.close()    
+    if code_adv_cor:
+        file_name = PATH_MAT+'/L' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
+        coeff=1.
+        f = open(file_name,'r')
+        i = 0
+        while True:
+          line = f.readline()
+          if not line: 
+            break
+          else:            
+           a = np.fromstring(line, dtype=float, sep=' ')
+           for j in range(len(a)):
+               L_sto[i][j]=a[j]*coeff
+           i=i+1
+        f.close()    
     file_name = PATH_MAT+'/S' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
     coeff=1.
     f = open(file_name,'r')

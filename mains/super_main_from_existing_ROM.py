@@ -36,6 +36,7 @@ if __name__ == '__main__':
 
     no_subampl_in_forecast = False 
     vect_reconstruction = [False] # for the super_main_from_existing_ROM
+    #vect_adv_corrected = [False,True]
     vect_adv_corrected = [True]
     test_fct = 'b'
     svd_pchol = 2
@@ -70,7 +71,10 @@ if __name__ == '__main__':
     #   if EV=1 : Eddy Viscosity model with noise and random IC 
     #   if EV=0 : no Eddy Viscosity model
 
-    param_file = Path(__file__).parents[2].joinpath('run_info.txt')
+    MORAANE_PATH = Path(__file__).parents[2]
+    print("PATH="+str(MORAANE_PATH))
+    
+    param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
     print("     Cf. run_file [", str(param_file)+"]")
     
     vect_nb_modes, type_data, SECONDS_OF_SIMU, EV = super_main_globalParam_from_info_txt_file(param_file)
@@ -91,9 +95,8 @@ if __name__ == '__main__':
     
     # writting INFO file
 
-    current_pwd = Path(__file__).parents[2]  # Select the path
-    file_info = current_pwd.parents[0].joinpath('3rdresult').joinpath('test_input.info')
-    
+    file_info = Path(MORAANE_PATH).joinpath('3rdresult/test_input.info')
+  
     print("\n---> Cf. INFO file = ", str(file_info), "------\n" ) 
     f_info = open(file_info,'w')
     

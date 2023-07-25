@@ -23,6 +23,25 @@ import numpy as np
 from pathlib import Path
 import os
 
+import re # for grep search in param file
+
+##################################################################################################
+# search "-v" sequencies in [redlumcpp_code_version] and keep last part of the word 
+def recentROM ( redlumcpp_code_version, first_digit, second_digit ):
+    
+   ROM_name = redlumcpp_code_version
+   ROM_name = re.sub('-v', ' ', ROM_name)
+   ROM_split = ROM_name.split(' ')
+   ROM_release = ROM_split[1]
+   bool_recentROM = (len(ROM_release)>=2)
+   if bool_recentROM:
+       bool_recentROM = ( (ROM_release[0].isdigit()) 
+                         & (ROM_release[2].isdigit()) )
+   if bool_recentROM:
+       bool_recentROM = ( (int(ROM_release[0])>=first_digit) 
+                          & (int(ROM_release[2])>=second_digit) )    
+   return bool_recentROM
+
 ##################################################################################################
 # defining indexes for cropping (index_XY_PIV), coordinates_x_PIV, coordinates_y_PIV and MX_PIV
 def convert_Cmat_to_python_cropZone(PARAM):
@@ -191,13 +210,14 @@ def convert_Cmat_to_python_lambda(PARAM):
     t1_learningBase = PARAM.t1_learningBase
     dt_DNS = PARAM.dt_DNS
     redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0]))
-    bool_npy = (len(redlumcpp_code_version)>=8) 
-    if bool_npy:
-        bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
-                   & (redlumcpp_code_version[7].isdigit()) )
-    if bool_npy:
-        bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
-                     & (int(redlumcpp_code_version[7])>=1) )
+    # bool_npy = (len(redlumcpp_code_version)>=8) 
+    # if bool_npy:
+    #     bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
+    #                & (redlumcpp_code_version[7].isdigit()) )
+    # if bool_npy:
+    #     bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
+    #                  & (int(redlumcpp_code_version[7])>=1) )
+    bool_npy = recentROM( redlumcpp_code_version, 3, 1 )
     if bool_npy:
         file_format = "npy"
     else:
@@ -260,13 +280,14 @@ def convert_Cmat_to_python_bt_tot(PARAM):
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
     redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0]))
-    bool_npy = (len(redlumcpp_code_version)>=8) 
-    if bool_npy:
-        bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
-                   & (redlumcpp_code_version[7].isdigit()) )
-    if bool_npy:
-        bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
-                     & (int(redlumcpp_code_version[7])>=1) )
+    # bool_npy = (len(redlumcpp_code_version)>=8) 
+    # if bool_npy:
+    #     bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
+    #                & (redlumcpp_code_version[7].isdigit()) )
+    # if bool_npy:
+    #     bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
+    #                  & (int(redlumcpp_code_version[7])>=1) )
+    bool_npy = recentROM( redlumcpp_code_version, 3, 1 )    
     if bool_npy:
         file_format = "npy"
     else:
@@ -320,14 +341,15 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
     dt_run = PARAM.dt_DNS / n_simu
-    redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0]))
-    bool_npy = (len(redlumcpp_code_version)>=8) 
-    if bool_npy:
-        bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
-                   & (redlumcpp_code_version[7].isdigit()) )
-    if bool_npy:
-        bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
-                     & (int(redlumcpp_code_version[7])>=1) )
+    redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0])) 
+    # bool_npy = (len(redlumcpp_code_version)>=8)     
+    # if bool_npy:
+    #     bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
+    #                & (redlumcpp_code_version[7].isdigit()) )
+    # if bool_npy:
+    #     bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
+    #                  & (int(redlumcpp_code_version[7])>=1) )
+    bool_npy = recentROM( redlumcpp_code_version, 3, 1 )
     if bool_npy:
         file_format = "npy"
     else:
@@ -340,10 +362,15 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
 
     file = 'Reduced_coeff_'+str(nb_modes)+'_'+str(dt_run)+ \
           '_'+str(int(n_particles))
-    if bool_PFD:
+    if (bool_PFD==True):
         file = file + '_fullOrderPressure'
-    else:
+    elif (bool_PFD==False):
         file = file + '_neglectedPressure'
+    elif (bool_PFD==2):
+        file = file + '_reducerOrderPressure'
+    else:
+        print('ERROR: unknown case: bool_PFD =', str(bool_PFD))
+        return 0
     if bool_npy:
         file = file + '_centered'
     file = file + '/approx_temporalModes_U_'
@@ -545,7 +572,7 @@ def convert_Cmat_to_python_FakePIV(MX_PIV_all, index_XY_PIV, PARAM):
             Wake_file = Path(PATH_wake).joinpath(
                 Path(str(t)+'/B0001_new.dat'))
 
-        #print("file wake="+str(Wake_file))
+        #print("n="+str(n)+" t="+str(t)+" -> file wake="+str(Wake_file))
 
         if Wake_file.exists():
             f_Wake = open(Wake_file, 'r')

@@ -63,6 +63,9 @@ import re # for grep search in param file
 # Parameters choice : not erased
 param_ref = {}
 
+# # Corrected advection
+# adv_corrected = True
+
 ### Parameters often modified which are defined in function [main_globalParam_from_info_txt_file]
 
 # type_data_C : Openfoam dataset
@@ -103,7 +106,10 @@ param_ref = {}
 #          if beta_3=0, there is NO noise during simulation
 #   example : beta_3 = 1.
     
-param_file = Path(__file__).parents[2].joinpath('run_info.txt')
+MORAANE_PATH = Path(__file__).parents[2]
+
+param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
+
 print("     Cf. run_file [", str(param_file)+"]")
 type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   code_Assimilation, code_load_run, init_centred_on_ref, \
@@ -111,10 +117,11 @@ type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   beta_2, beta_3 = main_globalParam_from_info_txt_file(param_file)
 
 if code_load_run:
-    if code_Assimilation:
-        print('ERROR: loading previous assimilation results is not code yet')
-        sys.exit()
-    else:
+    # if code_Assimilation:
+    #     print('ERROR: loading previous assimilation results is not code yet')
+    #     sys.exit()
+    # else:
+    if (not code_Assimilation):
         if code_DATA_from_matlab:
             print('ERROR: loading previous matlab-test-basis results is not code yet')
             sys.exit()
@@ -134,7 +141,7 @@ if not code_Assimilation:
 if type_data_C == 'DNS300-D1_Lz1pi':
     vect_num_mode_to_reverse = [1,2]
 elif type_data_C == 'DNS300-GeoLES3900':
-    vect_num_mode_to_reverse = [1]
+    vect_num_mode_to_reverse = [1,4,6,8]
 elif type_data_C == 'LESRe100-openFoam2106-forYvhan-newSnap':
     vect_num_mode_to_reverse = []
 elif type_data_C == 'StationnaryRegime_TestSeparated_Re300':
@@ -148,6 +155,7 @@ elif type_data_C == 'LES100-test':
 else:
     if (not code_load_run):
         print('ERROR: unknown type_data_C')
+       
 if (not code_load_run) & (code_ROM_from_matlab == False):
     if code_DATA_from_matlab == True:
         # modif spatial mode sign for mode=num_mode_to_reverse => 2 choices
@@ -194,7 +202,8 @@ if not code_Assimilation:
     sub_sampling_PIV_data_temporaly = False
 
 # It can be chosen to plot chronos evolution in real time or only at the end of the simulation
-plt_real_time = True
+plt_real_time = False
+# plt_real_time = True
 if code_load_run:
     plt_real_time = False
 plot_period = 2 * float(5/10)/2
@@ -248,22 +257,24 @@ color_quantile_EV = 'paleturquoise'
 color_mean_LU = 'orangered'
 color_quantile_LU = 'sandybrown'
 
-#plot_debug = False
-param_file = Path(__file__).parents[2].joinpath('run_info.txt')
+param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
 print("     Cf. run_file [", str(param_file)+"]")
+
+#plot_debug = False
 plot_debug = main_optionalParam_from_info_txt_file(param_file)
 
 pos_Mes = -7
 
-#import matplotlib.pyplot as plt
+# #import matplotlib.pyplot as plt
 path_functions = Path(__file__).parents[1].joinpath('functions')
 sys.path.insert(0, str(path_functions))
+
 #from scipy import sparse as svds
 
 # writting INFO file
 
-current_pwd = Path(__file__).parents[2]  # Select the path
-file_info = current_pwd.parents[0].joinpath('3rdresult').joinpath('test.info')
+file_info = Path(MORAANE_PATH).joinpath('3rdresult').joinpath('test.info')
+
 # print("\n---> Cf. INFO file = ", str(file_info), "------\n" ) 
 
 f_info = open(file_info,'w')
@@ -540,10 +551,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         EV = True
     elif (EV == 1):
         LeastSquare = False
-        EV_withoutNoise = True
-        EV = True
-    elif (EV == 3):
-        LeastSquare = True
         EV_withoutNoise = False
         EV = True
     elif (EV == 0):
@@ -600,8 +607,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write("  - Re                          = " + str(Re) + "\n")
     f_info.write(str("\n"))   
 
-    PATH_up = Path(__file__).parents[2]  # Select the path
-    PATH_output = PATH_up.parents[0].joinpath('3rdresult')
+    PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
 
     if assimilate == 'real_data':
         switcher = {
@@ -626,36 +632,37 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             vector_of_assimilation_time = []
     elif assimilate == 'fake_real_data':
         plot_ref = plot_ref_gl                     # Plot bt_tot
-               
-        # input PATH = directory containing subdirectories [ITHACAoutput], [ROM_PIV], [util] and [FakePIV_noise2]
-        PATH_input = PATH_openfoam_data.joinpath(type_data_C)
-        
-        if not PATH_input.exists():
-            print('\n!!! ERROR: input directory ['+str(PATH_input)+'] not found !!!')
-            sys.exit()        
-        
-        PATH_ROM = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ITHACAoutput')
-        PATH_util = Path(PATH_input).joinpath('util')
-        PATH_ROM_PIV = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ROM_PIV')
-        PATH_DATA = Path(PATH_input).joinpath(Path('FakePIV_noise2'))
-        
-        param_file = Path(__file__).parents[2].joinpath('run_info.txt')
-        if not PATH_ROM.exists():
-            print('\n!!! ERROR: directory ['+str(PATH_ROM)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
-            sys.exit()
-        if not PATH_util.exists():
-            print('\n!!! ERROR: directory ['+str(PATH_util)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
-            sys.exit()
-        if code_Assimilation :
-            if not PATH_ROM_PIV.exists():
-                print('\n!!! ERROR: directory ['+str(PATH_ROM_PIV)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
-                sys.exit()
-            if not PATH_DATA.exists():
-                print('\n!!! ERROR: directory ['+str(PATH_DATA)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
-                sys.exit()
         
         if not code_DATA_from_matlab or not code_ROM_from_matlab:
-       
+                   
+            # input PATH = directory containing subdirectories [ITHACAoutput], [ROM_PIV], [util] and [FakePIV_noise2]
+            PATH_input = PATH_openfoam_data.joinpath(type_data_C)
+            
+            if not PATH_input.exists():
+                print('\n!!! ERROR: input directory ['+str(PATH_input)+'] not found !!!')
+                sys.exit()        
+            
+            PATH_ROM = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ITHACAoutput')
+            PATH_util = Path(PATH_input).joinpath('util')
+            PATH_ROM_PIV = Path(PATH_input).joinpath(str(redlumcpp_code_version) + '/ROM_PIV')
+            PATH_DATA = Path(PATH_input).joinpath(Path('FakePIV_noise2'))
+            
+            param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
+            if not PATH_ROM.exists():
+                print('\n!!! ERROR: directory ['+str(PATH_ROM)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
+                sys.exit()
+            if not PATH_util.exists():
+                print('\n!!! ERROR: directory ['+str(PATH_util)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
+                sys.exit()
+            if code_Assimilation :
+                if not PATH_ROM_PIV.exists():
+                    print('\n!!! ERROR: directory ['+str(PATH_ROM_PIV)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
+                    sys.exit()
+                if not PATH_DATA.exists():
+                    print('\n!!! ERROR: directory ['+str(PATH_DATA)+'] not found !!!\n  => change values in ['+str(param_file)+'] file')
+                    sys.exit()
+            
+           
             Cparam = namedtuple('Cparam', ['Re', 'nb_modes','SECONDS_OF_SIMU',
                                           'x1_PIV', 'x2_PIV',  'x0_cyl', 
                                           'y1_PIV', 'y2_PIV',  'y0_cyl',
@@ -754,9 +761,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
 # code_ROM_from_matlab = learning basis parameter : if True, MatLab result for ROM is used, else openfoam/C++ result is used
 # code_DATA_from_matlab = test basis parameter : if True, MatLab data is used, else openfoam/C++ data is used
-    current_pwd = Path(__file__).parents[1]  # Select the path
-    folder_current_results = current_pwd.parents[0].joinpath('resultats').joinpath(
-        'current_results')  # Select the current results path
+
+    folder_current_results = Path(MORAANE_PATH).joinpath('podfs2').joinpath('resultats').joinpath('current_results')   
     folder_current_results = str(folder_current_results)
     if code_ROM_from_matlab:
         folder_results = folder_current_results
@@ -771,9 +777,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     if code_DATA_from_matlab:
         folder_nrj = folder_current_results
-        current_pwd = Path(__file__).parents[1]  # Select the path
-        folder_data = current_pwd.parents[1].joinpath(
-            'data')  # Select the data path
+        folder_data = Path(MORAANE_PATH).joinpath('data')
     else:
         folder_nrj = 'Nan'
         #print("data=f(C++) => folder_data unknown")
@@ -808,7 +812,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     param = default_param( 0 )
   
     print('############ Default Param (Re='+str(Re) +")\n")
-    print("Cf. podfs2/python_scripts/mains/switch_case_param.py" + "\n")
+    print("Cf. pyReDA/functions/switch_case_param.py" + "\n")
 
     f_info.write("  - Param File (Re=" + str(Re)+") : any \n    parameters are defined by [switch_case_param.py]\n\n")
     
@@ -835,15 +839,14 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
           file = file + '_DFSPN'
       file = file + '.mat'
       
-      current_pwd = Path(__file__).parents[1]  # Select the path
-      folder_param = current_pwd.parents[0].joinpath('resultats').joinpath(
-          'current_results')
+      folder_param = Path(MORAANE_PATH).joinpath('podfs2').joinpath('resultats').joinpath('current_results')
+
       file_param = folder_param / Path(file)
 
       param = convert_mat_to_python_param(str(file_param))
       print('############ File Param (Re='+str(Re) +
             ') : [' + str(file_param) + "]\n")
-      print("Cf. podfs2/python_scripts/mains/convert_mat_to_python_param.py" + "\n")
+      print("Cf. pyReDA/functions/convert_mat_to_python_param.py" + "\n")
   
       f_info.write("  - Param File (Re=" + str(Re)+") : \n    " +
                    str(file_param) + "\n\n")
@@ -851,7 +854,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     plot_bts = False
     # code_ROM_from_matlab = learning basis parameter : if True, MatLab result for ROM is used, else openfoam/C++ result is used
-    if code_ROM_from_matlab:
+    if code_ROM_from_matlab and not code_load_run:
         file_res = folder_results / Path(file)
 
         # The function creates a dictionary with the same structure as the Matlab Struct in the path file_res
@@ -860,17 +863,17 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             str(file_res))
 
         print('############ File Result (Re='+str(Re)+') : [' + str(file_res))
-        print("Cf. podfs2/python_scripts/mains/convert_mat_to_python_ILCpchol.py]\n\n")
+        print("Cf. pyReDA/functions/convert_mat_to_python_ILCpchol.py]\n\n")
 
         f_info.write("  - Result File (Re=" + str(Re) +
                      ") : \n    " + str(file_res) + "\n\n")
         f_info.write(
-            "    (function used : podfs2/python_scripts/mains/convert_mat_to_python_ILCpchol.py)" + "]\n\n")
+            "    (function used : pyReDA/functions/convert_mat_to_python_ILCpchol.py)" + "]\n\n")
 
-    if not code_ROM_from_matlab:
+    if not code_ROM_from_matlab and not code_load_run:
         svd_pchol = False
         I_sto, L_sto, C_sto, I_deter, L_deter, C_deter, pchol_cov_noises = convert_Cmat_to_python_ILCpchol(
-            os.path.join(folder_results, 'Matrices'), str(Re), str(nb_modes), bool_PFD)
+            os.path.join(folder_results, 'Matrices'), str(Re), str(nb_modes), bool_PFD, adv_corrected)
 
         # changing sign values for certain modes : value -> -values
         if code_change_mode_sign_ILC:
@@ -880,18 +883,18 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
         print('############ Files Result (Re='+str(Re) +
               ') : [' + os.path.join(folder_results, 'Matrices') + "/*_mat.txt]\n\n")
-        print("Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_ILCpchol.py]\n\n")
+        print("Cf. pyReDA/functions/convert_Cmat_to_python_ILCpchol.py]\n\n")
 
         f_info.write("  - Result Files (Re=" + str(Re)+") : \n    " +
                      os.path.join(folder_results, 'Matrices') + "/*_mat.txt\n\n")
         f_info.write(
-            "    (function used : podfs2/python_scripts/mains/convert_Cmat_to_python_ILCpchol.py)" + "\n\n")
+            "    (function used : pyReDA/functions/convert_Cmat_to_python_ILCpchol.py)" + "\n\n")
 
     if not code_DATA_from_matlab :
         param['dt'] = dt_DNS
         param['N_tot'] = int((t1_testBase-t0_testBase)/dt_DNS)+1
     else:
-        #if code_DATA_from_matlab: Cf. podfs2/python_scripts/mains/convert_mat_to_python_param.py
+        #if code_DATA_from_matlab: Cf. pyReDA/functions/convert_mat_to_python_param.py
         # Define the constant
         param['dt'] = float(param['dt'])
         param['decor_by_subsampl']['no_subampl_in_forecast'] = no_subampl_in_forecast
@@ -912,7 +915,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             file_EV_res = folder_results / Path(file_EV)
             # Call the function and load the matlab data calculated before in matlab scripts.
             ILC_EV = convert_mat_to_python_EV(str(file_EV_res))
-        print("Cf. podfs2/python_scripts/mains/convert_mat_to_python_EV.py")
+        print("Cf. pyReDA/functions/convert_mat_to_python_EV.py")
 
     else:
         print('############ [EV] UNDEFINED ################')
@@ -948,11 +951,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     # if not code_DATA_from_matlab:
     if not code_ROM_from_matlab:
         lambda_values = convert_Cmat_to_python_lambda(PARAM)
-        print("\nCf. podfs2/python_scripts/mains/convert_Cmat_to_python_lambda.py]\n\n")
+        print("\nCf. pyReDA/functions/convert_Cmat_to_python_lambda.py]\n\n")
         f_info.write("  - Lambda values (Re=" + str(Re)+") : \n    " +
                      os.path.join(folder_results, 'temporalModes_'+str(nb_modes)+'modes') + "/U_mat.txt\n\n")
         f_info.write(
-            "    (function used : Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
+            "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
     
     print("\nNew     lambda_values="+str(lambda_values)+"\n")
     
@@ -961,11 +964,16 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     sq_lambda = np.sqrt(lambda_values)
     
     # figure limits
-    lim_fig = [0] * len(sq_lambda)
-    for i in range (len(sq_lambda)):
+    lim_fig = [0] * 16
+    # for i in range (len(sq_lambda)):
+    if ((nb_modes > 2) & (nb_modes <= 16)) :
+        for i in range (2,16):
+            lim_fig[i] = 4.*sq_lambda[2]
+    for i in range (nb_modes):
         lim_fig[i] = 4.*sq_lambda[i]
         
-    if svd_pchol > 0:
+        
+    if svd_pchol > 0  and not code_load_run:
 
         pchol_cov_noises_add = pchol_cov_noises[range(nb_modes), :]
         pchol_cov_noises = pchol_cov_noises[nb_modes:, :]
@@ -1031,7 +1039,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     else:
         file_plots = file_plots + type_data_C
     file_plots = file_plots + '_' + str(nb_modes) + '_modes'
-    if not code_load_run :
+    if code_load_run :
         file_plots = file_plots + '_loaded'
     if not code_Assimilation :
         file_plots = file_plots + '_noDA'
@@ -1040,8 +1048,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if not code_DATA_from_matlab :
         file_plots = file_plots + '_Cpptestbasis'
     if not code_ROM_from_matlab or not code_DATA_from_matlab:
-        file_plots = file_plots + '/' + type_data_C \
+        # file_plots = file_plots + '/' + type_data_C \
+        file_plots = file_plots \
                      + '/' + redlumcpp_code_version + '/'
+        if not adv_corrected:
+            file_plots = file_plots + '_no_correct_drift'
     else:
         file_plots = file_plots + '_' + choice_n_subsample 
         if choice_n_subsample == 'auto_shanon':
@@ -1066,17 +1077,18 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             file_plots = file_plots + '_DFSPN'       
     file_plots = file_plots + '/' + assimilate + \
                               '/_DADuration_' + str(int(SECONDS_OF_SIMU)) + '_'
-    if sub_sampling_PIV_data_temporaly:
-        file_plots = file_plots + 'ObsSubt_' + \
-            str(int(factor_of_PIV_time_subsampling)) + '_'
-    if mask_obs:
-        file_plots = file_plots + 'ObsMaskyy_sub_' + str(int(subsampling_PIV_grid_factor)) \
-            + '_from_' + str(int(x0_index)) + '_to_' \
-            + str(int(x0_index + nbPoints_x*subsampling_PIV_grid_factor)) \
-            + '_from_' + str(int(y0_index)) + '_to_' \
-            + str(int(y0_index+nbPoints_y*subsampling_PIV_grid_factor)) + '_'
-    else:
-        file_plots = file_plots + 'no_mask_'
+    file_plots = file_plots + 'ObsCase_' + str(case_choice) + '_'
+    # if sub_sampling_PIV_data_temporaly:
+    #     file_plots = file_plots + 'ObsSubt_' + \
+    #         str(int(factor_of_PIV_time_subsampling)) + '_'
+    # if mask_obs:
+    #     file_plots = file_plots + 'ObsMaskyy_sub_' + str(int(subsampling_PIV_grid_factor)) \
+    #         + '_from_' + str(int(x0_index)) + '_to_' \
+    #         + str(int(x0_index + nbPoints_x*subsampling_PIV_grid_factor)) \
+    #         + '_from_' + str(int(y0_index)) + '_to_' \
+    #         + str(int(y0_index+nbPoints_y*subsampling_PIV_grid_factor)) + '_'
+    # else:
+    #     file_plots = file_plots + 'no_mask_'
     if init_centred_on_ref:
         file_plots = file_plots + 'initOnRef_'
     file_plots = file_plots + 'beta_2_' + str(int(beta_2))
@@ -1087,9 +1099,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         file_plots = file_plots + '_EVnoNoise'
     if LeastSquare:
         file_plots = file_plots + '_LS'
-        
-    folder_results_plot = Path(__file__).parents[3]    
-    file_plots_res = os.path.join(folder_results_plot, file_plots)
+    
+    file_plots_res = os.path.join(MORAANE_PATH, file_plots)
+    
     if not os.path.exists(file_plots_res):
         os.makedirs(file_plots_res)
 
@@ -1098,43 +1110,41 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     if plot_Q_crit:
         # File to save Q cirterion for real time 3D plots
-        path_Q_crit = Path(__file__).parents[3].\
-            joinpath('data_after_filtering').joinpath('Q_RedLUM')
+        path_Q_crit = Path(MORAANE_PATH).joinpath('data_after_filtering').joinpath('Q_RedLUM')
         if os.path.exists(path_Q_crit):
             shutil.rmtree(path_Q_crit)
             plt.pause(1)
         os.makedirs(path_Q_crit)
         if EV:
             # File to save Q cirterion for real time 3D plots
-            path_Q_crit_EV = Path(__file__).parents[3].\
-                joinpath('data_after_filtering').joinpath('Q_EV')
+            path_Q_crit_EV = Path(MORAANE_PATH).joinpath('data_after_filtering').joinpath('Q_EV')
             if not os.path.exists(path_Q_crit_EV):
                 os.makedirs(path_Q_crit_EV)
         if plot_ref:
             # File to save Q cirterion for real time 3D plots
-            path_Q_crit_ref = Path(__file__).parents[3].\
-                joinpath('data_after_filtering').joinpath('Q_ref')
+            path_Q_crit_ref = Path(MORAANE_PATH).joinpath('data_after_filtering').joinpath('Q_ref')
             if not os.path.exists(path_Q_crit_ref):
                 os.makedirs(path_Q_crit_ref)
 
     # %% Parameters of the ODE of the b(t)
 
-    modal_dt = modal_dt_ref
-
-    tot = {'I': I_sto, 'L': L_sto, 'C': C_sto}
-
-    I_sto = I_sto - I_deter
-    L_sto = L_sto - L_deter
-    C_sto = C_sto - C_deter
-
-    deter = {'I': I_deter, 'L': L_deter, 'C': C_deter}
-
-    sto = {'I': I_sto, 'L': L_sto, 'C': C_sto}
-
-    ILC = {'deter': deter, 'sto': sto, 'tot': tot}
-
-    ILC_a_cst = ILC.copy()   
-    ILC_a_cst = ILC_a_cst['tot']
+    if not code_load_run:
+        modal_dt = modal_dt_ref
+    
+        tot = {'I': I_sto, 'L': L_sto, 'C': C_sto}
+    
+        I_sto = I_sto - I_deter
+        L_sto = L_sto - L_deter
+        C_sto = C_sto - C_deter
+    
+        deter = {'I': I_deter, 'L': L_deter, 'C': C_deter}
+    
+        sto = {'I': I_sto, 'L': L_sto, 'C': C_sto}
+    
+        ILC = {'deter': deter, 'sto': sto, 'tot': tot}
+    
+        ILC_a_cst = ILC.copy()   
+        ILC_a_cst = ILC_a_cst['tot']
     
     #%% Do not temporally subsample, in order to prevent aliasing in the results
     N_tot_max = int(SECONDS_OF_SIMU/param['dt'])+1
@@ -1145,13 +1155,13 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         N_tot = N_tot_max
     if not reconstruction:
         if assimilate == 'fake_real_data':
-            current_pwd = Path(__file__).parents[1]
             # code_DATA_from_matlab = test basis parameter : if True, MatLab data is used, else openfoam/C++ data is used
             # code_ROM_from_matlab = learning basis parameter : if True, MatLab result for ROM is used, else openfoam/C++ result is used
             if code_DATA_from_matlab:
-               name_file_data = current_pwd.parents[1].joinpath('data').\
+               name_file_data = Path(MORAANE_PATH).joinpath('data').\
                    joinpath(type_data + '_' + str(nb_modes) + '_modes' +
                             '_subsample_1_nb_period_test_NaN_Chronos_test_basis.mat')
+               
                if name_file_data.exists():
                    mat = hdf5storage.loadmat(str(name_file_data))
                    bt_tot = mat['bt']
@@ -1168,7 +1178,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                f_info.write("  - bt_tot (Re=" + str(Re)+") : \n    " +
                             os.path.join(folder_results, 'temporalModesSimulation_'+str(nb_modes)+'modes') + "/U_mat.txt\n\n")
                f_info.write(
-                   "    (function used : Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
+                   "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
                    bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
                              PARAM, n_simu, n_particles, bool_PFD)
@@ -1178,7 +1188,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             param['decor_by_subsampl']['n_subsampl_decor']
             print("#### truncated_error2"+str(truncated_error2.shape))
             print("#### bt_tot"+str(bt_tot.shape))
-
+            
             #    Change the sign of spatial mode for mode=num_mode_to_reverse
             # mode1 -> -mode1
             # num_mode = 1
@@ -1200,8 +1210,20 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             if len(time_bt_tot.shape) > 1:
                 time_bt_tot = time_bt_tot[0, :]
             quantiles_PIV = np.zeros((2, bt_tot.shape[0], bt_tot.shape[1]))
+
+            # print bt_tot in file for critQ visualisation
+            
+            file_temporalModeSimulation_name = 'temporalModeSimulation.txt'
+            file_temporalModeSimulation = Path(PATH_output).joinpath(str(file_temporalModeSimulation_name))
+            f_txt = open(file_temporalModeSimulation,'w')
+            for i in range(len(bt_tot)):
+                for j in range(nb_modes-1):
+                    f_txt.write(str(bt_tot[i][j])+" ")                        
+                f_txt.write(str(bt_tot[i][-1])+"\n")                        
+            f_txt.close()    
+        
         else:
-            file = (Path(__file__).parents[3]).joinpath('data_PIV').\
+            file = Path(MORAANE_PATH).joinpath('data_PIV').\
                 joinpath('bt_tot_PIV_Re'+str(int(Re)) +
                          '_n'+str(nb_modes)+'.mat')
             print(file)
@@ -1256,7 +1278,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         print('\nLoading H_PIV @ Topos...')
     
         if code_DATA_from_matlab:
-            # path_topos = Path(pwd).parents[0].joinpath('data_PIV').\
             path_topos = Path(folder_data).parents[0].joinpath('data_PIV').\
                 joinpath('mode_'+type_data+'_'+str(nb_modes) +
                          '_modes_PIV')  # Topos path
@@ -1284,7 +1305,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             f_info.write("  - Sigma_inverse (Re=" + str(Re)+") : \n    " +
                          os.path.join(folder_results, 'residualSpeed_'+str(nb_modes)) + "/Inv_COVxy.dat\n\n")
             f_info.write(
-                "    (function used : Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
+                "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
     
         # Define the vectorial field dimension
         dim = topos.shape[-1]
@@ -1313,7 +1334,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         '''
     
         if code_DATA_from_matlab:
-            path_Sigma_inverse = Path(__file__).parents[3].joinpath('data_PIV').\
+            path_Sigma_inverse = Path(MORAANE_PATH).joinpath('data_PIV').\
                 joinpath('HSigSigH_PIV_'+type_data+'_'+str(nb_modes)
                          + '_modes_a_cst_threshold_NaN')  # Load Sigma_inverse
             Sigma_inverse_data = hdf5storage.loadmat(
@@ -1323,56 +1344,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             print("\nSigma_inverse already defined with [convert_Cmat_to_python_Topos] function\n")
         topos_new_coordinates = np.reshape(topos,
                                            MX_PIV + tuple(np.array([data_assimilate_dim, (nb_modes+1)])), order='F')    
-        
-        # Plots for debug
-        if plot_debug:
-            matrix_H_plot = topos_new_coordinates.copy()
-            fig = plt.figure(20)
-            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, -1]),
-                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                               coordinates_y_PIV[0], coordinates_y_PIV[-1]])
-            plt.title("mean : Ux")
-            fig.colorbar(imgplot, orientation="horizontal")
-            plt.pause(1)
-            plt.savefig(PATH_output.joinpath("mode0_Ux.png"),
-                        dpi=100, transparent=False)
-            plt.close()
-    
-            fig = plt.figure(21)
-            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, -1]),
-                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                               coordinates_y_PIV[0], coordinates_y_PIV[-1]])
-            plt.title("mean : Uy")
-            fig.colorbar(imgplot, orientation="horizontal")
-            plt.pause(1)
-            plt.savefig(PATH_output.joinpath("mode0_Uy.png"),
-                        dpi=100, transparent=False)
-            plt.close()
-    
-            for n in range(nb_modes):
-    
-                fig = plt.figure(int(20+n+1))
-                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, n]),
-                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                                   coordinates_y_PIV[0], coordinates_y_PIV[-1]])
-                plt.title("mode "+str(n+1)+" : Ux")
-                fig.colorbar(imgplot, orientation="horizontal")
-                plt.pause(1)
-                plt.savefig(PATH_output.joinpath("mode"+str(n+1) +
-                            "_Ux.png"), dpi=100, transparent=False)
-                plt.close()
-    
-                fig = plt.figure(int(21+n+1))
-                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, n]),
-                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],
-                                                                   coordinates_y_PIV[0], coordinates_y_PIV[-1]])
-                plt.title("mode "+str(n+1)+" : Uy")
-                fig.colorbar(imgplot, orientation="horizontal")
-                plt.pause(1)
-                plt.savefig(PATH_output.joinpath("mode"+str(n+1) +
-                            "_Uy.png"), dpi=100, transparent=False)
-                plt.close()
-    
+            
         # The topos that we have estimated reshaped to posterior matrix multiplications
         Hpiv_Topos = np.reshape(topos_new_coordinates, (int(
             topos_new_coordinates.shape[0]*topos_new_coordinates.shape[1]*topos_new_coordinates.shape[2]), topos_new_coordinates.shape[3]), order='F')
@@ -1463,6 +1435,76 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         print('\nThe points that will be observed (with MASK): ')
         print('  The x coordinates : '+str(coordinates_x_PIV_with_MASK))
         print('  The y coordinates : '+str(coordinates_y_PIV_with_MASK))
+        
+        f_info.write('\nThe points that will be observed (with MASK): \n')
+        f_info.write('  The x coordinates : '+str(coordinates_x_PIV_with_MASK)+'\n')
+        f_info.write('  The y coordinates : '+str(coordinates_y_PIV_with_MASK)+'\n\n')
+
+        # Plots for debug
+        if plot_debug:
+            matrix_H_plot = topos_new_coordinates.copy()
+            fig = plt.figure(20)
+            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, -1]),\
+                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],\
+                                                               coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8,\
+                                                               origin='lower')
+            
+            plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
+            
+            plt.title("mean : Ux")
+            fig.colorbar(imgplot, orientation="horizontal")
+            plt.pause(1)
+            plt.savefig(PATH_output.joinpath("mode0_Ux.png"),
+                        dpi=100, transparent=False)
+            plt.close()
+    
+            fig = plt.figure(21)
+            imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, -1]),\
+                                 interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],\
+                                                               coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8,\
+                                                               origin='lower')
+            
+            plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
+            
+            plt.title("mean : Uy")
+            fig.colorbar(imgplot, orientation="horizontal")
+            plt.pause(1)
+            plt.savefig(PATH_output.joinpath("mode0_Uy.png"),
+                        dpi=100, transparent=False)
+            plt.close()
+    
+            for n in range(nb_modes):
+    
+                fig = plt.figure(int(20+n+1))
+                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 0, n]),\
+                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],\
+                                                                   coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8,\
+                                                                   origin='lower')
+                
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
+                
+                plt.title("mode "+str(n+1)+" : Ux")
+                fig.colorbar(imgplot, orientation="horizontal")
+                plt.pause(1)
+                plt.savefig(PATH_output.joinpath("mode"+str(n+1) +
+                            "_Ux.png"), dpi=100, transparent=False)
+                plt.close()
+    
+                fig = plt.figure(int(21+n+1))
+                imgplot = plt.imshow(np.transpose(matrix_H_plot[:, :, 1, n]),\
+                                     interpolation='none', extent=[coordinates_x_PIV[0], coordinates_x_PIV[-1],\
+                                                                   coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8,\
+                                                                   origin='lower')
+                
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
+                
+                plt.title("mode "+str(n+1)+" : Uy")
+                fig.colorbar(imgplot, orientation="horizontal")
+                plt.pause(1)
+                plt.savefig(PATH_output.joinpath("mode"+str(n+1) +
+                            "_Uy.png"), dpi=100, transparent=False)
+                plt.close()        
+        
         # %%   Calculate Sigma_inverse
     
         if code_DATA_from_matlab:
@@ -1473,7 +1515,20 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         # SelectSigma inverse in the mask that we observe
         Sigma_inverse = Sigma_inverse[Mask_final_bool[:Sigma_inverse.shape[0]], :, :].copy(
         )
-    
+        
+        # print ("sigma="+str(Sigma_inverse))
+        
+        # print ("sigma[0][0][0]="+str(Sigma_inverse[0][0][0]))
+        # print ("sigma[0][0][1]="+str(Sigma_inverse[0][0][1]))
+        # print ("sigma[0][1][0]="+str(Sigma_inverse[0][1][0]))
+        # print ("sigma[0][1][1]="+str(Sigma_inverse[0][1][1]))
+        
+        # # DATA matlab values for OBS 3 2modes
+        # Sigma_inverse[0][0][0]=31.9842
+        # Sigma_inverse[0][0][1]=-4.17775
+        # Sigma_inverse[0][1][0]=-4.17775
+        # Sigma_inverse[0][1][1]=19.107
+        
         # Transform this matrix in a square matrix
         # Number of points in the grid
         nb_points = Sigma_inverse.shape[0]
@@ -1531,7 +1586,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         
         if assimilate == 'real_data':
     
-            file = (Path(__file__).parents[3]).joinpath('data_PIV').joinpath(
+            file = Path(MORAANE_PATH).joinpath('data_PIV').joinpath(
                 'wake_Re'+str(Re)).joinpath('B'+str(1).zfill(4)+'.dat')   # The path to load PIV data
             # Open the PIV data
             data = open(str(file))
@@ -1561,7 +1616,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 # Loading the other files as defined in the start of this function
                 for nb_file in range(1, (number_of_PIV_files+1), factor_of_PIV_time_subsampling)[1:]:
                     print(nb_file)
-                    file = (Path(__file__).parents[3]).joinpath('data_PIV').joinpath(
+                    file = Path(MORAANE_PATH).joinpath('data_PIV').joinpath(
                         'wake_Re'+str(Re)).joinpath('B'+str(nb_file).zfill(4)+'.dat')  # Path to file
                     # Open the file
                     data = open(str(file))
@@ -1601,7 +1656,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             
             if code_DATA_from_matlab:
                 i = 1
-                file = (Path(__file__).parents[3]).joinpath('data_PIV')\
+                file = Path(MORAANE_PATH).joinpath('data_PIV')\
                     .joinpath('wake_Re'+str(Re)+'_fake')\
                     .joinpath('strat'+str(nb_file_learning_basis+i)+'_U_temp_PIV')   # The path to load PIV data
                 data = hdf5storage.loadmat(str(file))
@@ -1625,7 +1680,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
                 if number_of_FAKE_PIV_files > 1:
                     for i in range(1, number_of_FAKE_PIV_files+1, 1)[1:]:
-                        file = (Path(__file__).parents[3]).joinpath('data_PIV')\
+                        file = Path(MORAANE_PATH).joinpath('data_PIV')\
                             .joinpath('wake_Re'+str(Re)+'_fake')\
                             .joinpath('strat'+str(nb_file_learning_basis+i)+'_U_temp_PIV')  # The path to load PIV data
     
@@ -1650,7 +1705,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                     f_info.write("  - data (Re=" + str(Re)+") : \n    " +
                                  str(folder_data) + "/*/B0001_new.dat\n\n")
                     f_info.write(
-                        "    (function used : Cf. podfs2/python_scripts/mains/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
+                        "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                 
             end = t_exe.time()
             print('Time for loading '+str(number_of_FAKE_PIV_files)+' Fake PIV files : '+str(end -start)+'\n\n')
@@ -1663,8 +1718,17 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 mean_vector_flow.shape
     
                 fig = plt.figure(10)
-                imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 0]), interpolation='none', extent=[
-                    coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]])
+                # imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 0]), interpolation='none', extent=[
+                #     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[-1], coordinates_y_PIV[0]], alpha=0.8)
+                imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 0]), \
+                    interpolation='none', extent=[
+                    coordinates_x_PIV[0], coordinates_x_PIV[-1], \
+                    coordinates_y_PIV[-1], coordinates_y_PIV[0]],\
+                    alpha=0.8,\
+                    origin='lower')
+                
+                origin='lower'
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("mean(WAKE) : Ux")
                 fig.colorbar(imgplot, orientation="horizontal")
                 plt.pause(1)
@@ -1673,8 +1737,13 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 # plt.close()
     
                 fig = plt.figure(11)
-                imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 1]), interpolation='none', extent=[
-                    coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]])
+                imgplot = plt.imshow(np.transpose(mean_vector_flow[:, :, 1]),\
+                    interpolation='none', extent=[
+                    coordinates_x_PIV[0], coordinates_x_PIV[-1], \
+                    coordinates_y_PIV[-1], coordinates_y_PIV[0]],\
+                    alpha=0.8,\
+                    origin='lower')
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("mean(WAKE) : Uy")
                 fig.colorbar(imgplot, orientation="horizontal")
                 plt.pause(1)
@@ -1686,7 +1755,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 differ = mean_vector_flow[:, :, 0] - matrix_H_plot[:, :, 0, -1]
                 fig = plt.figure(12)
                 imgplot = plt.imshow(np.transpose(differ), interpolation='none', extent=[
-                                     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]])
+                                    coordinates_x_PIV[0], coordinates_x_PIV[-1], \
+                                    coordinates_y_PIV[-1], coordinates_y_PIV[0]],\
+                                    alpha=0.8,\
+                                     origin='lower')
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("diff mean(WAKE)-mode0 : Ux")
                 fig.colorbar(imgplot, orientation="horizontal")
                 plt.pause(1)
@@ -1697,7 +1770,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 differ = mean_vector_flow[:, :, 1] - matrix_H_plot[:, :, 1, -1]
                 fig = plt.figure(13)
                 imgplot = plt.imshow(np.transpose(differ), interpolation='none', extent=[
-                                     coordinates_x_PIV[0], coordinates_x_PIV[-1], coordinates_y_PIV[0], coordinates_y_PIV[-1]])
+                                    coordinates_x_PIV[0], coordinates_x_PIV[-1], \
+                                    coordinates_y_PIV[-1], coordinates_y_PIV[0]],\
+                                    alpha=0.8,\
+                                     origin='lower')
+                plt.scatter(x=coordinates_x_PIV_with_MASK, y=coordinates_y_PIV_with_MASK, c='r', s=50)
                 plt.title("diff mean(WAKE)-mode0 : Uy")
                 fig.colorbar(imgplot, orientation="horizontal")
                 plt.pause(1)
@@ -1736,22 +1813,22 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     #%% Pre-processing for plotting Q cirterion
     if plot_Q_crit:
         file = 'tensor_mode_' + type_data + '_'+str(nb_modes)+'_modes'
-        name_file_data = Path(__file__).parents[3].joinpath(
-            'data').joinpath(file)
+        name_file_data = Path(MORAANE_PATH).joinpath('data').joinpath(file)
         mat = hdf5storage.loadmat(str(name_file_data))
         Omega_phi_m_U = mat['Omega_phi_m_U']
         S_phi_m_U = mat['S_phi_m_U']
     
     #%% Begin propagation and assimilation
     # Cholesky de la matrix de covariance
-    pchol_cov_noises = beta_3*pchol_cov_noises
-    if LeastSquare:
-        ILC_EV['pchol_cov_noises'] = np.zeros(ILC_EV['pchol_cov_noises'].shape)
-        ILC_EV['I'] = np.zeros(ILC_EV['I'].shape)
-        ILC_EV['L'] = np.zeros(ILC_EV['L'].shape)
-        ILC_EV['C'] = np.zeros(ILC_EV['C'].shape)
-        Hpiv_Topos_otimization = Hpiv_Topos[:, :-1].copy()
-#            Hpiv_Topos_otimization[:,j] = Hpiv_Topos_otimization[:,j] / diag_reg[j]
+    if not code_load_run:
+        pchol_cov_noises = beta_3*pchol_cov_noises
+        if LeastSquare:
+            ILC_EV['pchol_cov_noises'] = np.zeros(ILC_EV['pchol_cov_noises'].shape)
+            ILC_EV['I'] = np.zeros(ILC_EV['I'].shape)
+            ILC_EV['L'] = np.zeros(ILC_EV['L'].shape)
+            ILC_EV['C'] = np.zeros(ILC_EV['C'].shape)
+            Hpiv_Topos_otimization = Hpiv_Topos[:, :-1].copy()
+    #            Hpiv_Topos_otimization[:,j] = Hpiv_Topos_otimization[:,j] / diag_reg[j]
     elif EV_withoutNoise:
         ILC_EV['pchol_cov_noises'] = np.zeros(ILC_EV['pchol_cov_noises'].shape)
     elif EV:
@@ -1950,7 +2027,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if EV:
         time_exe_EV = 0
     n_frame_plots = int(plot_period/param['dt'])
-                   
+
     ################################ Start temporal integration ###################################
     for index in range(param['N_test']*(not code_load_run)): # Set the number of integration steps
 
@@ -2212,7 +2289,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                     time_phy = index*param['dt']
                     time_CPU_phy = np.array([time_CPU, time_phy])
                     
-    #                file = Path(__file__).parents[3].joinpath('data_after_filtering').joinpath('aurore')
                     name_file_data_temp = path_Q_crit_EV.joinpath(
                         str(index)+'_temp.txt')
                     name_file_data = path_Q_crit_EV.joinpath(str(index)+'.txt')
@@ -2434,26 +2510,27 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     
     ##############################################################################################################
     #################################---TEST PLOTS---#############################################################
-
+    
     plt.close('all')
-
+    
     dt_tot = param['dt']
     N_test = param['N_test'] 
-    if code_load_run:
+    
+    if ( code_load_run):
         time = np.arange(bt_MCMC.shape[0])*float(dt_DNS)
         n_simu=1
-
+        
     particles_mean = np.mean(bt_MCMC[:, :, :], axis=2)
     particles_median = np.median(bt_MCMC[:, :, :], axis=2)
     quantiles = np.quantile(bt_MCMC[:, :, :], q=[0.025, 0.975], axis=2)
+    
     if EV:
         particles_mean_EV = np.mean(bt_forecast_EV[:, :, :], axis=2)
         particles_median_EV = np.median(bt_forecast_EV[:, :, :], axis=2)
         quantiles_EV = np.quantile(bt_forecast_EV[:, :, :], q=[
                                    0.025, 0.975], axis=2)
+        
     n_particles = bt_MCMC.shape[-1]
-#    particles_std_estimate = np.std(bt_MCMC[:,:,1:],axis=2)
-#    erreur = np.abs(particles_mean-ref)
 
     for index in range(particles_mean.shape[1]):
         plt.figure(index, figsize=(12, 9))
@@ -2493,7 +2570,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         plt.legend(fontsize=10)
         plt.xticks(fontsize=10)
         plt.yticks(fontsize=10)
-        path_img_name = Path(__file__).parents[3]
+        path_img_name = Path(MORAANE_PATH)
         if code_ROM_from_matlab:
             plt.savefig(str(path_img_name)+"/diff_bt"+str(index+1) +
                         "_ROMmatlabA.png", dpi=200, transparent=False)
@@ -2518,6 +2595,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         plt.savefig(file_res_mode, dpi=200)
 #            plt.savefig(file_res_mode,dpi=500 )
 #            plt.savefig(file_res_mode,quality = 95)
+
+        # PNG file
+        file_res_mode = file_plots_res / Path(str(index+1)+'_case'+str(case_choice)+'_DATA'+str(code_DATA_from_matlab)+'_ROM'+str(code_ROM_from_matlab)+'.png')
+        plt.savefig(file_res_mode, dpi=200)
+    
 
     if 'threshold_effect_on_tau_corrected' \
             in param['decor_by_subsampl']:
@@ -2548,6 +2630,36 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         dict_python['quantiles_EV'] = quantiles_EV
     file_res = file_plots_res / Path('chronos.mat')
     sio.savemat(file_res,dict_python)
+    
+    # file for post traitment critQ
+    
+    npTime = np.array(time)
+    # time_DA = np.array(time)[np.array(index_pf)[1:]]
+    # plt.figure(22)
+    # plt.plot(npTime[1:-1]-npTime[0:-2], 'r.')
+    # #temporalModeDAresult = particles_mean[::n_simu]
+    
+    print("size(time)="+str(len(npTime)))
+    
+    n_simu_for_file = n_simu
+    file_temporalModeDAresult_name = 'temporalModeDAresult.txt'
+    file_temporalModeDAresult = Path(PATH_output).joinpath(str(file_temporalModeDAresult_name))    
+    f_txt = open(file_temporalModeDAresult,'w')
+    N=0
+    for i in range(len(npTime)-1):
+        d = npTime[i] - npTime[i+1]; d=math.sqrt(d*d)
+        if ( d <= 0.000001 ):
+            N=N+1
+            print("i="+str(i)+" -> save value for i+1 only")
+        else:
+            for j in range(nb_modes-1):
+                f_txt.write(str(particles_mean[i][j])+" ")                        
+            f_txt.write(str(particles_mean[i][-1])+"\n")                        
+    N=len(npTime)-N
+    for j in range(nb_modes-1):
+        f_txt.write(str(particles_mean[-1][j])+" ")
+    f_txt.write(str(particles_mean[-1][-1])+"\n")
+    f_txt.close()  
     
     if EV:
         param['truncated_error2'] = param['truncated_error2'][0:(
@@ -2609,7 +2721,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             .copy()[:N_:n_simu]
         struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
             .copy()[:N_:n_simu]
-            
+           
         time = time[:N_:n_simu]
 
         bt_tot_interp = np.zeros(struct_bt_MCMC['mean'].shape)
@@ -2617,17 +2729,29 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             interpolant_bt_tot_k = interpolate.interp1d(
                 time_bt_tot, bt_tot[:, index])
             bt_tot_interp[:, index] = interpolant_bt_tot_k(time)
- ##################### A CORRIGER ###########################
-        if code_DATA_from_matlab:
-            interpolant_error = interpolate.interp1d(
-                time_bt_tot, param['truncated_error2'][:, 0])
-            param['truncated_error2'] = interpolant_error(time)
-            param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
+ # ##################### A CORRIGER ###########################
+ #        if code_DATA_from_matlab:
+ #            interpolant_error = interpolate.interp1d(
+ #                time_bt_tot, param['truncated_error2'][:, 0])
+ #            param['truncated_error2'] = interpolant_error(time)
+ #            param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
 
-            plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
-                                                  param, bt_tot_interp, struct_bt_MCMC, time)
+ #            plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
+ #                                                  param, bt_tot_interp, struct_bt_MCMC, time)
+ # ##################### A CORRIGER ###########################
+ 
  ##################### A CORRIGER ###########################
-        path_img_name = Path(__file__).parents[3]
+        # if code_DATA_from_matlab:
+        interpolant_error = interpolate.interp1d(
+            time_bt_tot, param['truncated_error2'][:, 0])
+        param['truncated_error2'] = interpolant_error(time)
+        param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
+        param['nb_modes']=nb_modes
+        param['code_DATA_from_matlab'] = code_DATA_from_matlab
+        plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
+                                              param, bt_tot_interp, struct_bt_MCMC, time)
+ ##################### A CORRIGER ###########################
+        path_img_name = Path(MORAANE_PATH)
         if code_ROM_from_matlab:
             plt.savefig(str(path_img_name)+"/diff_bt_ROMmatlabB.png",
                         dpi=200, transparent=False)
@@ -2703,7 +2827,15 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
       png_file = PATH_output / Path("diff_mean_WAKE_mode0_Uy.png")
       png_file_copy = file_plots_res / Path("diff_mean_WAKE_mode0_Uy.png")
       shutil.copyfile(str(png_file), str(png_file_copy))
+    
+    txt_file = file_temporalModeSimulation
+    txt_file_copy = file_plots_res / Path (str(file_temporalModeSimulation_name))
+    shutil.copyfile(str(txt_file), str(txt_file_copy))
+
+    txt_file = file_temporalModeDAresult
+    txt_file_copy = file_plots_res / Path (str(file_temporalModeDAresult_name))
+    shutil.copyfile(str(txt_file), str(txt_file_copy))
 
     print('\n\nCf. files in directory : \n   ' + str(file_plots_res) + '\n\n')
 
-    return 0  # var
+ 

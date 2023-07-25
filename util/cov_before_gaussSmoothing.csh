@@ -28,10 +28,10 @@ set All_D = ( residualSpeed_2 )
 # D folder : input value
 if ( $1 != "" ) set All_D = ( $1 )
 
-# DIR0 folder :  for example .../RedLum_from_OpenFoam/D1_Lz*pi_Re*/ROMDNS
+# DIR0 folder :  for example .../RedLum_from_OpenFoam/D1_Lz*pi_Re*/ROM-v1
 
 # DIR0 folder : default value
-set DIR0 = ~/Bureau/MORAANE/data_red_lum_cpp/DNS300-D1_Lz1pi
+set DIR0 = /media/laurence.wallian/Val4To/RedLUM/data_red_lum_cpp/DNS300-GeoLES3900/ROM-v3.1.2
 
 # DIR0 folder : input value
 if ( $2 != "" ) set DIR0 = $2
@@ -87,10 +87,10 @@ foreach D ( ${All_D} )
   set fic_src = ${DIR0}/system/ITHACAdict
   set t_first = ` cat ${fic_src} | \
                             awk 'BEGIN{code=0}{if ($1=="{") code=code+1; if ($1=="}") code=code-1; if (code==0) print $0 }' | \
-                            sed s/";"//g | awk '{ if ($1=="FinalTime") print  $2 }' `
+                            sed s/";"//g | awk '{ if ($1=="InitialTime") print  $2 }' `
   set t_last = ` cat ${fic_src} | \
                             awk 'BEGIN{code=0}{if ($1=="{") code=code+1; if ($1=="}") code=code-1; if (code==0) print $0 }' | \
-                            sed s/";"//g | awk '{ if ($1=="FinalTimeSimulation") print  $2 }' `
+                            sed s/";"//g | awk '{ if ($1=="FinalTime") print  $2 }' `
                                   
   # first and last time : input values
 
@@ -214,19 +214,33 @@ foreach D ( ${All_D} )
    
   #  same order (x,y) as  PIV model
   
+  if -e PIV_new_x.txt \rm PIV_new_x.txt
+  cat ${PIV_file_new} | grep -v "#" | \
+    awk '{ x=$1+0. ; if (NF!=0) printf("%.0f\n", 1000000.*x) }' | sort -n  | uniq | \
+    awk '{ x=$1+0. ; printf("%.6f\n",x/1000000.)}' > PIV_new_x.txt
+  #set All_PIV_yinv = ` cat All_PIV_x.txt | sed s/"-"/"\\-"/g`
+  set All_PIV_x = ` cat PIV_new_x.txt `
+  
+  set dx_max = ` echo ${All_PIV_x} | sort -n | awk '{ d=$NF-$1; d=sqrt(d*d); print d }' `
+  
   if -e PIV_new_yinv.txt \rm PIV_new_yinv.txt
   cat ${PIV_file_new} | grep -v "#" | \
     awk '{ x=$2+0. ; if (NF!=0) printf("%.0f\n", 1000000.*x) }' | sort -n -r  | uniq | \
     awk '{ x=$1+0. ; printf("%.6f\n",x/1000000.)}' > PIV_new_yinv.txt
-  set All_PIV_new_yinv = ` cat PIV_new_yinv.txt | sed s/"-"/"\\-"/g`
+  #set All_PIV_new_yinv = ` cat PIV_new_yinv.txt | sed s/"-"/"\\-"/g`
+  set All_PIV_new_yinv = ` cat PIV_new_yinv.txt `
 
-  \mv ${PIV_file_new} tmp.txt; #touch  ${PIV_file_new}
+  if -e tmp.txt \rm tmp.txt
+  cat ${PIV_file_new} | grep -v "#" | awk '{ for (i=1; i<=NF; i++) printf("%s ",$i); print "" }' > tmp.txt
+  \rm ${PIV_file_new}
   echo "# x   y   inv(cov_xx+A2)   inv(cov_yy+A2)   inv(cov_xy)" > ${PIV_file_new}
   echo "# with A2 = ${A_mat_diag}**2" >> ${PIV_file_new}
   foreach y ( ${All_PIV_new_yinv} )
-    cat tmp.txt | grep "${y}" >> ${PIV_file_new}
+    cat tmp.txt | awk -v y=${y} -v dx_max=${dx_max} '{ if ($2==y) print $1+dx_max, $0 }' | \
+    sort -n | uniq | \
+    awk '{ for (i=2;i<NF; i++) printf("%s ",$i); print $NF }' >> ${PIV_file_new}
   end
-    
+
   # visu gnuplot
   set fic_gnp = Inv_COVxy.gnp
   if -e ${fic_gnp} \rm ${fic_gnp}; touch ${fic_gnp}
@@ -371,7 +385,7 @@ foreach D ( ${All_D} )
   \cp Inv_COVxy.* cov_before_gaussSmoothing
   \cp PIV_new_covInv_*.png  cov_before_gaussSmoothing
   
-  echo ""; echo "Cf cov_before_gaussSmoothing/cov_mean_*.png (in ${dir_ici}/${D})"; echo ""
+  echo ""; echo "Cf. cov_before_gaussSmoothing/cov_mean_*.png (in ${dir_ici}/${D})"; echo ""
  
 end
 
