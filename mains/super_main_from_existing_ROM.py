@@ -50,7 +50,8 @@ if __name__ == '__main__':
     
     vect_nb_mutation_steps = [-1]                # Number of mutation steps in particle filter 
     n_particle = 100
-
+    #pathHilbertSpace = "_L2wBC"
+    pathHilbertSpace = ""
     # parameters defined in [run_info.txt] file
     #
     # DATA SET examples :
@@ -114,6 +115,7 @@ if __name__ == '__main__':
     f_info.write("  - nb_period_test         = " + str(nb_period_test) + "\n")
     f_info.write("  - no_subampl_in_forecast = " + str(no_subampl_in_forecast) + "\n")
     f_info.write("  - n_particle             = " + str(n_particle) + "\n")
+    f_info.write("  - pathHilbertSpace             = " + str(pathHilbertSpace) + "\n")
     f_info.write("  - test_fct               = " + str(test_fct) + "\n")
     f_info.write("  - svd_pchol              = " + str(svd_pchol) + "\n")
     f_info.write("  - stochastic_integration = " + str(stochastic_integration) + "\n")
@@ -137,7 +139,7 @@ if __name__ == '__main__':
                             for k in vect_nb_modes:
                                 main_from_existing_ROM(k,threshold,type_data,nb_period_test,\
                                                        no_subampl_in_forecast,reconstruction,\
-                                                       adv_corrected,modal_dt,n_particle,\
+                                                       adv_corrected,modal_dt,n_particle,pathHilbertSpace,\
                                                        test_fct,svd_pchol,\
                                                        stochastic_integration,\
                                                        estim_rmv_fv,eq_proj_div_free,\

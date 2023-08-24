@@ -332,7 +332,7 @@ def convert_Cmat_to_python_bt_tot(PARAM):
 
 ##################################################################################################
 # defining bt_MCMC
-def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
+def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles,pathHilbertSpace, bool_PFD):
     
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
@@ -367,10 +367,11 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
     elif (bool_PFD==False):
         file = file + '_neglectedPressure'
     elif (bool_PFD==2):
-        file = file + '_reducerOrderPressure'
+        file = file + '_reducedOrderPressure'
     else:
         print('ERROR: unknown case: bool_PFD =', str(bool_PFD))
         return 0
+    file = file + pathHilbertSpace
     if bool_npy:
         file = file + '_centered'
     file = file + '/approx_temporalModes_U_'
