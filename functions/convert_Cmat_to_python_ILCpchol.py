@@ -232,34 +232,21 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     ### C_deter = z0=C_PFD_0_2_0_t0 z1=-C_PFD_0_2_0_t1 ###
     nx=nb_modes; ny=nx; nz=nx;
     C_deter = np.zeros( (nx,ny,nz), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/C' + path_PFD + '_0_' + nb_modes_str + '_0/C0_mat.txt'
-    coeff=-1.
-    f = open(file_name,'r')
-    i = 0
-    while True:
-      line = f.readline()
-      if not line: 
-        break
-      else:            
-       a = np.fromstring(line, dtype=float, sep=' ')
-       for j in range(len(a)):
-           C_deter[i][j][0]=a[j]*coeff
-       i=i+1
-    f.close()    
-    file_name = PATH_MAT+'/C' + path_PFD + '_0_' + nb_modes_str + '_0/C1_mat.txt'
-    coeff=-1.
-    f = open(file_name,'r')
-    i = 0
-    while True:
-      line = f.readline()
-      if not line: 
-        break
-      else:            
-       a = np.fromstring(line, dtype=float, sep=' ')
-       for j in range(len(a)):
-           C_deter[i][j][1]= a[j]*coeff
-       i=i+1
-    f.close()    
+    for k in range(nz):
+        file_name = PATH_MAT+'/C' + path_PFD + '_0_' + nb_modes_str + '_0/C' + str(k) + '_mat.txt'
+        coeff=-1.
+        f = open(file_name,'r')
+        i = 0
+        while True:
+          line = f.readline()
+          if not line: 
+            break
+          else:            
+           a = np.fromstring(line, dtype=float, sep=' ')
+           for j in range(len(a)):
+               C_deter[i][j][k]=a[j]*coeff
+           i=i+1
+        f.close()  
     #print(" -> C_deter="+str(C_deter))
     
     ### C_deter -> C_deter~Transpose(C_deter) (Cf. functions_Cpp_to_matlab/read_Cpp_deter.m)
