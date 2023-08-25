@@ -2556,6 +2556,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 plt.plot(time_bt_tot, bt_tot[:, index], 'k--',
                          label='True state', linewidth=linewidth_)
 
+        line2 = plt.plot(time, particles_1pcl[:, index], '-', color='m',
+                        label='Red LUM first particle', linewidth=linewidth_)
         line1 = plt.plot(time, particles_mean[:, index], '-', color=color_mean_LU,
                          label='Red LUM particles mean', linewidth=linewidth_)
      
