@@ -594,9 +594,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write(str("\n"))
     
     ###### default values ####################
-    n_simu = 100 # Time step decreasing factor for ROM time integration
-    # update param_ref
-    param_ref['n_simu'] = n_simu
+    # n_simu = 100 # Time step decreasing factor for ROM time integration
+    # # update param_ref
+    # param_ref['n_simu'] = n_simu
     ########################################
 
     switcher = {
