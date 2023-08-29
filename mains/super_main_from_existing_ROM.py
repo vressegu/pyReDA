@@ -52,6 +52,7 @@ if __name__ == '__main__':
     n_particle = 100
     #pathHilbertSpace = "_L2wBC"
     pathHilbertSpace = ""
+    pathfreqBC = ""
     # parameters defined in [run_info.txt] file
     #
     # DATA SET examples :
@@ -140,7 +141,7 @@ if __name__ == '__main__':
                                 main_from_existing_ROM(k,threshold,type_data,nb_period_test,\
                                                        no_subampl_in_forecast,reconstruction,\
                                                        adv_corrected,modal_dt,n_particle,pathHilbertSpace,\
-                                                       test_fct,svd_pchol,\
+                                                       pathfreqBC,test_fct,svd_pchol,\
                                                        stochastic_integration,\
                                                        estim_rmv_fv,eq_proj_div_free,\
                                                        thrDtCorrect,\

@@ -468,7 +468,7 @@ f_info.close()
 
 def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                            no_subampl_in_forecast, reconstruction,
-                           adv_corrected, modal_dt, n_particles, pathHilbertSpace,test_fct, svd_pchol,
+                           adv_corrected, modal_dt, n_particles, pathHilbertSpace,pathfreqBC,test_fct, svd_pchol,
                            stochastic_integration,
                            estim_rmv_fv, eq_proj_div_free,
                            thrDtCorrect,
@@ -505,6 +505,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                  str(no_subampl_in_forecast) + "\n")
     f_info.write("  - n_particle             = " + str(n_particles) + "\n")
     f_info.write("  - pathHilbertSpace             = " + str(pathHilbertSpace) + "\n")
+    f_info.write("  - freqBC_0             = " + pathfreqBC + "\n")
     f_info.write("  - test_fct               = " + str(test_fct) + "\n")
     f_info.write("  - svd_pchol              = " + str(svd_pchol) + "\n")
     f_info.write("  - stochastic_integration = " +
@@ -570,8 +571,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     param_ref['N_particules'] = n_particles # Number of particles to select  
     param_ref['pathHilbertSpace'] = pathHilbertSpace #Path for the results with a chosen Hilbert Space
-        
-    if not mask_obs:   # If we must select a smaller grid inside the observed grid. 
+    param_ref['pathfreqBC'] = pathfreqBC
+
+    if not mask_obs:   # If we must select a smaller grid inside the observed grid.
         x0_index = 1.
         y0_index = 1.
         nbPoints_x = float('nan')
@@ -936,6 +938,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     param['folder_results'] = param_ref['folder_results']
     param['N_particules'] = param_ref['N_particules']
     param['pathHilbertSpace'] = param_ref['pathHilbertSpace']
+    param['pathfreqBC'] = param_ref['pathfreqBC']
     n_simu = param_ref['n_simu']
 
     print("\nOther default parameters :")
@@ -1184,8 +1187,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
                    bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
-                             PARAM, n_simu, n_particles,pathHilbertSpace, bool_PFD)
-                
+                             PARAM, n_simu, n_particles,pathHilbertSpace,pathfreqBC, bool_PFD)
+
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
             param['decor_by_subsampl']['n_subsampl_decor']
@@ -2556,6 +2559,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 plt.plot(time_bt_tot, bt_tot[:, index], 'k--',
                          label='True state', linewidth=linewidth_)
 
+        line2 = plt.plot(time, particles_1pcl[:, index], '-', color='m',
+                        label='Red LUM first particle', linewidth=linewidth_)
         line1 = plt.plot(time, particles_mean[:, index], '-', color=color_mean_LU,
                          label='Red LUM particles mean', linewidth=linewidth_)
      
