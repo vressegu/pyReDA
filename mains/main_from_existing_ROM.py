@@ -1187,7 +1187,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
                    bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
-                             PARAM, n_simu, n_particles,pathHilbertSpace,pathfreqBC, bool_PFD)
+                             PARAM, n_simu, n_particles,pathHilbertSpace + pathfreqBC, bool_PFD)
 
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
@@ -2526,6 +2526,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         time = np.arange(bt_MCMC.shape[0])*float(dt_DNS)
         n_simu=1
         
+    particles_1pcl = bt_MCMC[:, :,0]
     particles_mean = np.mean(bt_MCMC[:, :, :], axis=2)
     particles_median = np.median(bt_MCMC[:, :, :], axis=2)
     quantiles = np.quantile(bt_MCMC[:, :, :], q=[0.025, 0.975], axis=2)
