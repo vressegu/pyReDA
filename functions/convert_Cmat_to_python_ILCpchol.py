@@ -61,8 +61,10 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     bool_massMatrix = recentROM ( redlumcpp_code_version, 3, 3 )
     if bool_massMatrix:
         prefix = 'M'
+        add_0vB = ''
     else:
         prefix = ''
+        add_0vB = '_0'
         
     if bool_recentROM or \
        PATH_MAT == PATH_MAT_test + \
@@ -180,7 +182,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
            I_deter[i][j]=a[j]*coeff
        i=i+1
     f.close()    
-    file_name = PATH_MAT+'/' + prefix + 'B_1_vector_0_' + nb_modes_str + '_0_mat.txt'
+    file_name = PATH_MAT+'/' + prefix + 'B_1_vector' + add_0vB + '_' + nb_modes_str + '_0_mat.txt'
     coeff=1./Re
     f = open(file_name,'r')
     i = 0
