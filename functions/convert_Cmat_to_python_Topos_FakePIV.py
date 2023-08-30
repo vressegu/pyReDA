@@ -379,6 +379,7 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles,pathHilbertSpace, 
         if (file_format=="npy"):
             bt_temp_file = PATH_ROM.joinpath(Path(file +str(k)+'.npy'))
             bt_temp = np.load(bt_temp_file)
+            print("bt_temp_file="+str(bt_temp_file))
         elif (file_format=="txt"):
             bt_temp_file = PATH_ROM.joinpath(Path(file +str(k)+'_mat.txt'))
             print("bt_temp_file="+str(bt_temp_file))
@@ -412,6 +413,7 @@ def convert_Cmat_to_python_Topos(MX_PIV_all, index_XY_PIV, data_assimilate_dim_s
     data_assimilate_dim=int(data_assimilate_dim_str)
     
     nb_modes = PARAM.nb_modes
+    PATH_ROM = PARAM.PATH_ROM
     PATH_ROM_PIV = PARAM.PATH_ROM_PIV
     
     print("\n\ndata=f(C++) => mode0=f(ITHACAoutput/mean)")
@@ -481,9 +483,15 @@ def convert_Cmat_to_python_Topos(MX_PIV_all, index_XY_PIV, data_assimilate_dim_s
 
 
     print("data=fake_real_data=f(C++) => inv(mat_covariance + mat_diag(0.06**2))")
-
-    sigmaInv_file = PATH_ROM_PIV.joinpath(
-        Path('residualSpeed_'+str(nb_modes)+'/Inv_COVxy.dat'))
+    
+    redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0]))
+    bool_res = recentROM( redlumcpp_code_version, 3, 3 )
+    if bool_res:
+        sigmaInv_file = PATH_ROM_PIV.joinpath(
+            Path('residualSpeed_'+str(nb_modes)+'_U/Inv_COVxy.dat'))
+    else:
+        sigmaInv_file = PATH_ROM_PIV.joinpath(
+            Path('residualSpeed_'+str(nb_modes)+'/Inv_COVxy.dat'))
 
     print("file sigma="+str(sigmaInv_file))
     #sigmaInv = np.zeros(((n_X_PIV*n_Y_PIV, 2, 2)))
