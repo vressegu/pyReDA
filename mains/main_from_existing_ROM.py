@@ -273,7 +273,10 @@ sys.path.insert(0, str(path_functions))
 
 # writting INFO file
 PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
+if not os.path.isdir(PATH_output):
+    os.mkdir(PATH_output)
 file_info = PATH_output.joinpath('test.info')
+open(file_info, mode='w').close()
 
 # print("\n---> Cf. INFO file = ", str(file_info), "------\n" ) 
 
