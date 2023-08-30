@@ -1063,6 +1063,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if not code_ROM_from_matlab :
         if (pathHilbertSpace == "_L2wBC"):
             pathHilbertSpace = pathHilbertSpace + pathfreqBC
+        file_plots = file_plots + pathHilbertSpace
+        if (bool_PFD == 1):
+            file_plots = file_plots + '-fullOrderP'
+        elif (bool_PFD == 2):
+            file_plots = file_plots + '-redOrderP'
     else:
         file_plots = file_plots + '_' + choice_n_subsample 
         if choice_n_subsample == 'auto_shanon':
