@@ -272,8 +272,8 @@ sys.path.insert(0, str(path_functions))
 #from scipy import sparse as svds
 
 # writting INFO file
-
-file_info = Path(MORAANE_PATH).joinpath('3rdresult').joinpath('test.info')
+PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
+file_info = PATH_output.joinpath('test.info')
 
 # print("\n---> Cf. INFO file = ", str(file_info), "------\n" ) 
 
@@ -610,8 +610,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write("\nReynolds Number :\n")   
     f_info.write("  - Re                          = " + str(Re) + "\n")
     f_info.write(str("\n"))   
-
-    PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
 
     if assimilate == 'real_data':
         switcher = {
@@ -1039,7 +1037,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     #%% Folder to save data assimilation plot results
     plt.close('all')
-    file_plots = '3rdresult/'
+    file_plots = ''
     if code_ROM_from_matlab and code_DATA_from_matlab:
         file_plots = file_plots + type_data
     else:
@@ -1109,7 +1107,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if LeastSquare:
         file_plots = file_plots + '_LS'
     
-    file_plots_res = os.path.join(MORAANE_PATH, file_plots)
+    file_plots_res = Path(PATH_output).joinpath(file_plots)
     
     if not os.path.exists(file_plots_res):
         os.makedirs(file_plots_res)
