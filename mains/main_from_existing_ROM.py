@@ -2805,12 +2805,13 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write('  - Files in Plot Folder : ' +
                  str(os.listdir(file_plots_res)) + ' \n\n')
 
-    del C_deter
-    del C_sto
-    del L_deter
-    del L_sto
-    del I_deter
-    del I_sto
+    if not code_load_run:
+        del C_deter
+        del C_sto
+        del L_deter
+        del L_sto
+        del I_deter
+        del I_sto
 
     # closing INFO file
     
