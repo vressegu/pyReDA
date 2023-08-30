@@ -1059,6 +1059,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                      + '/' + redlumcpp_code_version + '/'
         if not adv_corrected:
             file_plots = file_plots + '_no_correct_drift'
+    if not code_ROM_from_matlab :
+        if (pathHilbertSpace == "_L2wBC"):
+            pathHilbertSpace = pathHilbertSpace + pathfreqBC
     else:
         file_plots = file_plots + '_' + choice_n_subsample 
         if choice_n_subsample == 'auto_shanon':
@@ -1187,7 +1190,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
                    bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
-                             PARAM, n_simu, n_particles,pathHilbertSpace + pathfreqBC, bool_PFD)
+                             PARAM, n_simu, n_particles,pathHilbertSpace, bool_PFD)
 
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
