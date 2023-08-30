@@ -272,8 +272,11 @@ sys.path.insert(0, str(path_functions))
 #from scipy import sparse as svds
 
 # writting INFO file
-
-file_info = Path(MORAANE_PATH).joinpath('3rdresult').joinpath('test.info')
+PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
+if not os.path.isdir(PATH_output):
+    os.mkdir(PATH_output)
+file_info = PATH_output.joinpath('test.info')
+open(file_info, mode='w').close()
 
 # print("\n---> Cf. INFO file = ", str(file_info), "------\n" ) 
 
@@ -468,7 +471,7 @@ f_info.close()
 
 def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                            no_subampl_in_forecast, reconstruction,
-                           adv_corrected, modal_dt, n_particles, pathHilbertSpace,test_fct, svd_pchol,
+                           adv_corrected, modal_dt, n_particles, pathHilbertSpace,pathfreqBC,test_fct, svd_pchol,
                            stochastic_integration,
                            estim_rmv_fv, eq_proj_div_free,
                            thrDtCorrect,
@@ -505,6 +508,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                  str(no_subampl_in_forecast) + "\n")
     f_info.write("  - n_particle             = " + str(n_particles) + "\n")
     f_info.write("  - pathHilbertSpace             = " + str(pathHilbertSpace) + "\n")
+    f_info.write("  - freqBC_0             = " + pathfreqBC + "\n")
     f_info.write("  - test_fct               = " + str(test_fct) + "\n")
     f_info.write("  - svd_pchol              = " + str(svd_pchol) + "\n")
     f_info.write("  - stochastic_integration = " +
@@ -570,8 +574,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     param_ref['N_particules'] = n_particles # Number of particles to select  
     param_ref['pathHilbertSpace'] = pathHilbertSpace #Path for the results with a chosen Hilbert Space
-        
-    if not mask_obs:   # If we must select a smaller grid inside the observed grid. 
+    param_ref['pathfreqBC'] = pathfreqBC
+
+    if not mask_obs:   # If we must select a smaller grid inside the observed grid.
         x0_index = 1.
         y0_index = 1.
         nbPoints_x = float('nan')
@@ -608,8 +613,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write("\nReynolds Number :\n")   
     f_info.write("  - Re                          = " + str(Re) + "\n")
     f_info.write(str("\n"))   
-
-    PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
 
     if assimilate == 'real_data':
         switcher = {
@@ -694,6 +697,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             param_file = PATH_ROM.joinpath(Path('../system/controlDict'))
             print("controlDict=", str(param_file)+"\n")
             dt_DNS, t0_DNS, t1_DNS = param_from_controlDict_file ( param_file )
+            
+            if code_Assimilation :
+                if assimilate == 'fake_real_data':
+                    dt_PIV = dt_DNS
             
             param_file = PATH_ROM.joinpath(Path('../system/ITHACAdict'))
             print("ITHACADict=", str(param_file)+"\n")
@@ -936,6 +943,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     param['folder_results'] = param_ref['folder_results']
     param['N_particules'] = param_ref['N_particules']
     param['pathHilbertSpace'] = param_ref['pathHilbertSpace']
+    param['pathfreqBC'] = param_ref['pathfreqBC']
     n_simu = param_ref['n_simu']
 
     print("\nOther default parameters :")
@@ -1036,7 +1044,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     #%% Folder to save data assimilation plot results
     plt.close('all')
-    file_plots = '3rdresult/'
+    file_plots = ''
     if code_ROM_from_matlab and code_DATA_from_matlab:
         file_plots = file_plots + type_data
     else:
@@ -1056,6 +1064,14 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                      + '/' + redlumcpp_code_version + '/'
         if not adv_corrected:
             file_plots = file_plots + '_no_correct_drift'
+    if not code_ROM_from_matlab :
+        if (pathHilbertSpace == "_L2wBC"):
+            pathHilbertSpace = pathHilbertSpace + pathfreqBC
+        file_plots = file_plots + pathHilbertSpace
+        if (bool_PFD == 1):
+            file_plots = file_plots + '-fullOrderP'
+        elif (bool_PFD == 2):
+            file_plots = file_plots + '-redOrderP'
     else:
         file_plots = file_plots + '_' + choice_n_subsample 
         if choice_n_subsample == 'auto_shanon':
@@ -1103,7 +1119,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if LeastSquare:
         file_plots = file_plots + '_LS'
     
-    file_plots_res = os.path.join(MORAANE_PATH, file_plots)
+    file_plots_res = Path(PATH_output).joinpath(file_plots)
     
     if not os.path.exists(file_plots_res):
         os.makedirs(file_plots_res)
@@ -1185,7 +1201,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                if code_load_run:
                    bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
                              PARAM, n_simu, n_particles,pathHilbertSpace, bool_PFD)
-                
+
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
             param['decor_by_subsampl']['n_subsampl_decor']
@@ -2523,6 +2539,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         time = np.arange(bt_MCMC.shape[0])*float(dt_DNS)
         n_simu=1
         
+    particles_1pcl = bt_MCMC[:, :,0]
     particles_mean = np.mean(bt_MCMC[:, :, :], axis=2)
     particles_median = np.median(bt_MCMC[:, :, :], axis=2)
     quantiles = np.quantile(bt_MCMC[:, :, :], q=[0.025, 0.975], axis=2)
@@ -2556,6 +2573,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 plt.plot(time_bt_tot, bt_tot[:, index], 'k--',
                          label='True state', linewidth=linewidth_)
 
+        line2 = plt.plot(time, particles_1pcl[:, index], '-', color='m',
+                        label='Red LUM first particle', linewidth=linewidth_)
         line1 = plt.plot(time, particles_mean[:, index], '-', color=color_mean_LU,
                          label='Red LUM particles mean', linewidth=linewidth_)
      
@@ -2795,12 +2814,13 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write('  - Files in Plot Folder : ' +
                  str(os.listdir(file_plots_res)) + ' \n\n')
 
-    del C_deter
-    del C_sto
-    del L_deter
-    del L_sto
-    del I_deter
-    del I_sto
+    if not code_load_run:
+        del C_deter
+        del C_sto
+        del L_deter
+        del L_sto
+        del I_deter
+        del I_sto
 
     # closing INFO file
     
