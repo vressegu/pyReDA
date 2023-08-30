@@ -1065,7 +1065,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         if not adv_corrected:
             file_plots = file_plots + '_no_correct_drift'
     if not code_ROM_from_matlab :
-        if (pathHilbertSpace == "_L2wBC"):
+        if (bool_PFD==2):
             pathHilbertSpace = pathHilbertSpace + pathfreqBC
         file_plots = file_plots + pathHilbertSpace
         if (bool_PFD == 1):
