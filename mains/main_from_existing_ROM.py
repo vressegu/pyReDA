@@ -125,6 +125,10 @@ if code_load_run:
         if code_DATA_from_matlab:
             print('ERROR: loading previous matlab-test-basis results is not code yet')
             sys.exit()
+else:
+    if ( scheme == "adams-bashforth" ):
+            print('ERROR: this temporal scheme is not coded yet')
+            sys.exit()
 
 # PATH_openfoam_data : upper PATH for subdirectories [ITHACAoutput], [ROM_PIV], [util] and [FakePIV_noise2]
 PATH_openfoam_data = Path(PATH_openfoam_data)
@@ -471,7 +475,9 @@ f_info.close()
 
 def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                            no_subampl_in_forecast, reconstruction,
-                           adv_corrected, modal_dt, n_particles, pathHilbertSpace,pathfreqBC,test_fct, svd_pchol,
+                           adv_corrected, modal_dt, n_particles, 
+                           temporalScheme,HilbertSpace,freqBC,
+                           test_fct, svd_pchol,
                            stochastic_integration,
                            estim_rmv_fv, eq_proj_div_free,
                            thrDtCorrect,
@@ -507,8 +513,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write("  - no_subampl_in_forecast = " +
                  str(no_subampl_in_forecast) + "\n")
     f_info.write("  - n_particle             = " + str(n_particles) + "\n")
-    f_info.write("  - pathHilbertSpace             = " + str(pathHilbertSpace) + "\n")
-    f_info.write("  - freqBC_0             = " + pathfreqBC + "\n")
+    f_info.write("  - temporalScheme             = " + str(temporalScheme) + "\n")
+    f_info.write("  - HilbertSpace             = " + str(HilbertSpace) + "\n")
+    f_info.write("  - freqBC             = " + str(freqBC) + "\n")
     f_info.write("  - test_fct               = " + str(test_fct) + "\n")
     f_info.write("  - svd_pchol              = " + str(svd_pchol) + "\n")
     f_info.write("  - stochastic_integration = " +
@@ -573,8 +580,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write(str("\n"))   
 
     param_ref['N_particules'] = n_particles # Number of particles to select  
-    param_ref['pathHilbertSpace'] = pathHilbertSpace #Path for the results with a chosen Hilbert Space
-    param_ref['pathfreqBC'] = pathfreqBC
+    param_ref['temporalScheme'] = temporalScheme 
+    param_ref['HilbertSpace'] = HilbertSpace #Path for the results with a chosen Hilbert Space
+    param_ref['freqBC'] = freqBC
 
     if not mask_obs:   # If we must select a smaller grid inside the observed grid.
         x0_index = 1.
@@ -675,6 +683,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                                           'dt_DNS', 't0_DNS', 't1_DNS',
                                           't0_learningBase', 't1_learningBase', 
                                           't0_testBase', 't1_testBase', 
+                                          'temporalScheme',
+                                          'HilbertSpace','freqBC',
                                           'PATH_input', 'PATH_DATA', 'PATH_ROM', 'PATH_ROM_PIV']) 
             
             print("\n\nDATA or ROM =f(C++) => param")
@@ -725,6 +735,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                          dt_DNS, t0_DNS, t1_DNS,
                          t0_learningBase, t1_learningBase,
                          t0_testBase, t1_testBase,
+                         temporalScheme,
+                         HilbertSpace,freqBC,
                          PATH_input, PATH_DATA, PATH_ROM, PATH_ROM_PIV)
                
         if code_load_run:
@@ -942,8 +954,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     param['folder_results'] = param_ref['folder_results']
     param['N_particules'] = param_ref['N_particules']
-    param['pathHilbertSpace'] = param_ref['pathHilbertSpace']
-    param['pathfreqBC'] = param_ref['pathfreqBC']
+    param['temporalScheme'] = param_ref['temporalScheme']
+    param['HilbertSpace'] = param_ref['HilbertSpace']
+    param['freqBC'] = param_ref['freqBC']
     n_simu = param_ref['n_simu']
 
     print("\nOther default parameters :")
@@ -1065,12 +1078,12 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         if not adv_corrected:
             file_plots = file_plots + '_no_correct_drift'
     if not code_ROM_from_matlab :
-        if (bool_PFD==2):
-            pathHilbertSpace = pathHilbertSpace + pathfreqBC
-        file_plots = file_plots + pathHilbertSpace
+        if not (HilbertSpace == "L2"):
+            file_plots = file_plots + '_' + HilbertSpace
         if (bool_PFD == 1):
             file_plots = file_plots + '-fullOrderP'
         elif (bool_PFD == 2):
+            file_plots = file_plots + str(freqBC)
             file_plots = file_plots + '-redOrderP'
     else:
         file_plots = file_plots + '_' + choice_n_subsample 
@@ -1112,6 +1125,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         file_plots = file_plots + 'initOnRef_'
     file_plots = file_plots + 'beta_2_' + str(int(beta_2))
     file_plots = file_plots + '_nSimu_' + str(int(n_simu))
+    if (temporalScheme == "adams-bashforth"):
+        file_plots = file_plots + '_AB'
     file_plots = file_plots + '_nMut_' + str(int(nb_mutation_steps))
     file_plots = file_plots + '_nPcl_' + str(int(n_particles))
     if EV_withoutNoise:
@@ -1200,7 +1215,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
                    bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
-                             PARAM, n_simu, n_particles,pathHilbertSpace, bool_PFD)
+                             PARAM, n_simu, n_particles, bool_PFD)
 
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \

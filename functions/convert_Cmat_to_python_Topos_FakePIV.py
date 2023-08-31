@@ -22,6 +22,8 @@ Created on Mon Dec 19 07:51:46 2022 : DATA and ROM from C++
 import numpy as np
 from pathlib import Path
 import os
+import sys
+
 
 import re # for grep search in param file
 
@@ -332,7 +334,7 @@ def convert_Cmat_to_python_bt_tot(PARAM):
 
 ##################################################################################################
 # defining bt_MCMC
-def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles,pathHilbertSpace, bool_PFD):
+def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
     
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
@@ -360,7 +362,14 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles,pathHilbertSpace, 
     bt_MCMC= np.transpose(bt_MCMC, (1, 2, 0))  
     # print('bt_MCMC:'+str(bt_MCMC.shape))
 
-    file = 'Reduced_coeff_'+str(nb_modes)+'_'+str(dt_run)+ \
+    if (PARAM.temporalScheme == "euler"):
+        pathtemporalScheme = ""
+    elif (PARAM.temporalScheme == "adams-bashforth"):
+        pathtemporalScheme = "AB"
+    else:
+        print("unknown temporal scheme")
+        sys.exit()
+    file = 'Reduced_coeff_'+str(nb_modes)+'_'+pathtemporalScheme+str(dt_run)+ \
           '_'+str(int(n_particles))
     if (bool_PFD==True):
         file = file + '_fullOrderPressure'
@@ -371,7 +380,10 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles,pathHilbertSpace, 
     else:
         print('ERROR: unknown case: bool_PFD =', str(bool_PFD))
         return 0
-    file = file + pathHilbertSpace
+    if not (PARAM.HilbertSpace == "L2"):
+        file = file + '_' + PARAM.HilbertSpace
+    if (bool_PFD == 2):
+        file = file + str(PARAM.freqBC)
     if bool_npy:
         file = file + '_centered'
     file = file + '/approx_temporalModes_U_'
