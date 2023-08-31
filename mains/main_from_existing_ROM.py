@@ -125,10 +125,6 @@ if code_load_run:
         if code_DATA_from_matlab:
             print('ERROR: loading previous matlab-test-basis results is not code yet')
             sys.exit()
-else:
-    if ( scheme == "adams-bashforth" ):
-            print('ERROR: this temporal scheme is not coded yet')
-            sys.exit()
 
 # PATH_openfoam_data : upper PATH for subdirectories [ITHACAoutput], [ROM_PIV], [util] and [FakePIV_noise2]
 PATH_openfoam_data = Path(PATH_openfoam_data)
@@ -249,6 +245,7 @@ mask_obs = True      # True            # Activate spatial mask in the observed d
 #                then factor_of_PIV_time_subsampling_gl = int(5/10 / dt_PIV)
 
 case_choice = 1
+#case_choice = 2
 #case_choice = "Case_Full"
 subsampling_PIV_grid_factor_gl, x0_index_gl, nbPoints_x_gl, \
  y0_index_gl, nbPoints_y_gl, assimilation_period_gl = switch_case(case_choice)
@@ -485,7 +482,12 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                            choice_n_subsample, EV,
                            nb_mutation_steps,
                            SECONDS_OF_SIMU):  # nb_modes,threshold,type_data,nb_period_test,no_subampl_in_forecast,reconstruction,adv_corrected,modal_dt):
-    
+
+    if not code_load_run:
+        if ( temporalScheme == "adams-bashforth" ):
+                print('ERROR: this temporal scheme is not coded yet')
+                sys.exit()
+   
     # learning basis
     if code_DATA_from_matlab == False:
         no_subampl_in_forecast = True
