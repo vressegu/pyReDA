@@ -405,7 +405,7 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
                     else:
                         a = np.fromstring(line, dtype=float, sep=' ')
                         for j in range(len(a)):
-                            bt_temp[i][j] = a[j]
+                            bt_temp[i][j] = a[j]                                
                         i = i+1
                 f_bt_temp.close()
             else:
@@ -414,7 +414,8 @@ def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
         else:
             print('ERROR: File format does not exist ', file_format)
             return 0
-        bt_MCMC[:,:,k]=bt_temp
+        #bt_MCMC[:,:,k]=bt_temp
+        bt_MCMC[:,:,k]=bt_temp[0:int((t1_testBase-t0_testBase)/dt_DNS)+1,:]
 
     return bt_MCMC
 
