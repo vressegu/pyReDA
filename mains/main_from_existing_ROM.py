@@ -30,6 +30,7 @@ from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_cropZone
 from convert_Cmat_to_python_Topos_FakePIV import load_lambda
 from convert_Cmat_to_python_Topos_FakePIV import load_bt_tot
 from convert_Cmat_to_python_Topos_FakePIV import load_bt_MCMC
+from convert_Cmat_to_python_Topos_FakePIV import load_errors
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_Topos
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_FakePIV
 
@@ -1218,6 +1219,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                if code_load_run:
                    bt_MCMC = load_bt_MCMC( \
                              PARAM, n_simu, n_particles, bool_PFD)
+                   bias, rmse, minDist = load_errors(PARAM, n_simu, n_particles, bool_PFD)
 
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
@@ -2721,6 +2723,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
         .copy()[:N_:n_simu]
         
+    if code_load_run and not code_ROM_from_matlab:
+        struct_bt_MCMC['bias'] = bias.copy()[:N_:n_simu]
+        struct_bt_MCMC['rmse'] = rmse.copy()[:N_:n_simu]
+        struct_bt_MCMC['minDist'] = minDist.copy()[:N_:n_simu]
+        
     time = time[:N_:n_simu]
         
    
@@ -2738,6 +2745,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     param['lambda'] = lambda_values
     param['nb_modes']=nb_modes
     param['code_DATA_from_matlab'] = code_DATA_from_matlab
+    param['code_load_run'] = code_load_run
     
     if EV:
         struct_bt_MEV_noise = {}

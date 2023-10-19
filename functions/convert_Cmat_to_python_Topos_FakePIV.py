@@ -333,6 +333,78 @@ def load_bt_tot(PARAM):
 
 
 ##################################################################################################
+# loading error
+def load_errors(PARAM, n_simu, n_particles, bool_PFD):
+
+
+    nb_modes = PARAM.nb_modes
+    PATH_ROM = PARAM.PATH_ROM
+    print(PARAM.PATH_ROM)
+    t0_testBase = PARAM.t0_testBase
+    t1_testBase = PARAM.t1_testBase
+    dt_DNS = PARAM.dt_DNS
+    dt_run = PARAM.dt_DNS / n_simu
+    redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0])) 
+    bool_npy = recentROM( redlumcpp_code_version, 3, 1 )
+    if bool_npy:
+        file_format = "npy"
+    else:
+        file_format = "txt"
+
+    bias = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1,1))
+    
+    # bt_temp = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1, nb_modes))
+    # bt_MCMC = np.tile(bt_temp, (n_particles, 1, 1))
+    # bt_MCMC= np.transpose(bt_MCMC, (1, 2, 0))  
+    # # print('bt_MCMC:'+str(bt_MCMC.shape))
+    
+
+    if (PARAM.temporalScheme == "euler"):
+        pathtemporalScheme = ""
+    elif (PARAM.temporalScheme == "adams-bashforth"):
+        pathtemporalScheme = "AB"
+    else:
+        print("unknown temporal scheme")
+        sys.exit()
+    file = 'Reduced_coeff_'+str(nb_modes)+'_'+pathtemporalScheme+str(dt_run)+ \
+          '_'+str(int(n_particles))
+    if (bool_PFD==True):
+        file = file + '_fullOrderPressure'
+    elif (bool_PFD==False):
+        file = file + '_neglectedPressure'
+    elif (bool_PFD==2):
+        file = file + '_reducedOrderPressure'
+    else:
+        print('ERROR: unknown case: bool_PFD =', str(bool_PFD))
+        return 0
+    if not (PARAM.HilbertSpace == "L2"):
+        file = file + '_' + PARAM.HilbertSpace
+    if (bool_PFD == 2):
+        file = file + str(PARAM.freqBC)
+    if bool_npy:
+        file = file + '_centered'
+    # file = file + '/approx_temporalModes_U_'
+    folder = file
+    filebias = folder + '/bias_temporalModes_U.npy'
+    filermse = folder + '/rmse_temporalModes_U.npy'
+    fileminDist = folder + '/minDist_temporalModes_U.npy'
+    
+    if (file_format=="npy"):
+        bt_temp_file = PATH_ROM.joinpath(Path(filebias))
+        bias = np.load(bt_temp_file)
+        print("filebias="+str(filebias))
+        bt_temp_file = PATH_ROM.joinpath(Path(filermse))
+        rmse = np.load(bt_temp_file)
+        bt_temp_file = PATH_ROM.joinpath(Path(fileminDist))
+        minDist = np.load(bt_temp_file)
+    else:
+        print('ERROR: File format does not exist ', file_format)
+        return 0
+
+    return bias, rmse, minDist
+
+
+##################################################################################################
 # defining bt_MCMC
 def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
     
