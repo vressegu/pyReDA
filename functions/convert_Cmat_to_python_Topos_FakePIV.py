@@ -204,7 +204,7 @@ def convert_Cmat_to_python_cropZone(PARAM):
 
 ##################################################################################################
 # defining lambda
-def convert_Cmat_to_python_lambda(PARAM):
+def load_lambda(PARAM):
     
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
@@ -274,7 +274,7 @@ def convert_Cmat_to_python_lambda(PARAM):
 
 ##################################################################################################
 # defining bt_tot
-def convert_Cmat_to_python_bt_tot(PARAM):
+def load_bt_tot(PARAM):
     
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
@@ -334,7 +334,7 @@ def convert_Cmat_to_python_bt_tot(PARAM):
 
 ##################################################################################################
 # defining bt_MCMC
-def convert_Cmat_to_python_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
+def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
     
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM

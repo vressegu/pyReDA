@@ -27,9 +27,9 @@ from convert_mat_to_python_ILCpchol import convert_mat_to_python_ILCpchol
 from convert_Cmat_to_python_ILCpchol import convert_Cmat_to_python_ILCpchol
 
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_cropZone
-from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_lambda
-from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_bt_tot
-from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_bt_MCMC
+from convert_Cmat_to_python_Topos_FakePIV import load_lambda
+from convert_Cmat_to_python_Topos_FakePIV import load_bt_tot
+from convert_Cmat_to_python_Topos_FakePIV import load_bt_MCMC
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_Topos
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_FakePIV
 
@@ -976,8 +976,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     # Cf. /media/laurence.wallian/WD_Ressegui/Boulot/RedLUM/RedLum_from_OpenFoam/RedLum_D1_Lz1pi_Re300/ROMDNS/system/ITHACAdict
     # if not code_DATA_from_matlab:
     if not code_ROM_from_matlab:
-        lambda_values = convert_Cmat_to_python_lambda(PARAM)
-        print("\nCf. pyReDA/functions/convert_Cmat_to_python_lambda.py]\n\n")
+        lambda_values = load_lambda(PARAM)
+        print("\nCf. pyReDA/functions/load_lambda.py]\n\n")
         f_info.write("  - Lambda values (Re=" + str(Re)+") : \n    " +
                      os.path.join(folder_results, 'temporalModes_'+str(nb_modes)+'modes') + "/U_mat.txt\n\n")
         f_info.write(
@@ -1209,14 +1209,14 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             if not code_DATA_from_matlab:
                # bt_tot = ITHACAoutput/temporalModesSimulation_*modes
                # truncated_error=0
-               truncated_error2, bt_tot = convert_Cmat_to_python_bt_tot(PARAM)
+               truncated_error2, bt_tot = load_bt_tot(PARAM)
                
                f_info.write("  - bt_tot (Re=" + str(Re)+") : \n    " +
                             os.path.join(folder_results, 'temporalModesSimulation_'+str(nb_modes)+'modes') + "/U_mat.txt\n\n")
                f_info.write(
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
-                   bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
+                   bt_MCMC = load_bt_MCMC( \
                              PARAM, n_simu, n_particles, bool_PFD)
 
             param['truncated_error2'] = truncated_error2
