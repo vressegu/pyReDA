@@ -731,9 +731,9 @@ def plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res, \
                      label = 'Red LUM bias',linewidth=linewidth_)
     
     if param['code_load_run']:
-        # plt.plot(time,np.sqrt(struct_bt_MCMC['bias'][:int(N_test+1),k]),
-        #                  '--r',\
-        #                  label = 'Red LUM bias C++',linewidth=linewidth_)
+        plt.plot(time,np.sqrt(struct_bt_MCMC['bias'][:int(N_test+1),k]),
+                          '--r',\
+                          label = 'Red LUM bias C++',linewidth=linewidth_)
         plt.plot(time,np.sqrt(struct_bt_MCMC['rmse'][:int(N_test+1),k]),
                          '--b',\
                          label = 'Red LUM rmse C++',linewidth=linewidth_)
