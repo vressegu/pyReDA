@@ -35,6 +35,7 @@ from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_Topos
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_FakePIV
 
 from switch_case_param import switch_case
+from switch_case_param import Left_Top_PtObs
 from switch_case_param import default_param
 
 from param_from_info_txt_file import main_globalParam_from_info_txt_file
@@ -106,6 +107,10 @@ param_ref = {}
 # beta_3 : the parameter that controls the impact in the model noise -> beta_3 * pchol_cov_noises
 #          if beta_3=0, there is NO noise during simulation
 #   example : beta_3 = 1.
+
+# xObs,yObs : coordinates of first Obs (l)
+#   example : yObs=1.5, to have (y0-y0_cyl)/Dcyl<1.5)
+# 
     
 MORAANE_PATH = Path(__file__).parents[2]
 
@@ -115,7 +120,7 @@ print("     Cf. run_file [", str(param_file)+"]")
 type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   code_Assimilation, code_load_run, init_centred_on_ref, \
   redlumcpp_code_version, PATH_openfoam_data, \
-  beta_2, beta_3 = main_globalParam_from_info_txt_file(param_file)
+  beta_2, beta_3, xObs, yObs = main_globalParam_from_info_txt_file(param_file)
 
 if code_load_run:
     # if code_Assimilation:
@@ -221,35 +226,28 @@ mask_obs = True      # True            # Activate spatial mask in the observed d
 #  1) subsampling_PIV_grid_factor_gl :
 #      Subsampling constant that will be applied in the observed data, 
 #      (i.e if 3 we will take 1 point in 3)
-#  2) x0_index_gl :
-#      Parameter necessary to chose the grid that we will observe
-#      (i.e if 6 we will start the select the start of the observed grid 
-#       in the 6th x index, hence we will reduce the observed grid).
-#  3) nbPoints_x_gl :
+#
+#  2) nbPoints_x_gl :
 #      Number of points that we will take in account in the observed grid. 
 #      Therefore, with this two parameters we can select any possible subgrid 
 #      inside the original PIV/DNS grid to observe.
 #      Example : if nbPoints_x_gl=70, 
 #                then nbPoints_x <= (202 - x0_index) /subsampling_PIV_grid_factor
-#  4) y0_index_gl :
-#      Parameter necessary to chose the grid that we will observe
-#      (i.e if 30 we will start the select the start of the observed grid 
-#       in the 30th y index, hence we will reduce the observed grid).
-#  5) nbPoints_y_gl :
+#  3) nbPoints_y_gl :
 #      Number of points that we will take in account in the observed grid. 
 #      Therefore, with this two parameters we can select any possible subgrid 
 #      inside the original PIV/DNS grid to observe.
 #      Example : if nbPoints_y_gl=30, 
 #                then nbPoints_y <= (74 - y0_index) /subsampling_PIV_grid_factor
-#  6) assimilation_period_gl :
+#  4) assimilation_period_gl :
 #      Example : if  assimilation_period=float(5/10),
 #                then factor_of_PIV_time_subsampling_gl = int(5/10 / dt_PIV)
 
 case_choice = 1
 #case_choice = 2
 #case_choice = "Case_Full"
-subsampling_PIV_grid_factor_gl, x0_index_gl, nbPoints_x_gl, \
- y0_index_gl, nbPoints_y_gl, assimilation_period_gl = switch_case(case_choice)
+subsampling_PIV_grid_factor_gl, nbPoints_x_gl, \
+ nbPoints_y_gl, assimilation_period_gl = switch_case(case_choice)
 
 
 color_mean_EV_withoutNoise = 'b'
@@ -448,14 +446,8 @@ f_info.write("\n  - Temporal parameters (Observations time step) :\n\n")
 f_info.write("    . Subsampling constant applied in the observed data : subsampling_PIV_grid_factor_gl=" + str(subsampling_PIV_grid_factor_gl) +
              "\n      ( -> 1 point selected every " + str(subsampling_PIV_grid_factor_gl) + " points)\n")
 f_info.write("\n  - Spatial parameters (Observations OffSet and Number):\n\n")
-f_info.write("    . X grid index OFFSET : x0_index_gl=" +
-             str(x0_index_gl) + "\n")
-f_info.write("    . Y grid index OFFSET : y0_index_gl=" +
-             str(y0_index_gl) + "\n")
-f_info.write("    . Number of points taken into account in X observed grid : nbPoints_x_gl=" + str(nbPoints_x_gl) +
-             " ( =?= (202-" + str(x0_index_gl) + ")/" + str(subsampling_PIV_grid_factor_gl) + " points)\n")
-f_info.write("    . Number of points taken into account in Y observed grid : nbPoints_y_gl=" + str(nbPoints_y_gl) +
-             " ( =?= (74-" + str(y0_index_gl) + ")/" + str(subsampling_PIV_grid_factor_gl) + " points)\n")
+f_info.write("    . Number of points taken into account in X observed grid : nbPoints_x_gl=" + str(nbPoints_x_gl))
+f_info.write("    . Number of points taken into account in Y observed grid : nbPoints_y_gl=" + str(nbPoints_y_gl)+ "\n")
 
 f_info.write("\n  - assimilation_period = " + str(assimilation_period_gl) + "\n")
 
@@ -594,15 +586,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         nbPoints_y = float('nan')
         subsampling_PIV_grid_factor = 1
     else:
-        x0_index = x0_index_gl
-        y0_index = y0_index_gl
         nbPoints_x = nbPoints_x_gl
         nbPoints_y = nbPoints_y_gl
         subsampling_PIV_grid_factor = subsampling_PIV_grid_factor_gl
       
     f_info.write("\nSub sampling conditions :\n")   
-    f_info.write("  - x0_index                    = " + str(x0_index) + "\n")
-    f_info.write("  - y0_index                    = " + str(y0_index) + "\n")
     f_info.write("  - nbPoints_x                  = " + str(nbPoints_x) + "\n")
     f_info.write("  - nbPoints_y                  = " + str(nbPoints_y) + "\n")
     f_info.write("  - subsampling_PIV_grid_factor = " +
@@ -1387,6 +1375,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         Hpiv_Topos = np.reshape(topos_new_coordinates, (int(
             topos_new_coordinates.shape[0]*topos_new_coordinates.shape[1]*topos_new_coordinates.shape[2]), topos_new_coordinates.shape[3]), order='F')
     
+        # Left Top observation point position 
+        x0_index, y0_index = Left_Top_PtObs( xObs, yObs, coordinates_x_PIV, coordinates_y_PIV ) 
         
         #%%  Define and apply mask in the observation
         '''
@@ -1469,14 +1459,14 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         Mask_final = np.concatenate((Mask_final, Mask_final))
         # Transform the data inside in boolean. 1->True and 0->False
         Mask_final_bool = Mask_final.astype(bool)
-    
-        print('\nThe points that will be observed (with MASK): ')
-        print('  The x coordinates : '+str(coordinates_x_PIV_with_MASK))
-        print('  The y coordinates : '+str(coordinates_y_PIV_with_MASK))
         
-        f_info.write('\nThe points that will be observed (with MASK): \n')
-        f_info.write('  The x coordinates : '+str(coordinates_x_PIV_with_MASK)+'\n')
-        f_info.write('  The y coordinates : '+str(coordinates_y_PIV_with_MASK)+'\n\n')
+        print('  The points that will be observed (with MASK) are : ')
+        print('    The x coordinates : '+str(coordinates_x_PIV_with_MASK))
+        print('    The y coordinates : '+str(coordinates_y_PIV_with_MASK))
+        
+        f_info.write('  The points that will be observed (with MASK) are: \n')
+        f_info.write('    The x coordinates : '+str(coordinates_x_PIV_with_MASK)+'\n')
+        f_info.write('    The y coordinates : '+str(coordinates_y_PIV_with_MASK)+'\n\n')
 
         # Plots for debug
         if plot_debug:
