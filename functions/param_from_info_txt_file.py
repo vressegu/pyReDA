@@ -149,7 +149,10 @@ def main_globalParam_from_info_txt_file ( param_file ):
     #
     # 11) beta_3 : parameter that controls the impact in the model noise -> beta_3 * pchol_cov_noises
     #     if beta_3=0, there is NO noise during simulation
-     
+    #
+    # 12) Left Top Obs observation point to cylinder center
+    #     (Cf. Left_Top_PtObs in switch_case_param.py)
+    
     if param_file.exists():
         f_param = open(param_file, 'r')               
         while True:
@@ -230,6 +233,14 @@ def main_globalParam_from_info_txt_file ( param_file ):
                 if re.search('beta_3', line):
                     if str(a[0]) != '#':
                         beta_3 = float(a[1])
+                # x left observation point
+                if re.search('xObs', line):
+                    if a[0] != '#':
+                        xObs = float(a[1])
+                # y top observation point
+                if re.search('yObs', line):
+                    if a[0] != '#':
+                        yObs = float(a[1])
 
     print("\nParameters defined in [run_file] :")       
     print(" - type_data_C=["+str(type_data_C)+"]")
@@ -254,12 +265,14 @@ def main_globalParam_from_info_txt_file ( param_file ):
     print("    (if =0, NO noise added to INIT condition)") 
     print(" - beta_3=["+str(beta_3)+"]")
     print("    (if =0, NO noise during simulation)") 
-    
+    print(" - xObs=["+str(xObs)+"] and yObs=["+str(yObs)+"]")
+    print('    (Left Top observation point)')
+        
     print('\n')
  
     return type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
     code_Assimilation, code_load_run, init_centred_on_ref, redlumcpp_code_version, PATH_openfoam_data, \
-    beta_2, beta_3
+    beta_2, beta_3, xObs, yObs
 
 ##################################################################################################
 # defining optional run parameters from [run_info.txt] file
