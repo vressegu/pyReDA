@@ -13,21 +13,31 @@ Created on Thu Dec 22 07:51:46 2022 : from original [main_from_existing_ROM.py] 
 #      Subsampling constant that will be applied in the observed data, 
 #      (i.e if 3 we will take 1 point in 3)
 
-#  2) nbPoints_x_gl :
+#  2) x0_index_gl :
+#      Parameter necessary to chose the grid that we will observe
+#      (i.e if 6 we will start the select the start of the observed grid 
+#       in the 6th x index, hence we will reduce the observed grid).
+
+#  3) nbPoints_x_gl :
 #      Number of points that we will take in account in the observed grid. 
 #      Therefore, with this two parameters we can select any possible subgrid 
 #      inside the original PIV/DNS grid to observe.
 #      Example : if nbPoints_x_gl=70, 
 #                then nbPoints_x <= (202 - x0_index) /subsampling_PIV_grid_factor
 
-#  3) nbPoints_y_gl :
+#  4) y0_index_gl :
+#      Parameter necessary to chose the grid that we will observe
+#      (i.e if 30 we will start the select the start of the observed grid 
+#       in the 30th y index, hence we will reduce the observed grid).
+
+#  5) nbPoints_y_gl :
 #      Number of points that we will take in account in the observed grid. 
 #      Therefore, with this two parameters we can select any possible subgrid 
 #      inside the original PIV/DNS grid to observe.
 #      Example : if nbPoints_y_gl=30, 
 #                then nbPoints_y <= (74 - y0_index) /subsampling_PIV_grid_factor
 
-#  4) assimilation_period :
+#  6) assimilation_period :
 #      Example : if  assimilation_period=float(5/10),
 #                then factor_of_PIV_time_subsampling_gl = int(5/10 / dt_PIV)
 
@@ -42,72 +52,117 @@ def switch_case(case_number):
   
   # default values :
   subsampling_PIV_grid_factor_gl = 3
+  x0_index_gl = 10 
   nbPoints_x_gl = 1
+  y0_index_gl = 10
   nbPoints_y_gl = 1 
   assimilation_period = float(5/10)
     
-  if case_number == 1 or \
-     case_number == 3 or \
-     case_number == 4 or \
-     case_number == 5 or \
-     case_number == 6 :
+  if case_number == 1:
     subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 10
     nbPoints_x_gl = 1
+    y0_index_gl = 10
     nbPoints_y_gl = 1
     assimilation_period = float(5/10)
     
   #if case_number == 7:
   if case_number == 2:
     subsampling_PIV_grid_factor_gl = 30
+    x0_index_gl = 10
     nbPoints_x_gl = 3
+    y0_index_gl = 10
     nbPoints_y_gl = 3
     assimilation_period = float(5/10)
     
   if case_number == 102:
     subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 10
     nbPoints_x_gl = 3
+    y0_index_gl = 10
     nbPoints_y_gl = 3
     assimilation_period = float(5)
     
-  #if case_number=10 = case_number=3:
+  #if case_number == 10:
+  if case_number == 3:
+    subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 10
+    nbPoints_x_gl = 1
+    y0_index_gl = 40
+    nbPoints_y_gl = 1
+    assimilation_period = float(5/10)
     
   if case_number == 103:
     subsampling_PIV_grid_factor_gl = 10
+    x0_index_gl = 10
     nbPoints_x_gl = 3
+    y0_index_gl = 10
     nbPoints_y_gl = 3
     assimilation_period = float(5/10)
     
-  #if case_number=8 = case_number=4
+  #if case_number == 8:
+  if case_number == 4:
+    subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 0
+    nbPoints_x_gl = 1
+    y0_index_gl = 0
+    nbPoints_y_gl = 1
+    assimilation_period = float(5/10)
     
   if case_number == 104:
     subsampling_PIV_grid_factor_gl = 10
+    x0_index_gl = 10
     nbPoints_x_gl = 3
+    y0_index_gl = 10
     nbPoints_y_gl = 3
     assimilation_period = float(5/20)
     
-  #if case_number=9 = case_number=5
+  #if case_number == 9:
+  if case_number == 5:
+    subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 200
+    nbPoints_x_gl = 1
+    y0_index_gl = 10
+    nbPoints_y_gl = 1
+    assimilation_period = float(5/10)
+    
+  if case_number == 6:
+    subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 10
+    nbPoints_x_gl = 1
+    y0_index_gl = 50
+    nbPoints_y_gl = 1
+    assimilation_period = float(5/10)
     
   if case_number == 105:
     subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 10
     nbPoints_x_gl = 10
+    y0_index_gl = 10
     nbPoints_y_gl = 10
     assimilation_period = float(5/10)
     
   if case_number == 11:
     subsampling_PIV_grid_factor_gl = 10
+    x0_index_gl = 10
     nbPoints_x_gl = 7
+    y0_index_gl = 10
     nbPoints_y_gl = 7
     assimilation_period = float(5/10)
     
   if case_number == "Case_Full":
     subsampling_PIV_grid_factor_gl = 3
+    x0_index_gl = 0
     nbPoints_x_gl = 67
+    y0_index_gl = 0
     nbPoints_y_gl = 24
     assimilation_period = float(5/10)
     
   if case_number == "Case_MegaFull":
     subsampling_PIV_grid_factor_gl = 1
+    x0_index_gl = 0
     nbPoints_x_gl = 202
+    y0_index_gl = 0
     nbPoints_y_gl = 74
     assimilation_period = float(5/10)
     
@@ -115,12 +170,14 @@ def switch_case(case_number):
    
   print("\nCase = "+str(case_number)+":\n") 
   print("  subsampling_PIV_grid_factor_gl="+str(subsampling_PIV_grid_factor_gl))
+  print("  x0_index_gl="+str(x0_index_gl))
   print("  nbPoints_x_gl="+str(nbPoints_x_gl))
+  print("  y0_index_gl="+str(y0_index_gl))
   print("  nbPoints_y_gl="+str(nbPoints_y_gl))
   print("  assimilation_period="+str(assimilation_period))
   print('\n')
  
-  return subsampling_PIV_grid_factor_gl, nbPoints_x_gl, nbPoints_y_gl, assimilation_period
+  return subsampling_PIV_grid_factor_gl, x0_index_gl,nbPoints_x_gl, y0_index_gl, nbPoints_y_gl, assimilation_period
 
 ##################################################################################################
 # defining default param like in matlab parameter file
@@ -187,30 +244,3 @@ def default_param ( code ):
   # param_dict['visosity'] = 0.0033333333333333335
   
   return param_dict.copy()
-
-##################################################################################################
-#  (left,top) observation point position just below (xObs,yObs)*Dcyl (with (0,0)=cylinder center)
-def Left_Top_PtObs( xObs, yObs, coordinates_x_PIV, coordinates_y_PIV ):
-    x0_index = 0
-    dx_min = xObs
-    y0_index = 0
-    dy_max = yObs
-        
-    dx = 0.
-    while dx<dx_min:
-        x0_index=x0_index+1
-        dx=coordinates_x_PIV[x0_index]
-        dx=np.sqrt(dx*dx) 
-    x0_index=x0_index-1
-    
-    dy = 1000.
-    while dy>dy_max:
-        y0_index=y0_index+1
-        dy=coordinates_y_PIV[y0_index]
-        dy=np.sqrt(dy*dy)
-    y0_index=y0_index
-    
-    print("Indexes of Left Top OBS point near P("+str(xObs)+","+str(yObs)+") are ("+str(x0_index)+","+str(y0_index)+")")
-    print("   (You can change the value of xObs and yObs in [run_info.txt] to choose another point)\n")
-  
-    return x0_index, y0_index
