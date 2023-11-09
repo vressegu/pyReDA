@@ -203,6 +203,102 @@ def convert_Cmat_to_python_cropZone(PARAM):
     return MX_PIV_all, MX_PIV, index_XY_PIV, coordinates_x_PIV, coordinates_y_PIV
 
 ##################################################################################################
+# file format : "*.npy" or "*.txt"
+def define_file_format (bool_npy): 
+    if bool_npy:
+        file_format = "npy"
+    else:
+        file_format = "txt"
+    return file_format
+
+##################################################################################################
+# defining folder result
+def define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
+ 
+    code_Assimilation = PARAM.code_Assimilation
+    adv_corrected = PARAM.adv_corrected
+    nb_modes = PARAM.nb_modes
+    PATH_ROM = PARAM.PATH_ROM
+    dt_run = PARAM.dt_DNS / n_simu
+    
+    # file format : "*.npy" or "*.txt"
+    redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0])) 
+    bool_npy = recentROM( redlumcpp_code_version, 3, 1 )
+    file_format = define_file_format (bool_npy)
+
+    pathCentered = ""
+    if bool_npy:
+        pathCentered = "_centered"
+        
+    # Cf. parameter [typeResolution] in main/redlum-ithaca/src/IthacaFVResolution.C
+    pathTypeResolution = ""
+    if (bool_PFD==True):
+        pathTypeResolution = '_fullOrderPressure'
+    elif (bool_PFD==False):
+        pathTypeResolution = '_neglectedPressure'
+    elif (bool_PFD==2):
+        pathTypeResolution = '_reducedOrderPressure'
+    else:
+        print('ERROR: unknown case: bool_PFD =', str(bool_PFD))
+        return 0
+       
+    pathHilbertSpace = ""
+    if not (PARAM.HilbertSpace == "L2"):
+        pathHilbertSpace = '_' + PARAM.HilbertSpace
+    
+    pathfreqBC = ""
+    if (bool_PFD==2):
+        pathfreqBC = str(PARAM.freqBC)
+    
+    pathModif = ""
+    if (code_Assimilation):
+        pathModif = "DA_"
+     
+    bool_symDiff = False # must be redefined 
+    if (bool_symDiff):
+        pathModif += "" # must be redefined 
+        
+    if (not adv_corrected):
+        pathModif += "noAdvC_"
+        
+    pathDEIM = ""
+    if (bool_DEIM):
+        pathDEIM = "DEIM"
+        bool_interpFieldCenteredOrNot=False
+        if (bool_interpFieldCenteredOrNot):
+            pathDEIM += "c"
+            bool_useHypRedSto=False
+            if (bool_useHypRedSto):
+                pathDEIM += "Sto"        
+        if (inflatNut):
+            pathDEIM += "Inflat"
+        DEIMInterpolatedField=""
+        name_nMagicPoints=""
+        pathDEIM += "_" + DEIMInterpolatedField+ "_m" + name_nMagicPoints + "_"
+        
+    # Cf. parameter [ROMTemporalScheme] in main/redlum-ithaca/src/IthacaFVResolution.C
+    pathTemporalScheme = ""
+    if (PARAM.temporalScheme == "euler"):
+        pathTemporalScheme = ""
+    elif (PARAM.temporalScheme == "adams-bashforth"):
+        pathTemporalScheme = "AB"
+    else:
+        print("unknown temporal scheme")
+        sys.exit()
+        
+    file = 'Reduced_coeff_'+str(nb_modes)+'_'
+    file += pathModif
+    file += pathDEIM
+    file += pathTemporalScheme
+    file += str(dt_run)+'_'+str(int(n_particles))   
+    file += pathTypeResolution    
+    file += pathHilbertSpace     
+    file += pathfreqBC       
+    file += pathCentered
+    
+    return file, file_format
+
+##################################################################################################
 # defining lambda
 def load_lambda(PARAM):
     
@@ -211,19 +307,10 @@ def load_lambda(PARAM):
     t0_learningBase = PARAM.t0_learningBase
     t1_learningBase = PARAM.t1_learningBase
     dt_DNS = PARAM.dt_DNS
+    
     redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0]))
-    # bool_npy = (len(redlumcpp_code_version)>=8) 
-    # if bool_npy:
-    #     bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
-    #                & (redlumcpp_code_version[7].isdigit()) )
-    # if bool_npy:
-    #     bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
-    #                  & (int(redlumcpp_code_version[7])>=1) )
     bool_npy = recentROM( redlumcpp_code_version, 3, 1 )
-    if bool_npy:
-        file_format = "npy"
-    else:
-        file_format = "txt"
+    file_format = define_file_format (bool_npy)
 
     lambda_values = np.zeros(nb_modes)
     print("data=f(C++) => lambda=f(ITHACAoutput/temporalModes_*modes")
@@ -282,18 +369,8 @@ def load_bt_tot(PARAM):
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
     redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0]))
-    # bool_npy = (len(redlumcpp_code_version)>=8) 
-    # if bool_npy:
-    #     bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
-    #                & (redlumcpp_code_version[7].isdigit()) )
-    # if bool_npy:
-    #     bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
-    #                  & (int(redlumcpp_code_version[7])>=1) )
     bool_npy = recentROM( redlumcpp_code_version, 3, 1 )    
-    if bool_npy:
-        file_format = "npy"
-    else:
-        file_format = "txt"
+    file_format = define_file_format (bool_npy)
 
     bt_tot = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1, nb_modes))
     truncated_error2 = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1,1))
@@ -334,60 +411,21 @@ def load_bt_tot(PARAM):
 
 ##################################################################################################
 # loading error
-def load_errors(PARAM, n_simu, n_particles, bool_PFD):
+def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
 
-
-    nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
     print(PARAM.PATH_ROM)
     t0_testBase = PARAM.t0_testBase
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
-    dt_run = PARAM.dt_DNS / n_simu
-    redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0])) 
-    bool_npy = recentROM( redlumcpp_code_version, 3, 1 )
-    if bool_npy:
-        file_format = "npy"
-    else:
-        file_format = "txt"
-
-    bias = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1,1))
     
-    # bt_temp = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1, nb_modes))
-    # bt_MCMC = np.tile(bt_temp, (n_particles, 1, 1))
-    # bt_MCMC= np.transpose(bt_MCMC, (1, 2, 0))  
-    # # print('bt_MCMC:'+str(bt_MCMC.shape))
-    
-
-    if (PARAM.temporalScheme == "euler"):
-        pathtemporalScheme = ""
-    elif (PARAM.temporalScheme == "adams-bashforth"):
-        pathtemporalScheme = "AB"
-    else:
-        print("unknown temporal scheme")
-        sys.exit()
-    file = 'Reduced_coeff_'+str(nb_modes)+'_'+pathtemporalScheme+str(dt_run)+ \
-          '_'+str(int(n_particles))
-    if (bool_PFD==True):
-        file = file + '_fullOrderPressure'
-    elif (bool_PFD==False):
-        file = file + '_neglectedPressure'
-    elif (bool_PFD==2):
-        file = file + '_reducedOrderPressure'
-    else:
-        print('ERROR: unknown case: bool_PFD =', str(bool_PFD))
-        return 0
-    if not (PARAM.HilbertSpace == "L2"):
-        file = file + '_' + PARAM.HilbertSpace
-    if (bool_PFD == 2):
-        file = file + str(PARAM.freqBC)
-    if bool_npy:
-        file = file + '_centered'
-    # file = file + '/approx_temporalModes_U_'
-    folder = file
+    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)  
+            
     filebias = folder + '/bias_temporalModes_U.npy'
     filermse = folder + '/rmse_temporalModes_U.npy'
     fileminDist = folder + '/minDist_temporalModes_U.npy'
+            
+    bias = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1,1))
     
     if (file_format=="npy"):
         bt_temp_file = PATH_ROM.joinpath(Path(filebias))
@@ -406,7 +444,7 @@ def load_errors(PARAM, n_simu, n_particles, bool_PFD):
 
 ##################################################################################################
 # defining bt_MCMC
-def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
+def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
     
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
@@ -414,51 +452,16 @@ def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD):
     t0_testBase = PARAM.t0_testBase
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
-    dt_run = PARAM.dt_DNS / n_simu
-    redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0])) 
-    # bool_npy = (len(redlumcpp_code_version)>=8)     
-    # if bool_npy:
-    #     bool_npy = ( (redlumcpp_code_version[5].isdigit()) 
-    #                & (redlumcpp_code_version[7].isdigit()) )
-    # if bool_npy:
-    #     bool_npy = ( (int(redlumcpp_code_version[5])>=3) 
-    #                  & (int(redlumcpp_code_version[7])>=1) )
-    bool_npy = recentROM( redlumcpp_code_version, 3, 1 )
-    if bool_npy:
-        file_format = "npy"
-    else:
-        file_format = "txt"
+    
+    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)  
+
+    file = folder + '/approx_temporalModes_U_'
         
     bt_temp = np.zeros((int((t1_testBase-t0_testBase)/dt_DNS)+1, nb_modes))
     bt_MCMC = np.tile(bt_temp, (n_particles, 1, 1))
     bt_MCMC= np.transpose(bt_MCMC, (1, 2, 0))  
     # print('bt_MCMC:'+str(bt_MCMC.shape))
-
-    if (PARAM.temporalScheme == "euler"):
-        pathtemporalScheme = ""
-    elif (PARAM.temporalScheme == "adams-bashforth"):
-        pathtemporalScheme = "AB"
-    else:
-        print("unknown temporal scheme")
-        sys.exit()
-    file = 'Reduced_coeff_'+str(nb_modes)+'_'+pathtemporalScheme+str(dt_run)+ \
-          '_'+str(int(n_particles))
-    if (bool_PFD==True):
-        file = file + '_fullOrderPressure'
-    elif (bool_PFD==False):
-        file = file + '_neglectedPressure'
-    elif (bool_PFD==2):
-        file = file + '_reducedOrderPressure'
-    else:
-        print('ERROR: unknown case: bool_PFD =', str(bool_PFD))
-        return 0
-    if not (PARAM.HilbertSpace == "L2"):
-        file = file + '_' + PARAM.HilbertSpace
-    if (bool_PFD == 2):
-        file = file + str(PARAM.freqBC)
-    if bool_npy:
-        file = file + '_centered'
-    file = file + '/approx_temporalModes_U_'
+               
     for k in range(n_particles): 
         if (file_format=="npy"):
             bt_temp_file = PATH_ROM.joinpath(Path(file +str(k)+'.npy'))

@@ -121,6 +121,9 @@ type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   code_Assimilation, code_load_run, init_centred_on_ref, \
   redlumcpp_code_version, PATH_openfoam_data, \
   beta_2, beta_3, xObs, yObs = main_globalParam_from_info_txt_file(param_file)
+  
+tmp_string = type_data_C[0:2]
+bool_DEIM = (tmp_string == "DNS") # False if DNS, True if LES
 
 if code_load_run:
     # if code_Assimilation:
@@ -676,7 +679,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                                           't0_testBase', 't1_testBase', 
                                           'temporalScheme',
                                           'HilbertSpace','freqBC',
-                                          'PATH_input', 'PATH_DATA', 'PATH_ROM', 'PATH_ROM_PIV']) 
+                                          'PATH_input', 'PATH_DATA', 'PATH_ROM', 'PATH_ROM_PIV',
+                                          'code_Assimilation', 'adv_corrected']) 
             
             print("\n\nDATA or ROM =f(C++) => param")
             
@@ -705,7 +709,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             
             param_file = PATH_ROM.joinpath(Path('../system/ITHACAdict'))
             print("ITHACADict=", str(param_file)+"\n")
-            t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu = param_from_ITHACADict_file ( param_file )
+            t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut = param_from_ITHACADict_file ( param_file )
+            if not bool_DEIM:
+                inflatNut=0
             
             # update param_ref
             param_ref['n_simu'] = n_simu
@@ -728,7 +734,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                          t0_testBase, t1_testBase,
                          temporalScheme,
                          HilbertSpace,freqBC,
-                         PATH_input, PATH_DATA, PATH_ROM, PATH_ROM_PIV)
+                         PATH_input, PATH_DATA, PATH_ROM, PATH_ROM_PIV, 
+                         code_Assimilation, adv_corrected)
                
         if code_load_run:
             SECONDS_OF_SIMU = t1_testBase - t0_testBase
@@ -1206,8 +1213,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
                    bt_MCMC = load_bt_MCMC( \
-                             PARAM, n_simu, n_particles, bool_PFD)
-                   bias, rmse, minDist = load_errors(PARAM, n_simu, n_particles, bool_PFD)
+                             PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)
+                   bias, rmse, minDist = load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)
 
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
