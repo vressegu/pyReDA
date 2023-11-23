@@ -27,13 +27,15 @@ from convert_mat_to_python_ILCpchol import convert_mat_to_python_ILCpchol
 from convert_Cmat_to_python_ILCpchol import convert_Cmat_to_python_ILCpchol
 
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_cropZone
-from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_lambda
-from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_bt_tot
-from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_bt_MCMC
+from convert_Cmat_to_python_Topos_FakePIV import load_lambda
+from convert_Cmat_to_python_Topos_FakePIV import load_bt_tot
+from convert_Cmat_to_python_Topos_FakePIV import load_bt_MCMC
+from convert_Cmat_to_python_Topos_FakePIV import load_errors
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_Topos
 from convert_Cmat_to_python_Topos_FakePIV import convert_Cmat_to_python_FakePIV
 
 from switch_case_param import switch_case
+from switch_case_param import Left_Top_PtObs
 from switch_case_param import default_param
 
 from param_from_info_txt_file import main_globalParam_from_info_txt_file
@@ -105,6 +107,10 @@ param_ref = {}
 # beta_3 : the parameter that controls the impact in the model noise -> beta_3 * pchol_cov_noises
 #          if beta_3=0, there is NO noise during simulation
 #   example : beta_3 = 1.
+
+# xObs,yObs : coordinates of first Obs (l)
+#   example : yObs=1.5, to have (y0-y0_cyl)/Dcyl<1.5)
+# 
     
 MORAANE_PATH = Path(__file__).parents[2]
 
@@ -114,7 +120,10 @@ print("     Cf. run_file [", str(param_file)+"]")
 type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   code_Assimilation, code_load_run, init_centred_on_ref, \
   redlumcpp_code_version, PATH_openfoam_data, \
-  beta_2, beta_3 = main_globalParam_from_info_txt_file(param_file)
+  beta_2, beta_3, xObs, yObs = main_globalParam_from_info_txt_file(param_file)
+  
+tmp_string = type_data_C[0:2]
+bool_DEIM = (tmp_string == "DNS") # False if DNS, True if LES
 
 if code_load_run:
     # if code_Assimilation:
@@ -220,34 +229,28 @@ mask_obs = True      # True            # Activate spatial mask in the observed d
 #  1) subsampling_PIV_grid_factor_gl :
 #      Subsampling constant that will be applied in the observed data, 
 #      (i.e if 3 we will take 1 point in 3)
-#  2) x0_index_gl :
-#      Parameter necessary to chose the grid that we will observe
-#      (i.e if 6 we will start the select the start of the observed grid 
-#       in the 6th x index, hence we will reduce the observed grid).
-#  3) nbPoints_x_gl :
+#
+#  2) nbPoints_x_gl :
 #      Number of points that we will take in account in the observed grid. 
 #      Therefore, with this two parameters we can select any possible subgrid 
 #      inside the original PIV/DNS grid to observe.
 #      Example : if nbPoints_x_gl=70, 
 #                then nbPoints_x <= (202 - x0_index) /subsampling_PIV_grid_factor
-#  4) y0_index_gl :
-#      Parameter necessary to chose the grid that we will observe
-#      (i.e if 30 we will start the select the start of the observed grid 
-#       in the 30th y index, hence we will reduce the observed grid).
-#  5) nbPoints_y_gl :
+#  3) nbPoints_y_gl :
 #      Number of points that we will take in account in the observed grid. 
 #      Therefore, with this two parameters we can select any possible subgrid 
 #      inside the original PIV/DNS grid to observe.
 #      Example : if nbPoints_y_gl=30, 
 #                then nbPoints_y <= (74 - y0_index) /subsampling_PIV_grid_factor
-#  6) assimilation_period_gl :
+#  4) assimilation_period_gl :
 #      Example : if  assimilation_period=float(5/10),
 #                then factor_of_PIV_time_subsampling_gl = int(5/10 / dt_PIV)
 
 case_choice = 1
+#case_choice = 2
 #case_choice = "Case_Full"
-subsampling_PIV_grid_factor_gl, x0_index_gl, nbPoints_x_gl, \
- y0_index_gl, nbPoints_y_gl, assimilation_period_gl = switch_case(case_choice)
+subsampling_PIV_grid_factor_gl, nbPoints_x_gl, \
+ nbPoints_y_gl, assimilation_period_gl = switch_case(case_choice)
 
 
 color_mean_EV_withoutNoise = 'b'
@@ -272,8 +275,11 @@ sys.path.insert(0, str(path_functions))
 #from scipy import sparse as svds
 
 # writting INFO file
-
-file_info = Path(MORAANE_PATH).joinpath('3rdresult').joinpath('test.info')
+PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
+if not os.path.isdir(PATH_output):
+    os.mkdir(PATH_output)
+file_info = PATH_output.joinpath('test.info')
+open(file_info, mode='w').close()
 
 # print("\n---> Cf. INFO file = ", str(file_info), "------\n" ) 
 
@@ -443,14 +449,8 @@ f_info.write("\n  - Temporal parameters (Observations time step) :\n\n")
 f_info.write("    . Subsampling constant applied in the observed data : subsampling_PIV_grid_factor_gl=" + str(subsampling_PIV_grid_factor_gl) +
              "\n      ( -> 1 point selected every " + str(subsampling_PIV_grid_factor_gl) + " points)\n")
 f_info.write("\n  - Spatial parameters (Observations OffSet and Number):\n\n")
-f_info.write("    . X grid index OFFSET : x0_index_gl=" +
-             str(x0_index_gl) + "\n")
-f_info.write("    . Y grid index OFFSET : y0_index_gl=" +
-             str(y0_index_gl) + "\n")
-f_info.write("    . Number of points taken into account in X observed grid : nbPoints_x_gl=" + str(nbPoints_x_gl) +
-             " ( =?= (202-" + str(x0_index_gl) + ")/" + str(subsampling_PIV_grid_factor_gl) + " points)\n")
-f_info.write("    . Number of points taken into account in Y observed grid : nbPoints_y_gl=" + str(nbPoints_y_gl) +
-             " ( =?= (74-" + str(y0_index_gl) + ")/" + str(subsampling_PIV_grid_factor_gl) + " points)\n")
+f_info.write("    . Number of points taken into account in X observed grid : nbPoints_x_gl=" + str(nbPoints_x_gl))
+f_info.write("    . Number of points taken into account in Y observed grid : nbPoints_y_gl=" + str(nbPoints_y_gl)+ "\n")
 
 f_info.write("\n  - assimilation_period = " + str(assimilation_period_gl) + "\n")
 
@@ -468,7 +468,9 @@ f_info.close()
 
 def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                            no_subampl_in_forecast, reconstruction,
-                           adv_corrected, modal_dt, n_particles, test_fct, svd_pchol,
+                           adv_corrected, modal_dt, n_particles, 
+                           temporalScheme,HilbertSpace,freqBC,
+                           test_fct, svd_pchol,
                            stochastic_integration,
                            estim_rmv_fv, eq_proj_div_free,
                            thrDtCorrect,
@@ -476,7 +478,12 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                            choice_n_subsample, EV,
                            nb_mutation_steps,
                            SECONDS_OF_SIMU):  # nb_modes,threshold,type_data,nb_period_test,no_subampl_in_forecast,reconstruction,adv_corrected,modal_dt):
-    
+
+    if not code_load_run:
+        if ( temporalScheme == "adams-bashforth" ):
+                print('ERROR: this temporal scheme is not coded yet')
+                sys.exit()
+   
     # learning basis
     if code_DATA_from_matlab == False:
         no_subampl_in_forecast = True
@@ -504,6 +511,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write("  - no_subampl_in_forecast = " +
                  str(no_subampl_in_forecast) + "\n")
     f_info.write("  - n_particle             = " + str(n_particles) + "\n")
+    f_info.write("  - temporalScheme             = " + str(temporalScheme) + "\n")
+    f_info.write("  - HilbertSpace             = " + str(HilbertSpace) + "\n")
+    f_info.write("  - freqBC             = " + str(freqBC) + "\n")
     f_info.write("  - test_fct               = " + str(test_fct) + "\n")
     f_info.write("  - svd_pchol              = " + str(svd_pchol) + "\n")
     f_info.write("  - stochastic_integration = " +
@@ -568,23 +578,22 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write(str("\n"))   
 
     param_ref['N_particules'] = n_particles # Number of particles to select  
-        
-    if not mask_obs:   # If we must select a smaller grid inside the observed grid. 
+    param_ref['temporalScheme'] = temporalScheme 
+    param_ref['HilbertSpace'] = HilbertSpace #Path for the results with a chosen Hilbert Space
+    param_ref['freqBC'] = freqBC
+
+    if not mask_obs:   # If we must select a smaller grid inside the observed grid.
         x0_index = 1.
         y0_index = 1.
         nbPoints_x = float('nan')
         nbPoints_y = float('nan')
         subsampling_PIV_grid_factor = 1
     else:
-        x0_index = x0_index_gl
-        y0_index = y0_index_gl
         nbPoints_x = nbPoints_x_gl
         nbPoints_y = nbPoints_y_gl
         subsampling_PIV_grid_factor = subsampling_PIV_grid_factor_gl
       
     f_info.write("\nSub sampling conditions :\n")   
-    f_info.write("  - x0_index                    = " + str(x0_index) + "\n")
-    f_info.write("  - y0_index                    = " + str(y0_index) + "\n")
     f_info.write("  - nbPoints_x                  = " + str(nbPoints_x) + "\n")
     f_info.write("  - nbPoints_y                  = " + str(nbPoints_y) + "\n")
     f_info.write("  - subsampling_PIV_grid_factor = " +
@@ -592,9 +601,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write(str("\n"))
     
     ###### default values ####################
-    n_simu = 100 # Time step decreasing factor for ROM time integration
-    # update param_ref
-    param_ref['n_simu'] = n_simu
+    # n_simu = 100 # Time step decreasing factor for ROM time integration
+    # # update param_ref
+    # param_ref['n_simu'] = n_simu
     ########################################
 
     switcher = {
@@ -606,8 +615,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write("\nReynolds Number :\n")   
     f_info.write("  - Re                          = " + str(Re) + "\n")
     f_info.write(str("\n"))   
-
-    PATH_output = Path(MORAANE_PATH).joinpath('3rdresult')
 
     if assimilate == 'real_data':
         switcher = {
@@ -670,7 +677,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                                           'dt_DNS', 't0_DNS', 't1_DNS',
                                           't0_learningBase', 't1_learningBase', 
                                           't0_testBase', 't1_testBase', 
-                                          'PATH_input', 'PATH_DATA', 'PATH_ROM', 'PATH_ROM_PIV']) 
+                                          'temporalScheme',
+                                          'HilbertSpace','freqBC',
+                                          'PATH_input', 'PATH_DATA', 'PATH_ROM', 'PATH_ROM_PIV',
+                                          'code_Assimilation', 'adv_corrected']) 
             
             print("\n\nDATA or ROM =f(C++) => param")
             
@@ -693,9 +703,15 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             print("controlDict=", str(param_file)+"\n")
             dt_DNS, t0_DNS, t1_DNS = param_from_controlDict_file ( param_file )
             
+            if code_Assimilation :
+                if assimilate == 'fake_real_data':
+                    dt_PIV = dt_DNS
+            
             param_file = PATH_ROM.joinpath(Path('../system/ITHACAdict'))
             print("ITHACADict=", str(param_file)+"\n")
-            t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu = param_from_ITHACADict_file ( param_file )
+            t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut = param_from_ITHACADict_file ( param_file )
+            if not bool_DEIM:
+                inflatNut=0
             
             # update param_ref
             param_ref['n_simu'] = n_simu
@@ -716,7 +732,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                          dt_DNS, t0_DNS, t1_DNS,
                          t0_learningBase, t1_learningBase,
                          t0_testBase, t1_testBase,
-                         PATH_input, PATH_DATA, PATH_ROM, PATH_ROM_PIV)
+                         temporalScheme,
+                         HilbertSpace,freqBC,
+                         PATH_input, PATH_DATA, PATH_ROM, PATH_ROM_PIV, 
+                         code_Assimilation, adv_corrected)
                
         if code_load_run:
             SECONDS_OF_SIMU = t1_testBase - t0_testBase
@@ -933,6 +952,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     param['folder_results'] = param_ref['folder_results']
     param['N_particules'] = param_ref['N_particules']
+    param['temporalScheme'] = param_ref['temporalScheme']
+    param['HilbertSpace'] = param_ref['HilbertSpace']
+    param['freqBC'] = param_ref['freqBC']
     n_simu = param_ref['n_simu']
 
     print("\nOther default parameters :")
@@ -950,8 +972,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     # Cf. /media/laurence.wallian/WD_Ressegui/Boulot/RedLUM/RedLum_from_OpenFoam/RedLum_D1_Lz1pi_Re300/ROMDNS/system/ITHACAdict
     # if not code_DATA_from_matlab:
     if not code_ROM_from_matlab:
-        lambda_values = convert_Cmat_to_python_lambda(PARAM)
-        print("\nCf. pyReDA/functions/convert_Cmat_to_python_lambda.py]\n\n")
+        lambda_values = load_lambda(PARAM)
+        print("\nCf. pyReDA/functions/load_lambda.py]\n\n")
         f_info.write("  - Lambda values (Re=" + str(Re)+") : \n    " +
                      os.path.join(folder_results, 'temporalModes_'+str(nb_modes)+'modes') + "/U_mat.txt\n\n")
         f_info.write(
@@ -1033,7 +1055,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
 
     #%% Folder to save data assimilation plot results
     plt.close('all')
-    file_plots = '3rdresult/'
+    file_plots = ''
     if code_ROM_from_matlab and code_DATA_from_matlab:
         file_plots = file_plots + type_data
     else:
@@ -1053,6 +1075,14 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                      + '/' + redlumcpp_code_version + '/'
         if not adv_corrected:
             file_plots = file_plots + '_no_correct_drift'
+    if not code_ROM_from_matlab :
+        if not (HilbertSpace == "L2"):
+            file_plots = file_plots + '_' + HilbertSpace
+        if (bool_PFD == 1):
+            file_plots = file_plots + '-fullOrderP'
+        elif (bool_PFD == 2):
+            file_plots = file_plots + str(freqBC)
+            file_plots = file_plots + '-redOrderP'
     else:
         file_plots = file_plots + '_' + choice_n_subsample 
         if choice_n_subsample == 'auto_shanon':
@@ -1093,6 +1123,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         file_plots = file_plots + 'initOnRef_'
     file_plots = file_plots + 'beta_2_' + str(int(beta_2))
     file_plots = file_plots + '_nSimu_' + str(int(n_simu))
+    if (temporalScheme == "adams-bashforth"):
+        file_plots = file_plots + '_AB'
     file_plots = file_plots + '_nMut_' + str(int(nb_mutation_steps))
     file_plots = file_plots + '_nPcl_' + str(int(n_particles))
     if EV_withoutNoise:
@@ -1100,7 +1132,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     if LeastSquare:
         file_plots = file_plots + '_LS'
     
-    file_plots_res = os.path.join(MORAANE_PATH, file_plots)
+    file_plots_res = Path(PATH_output).joinpath(file_plots)
     
     if not os.path.exists(file_plots_res):
         os.makedirs(file_plots_res)
@@ -1173,16 +1205,17 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             if not code_DATA_from_matlab:
                # bt_tot = ITHACAoutput/temporalModesSimulation_*modes
                # truncated_error=0
-               truncated_error2, bt_tot = convert_Cmat_to_python_bt_tot(PARAM)
+               truncated_error2, bt_tot = load_bt_tot(PARAM)
                
                f_info.write("  - bt_tot (Re=" + str(Re)+") : \n    " +
                             os.path.join(folder_results, 'temporalModesSimulation_'+str(nb_modes)+'modes') + "/U_mat.txt\n\n")
                f_info.write(
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
-                   bt_MCMC = convert_Cmat_to_python_bt_MCMC( \
-                             PARAM, n_simu, n_particles, bool_PFD)
-                
+                   bt_MCMC = load_bt_MCMC( \
+                             PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)
+                   bias, rmse, minDist = load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)
+
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
             param['decor_by_subsampl']['n_subsampl_decor']
@@ -1349,6 +1382,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         Hpiv_Topos = np.reshape(topos_new_coordinates, (int(
             topos_new_coordinates.shape[0]*topos_new_coordinates.shape[1]*topos_new_coordinates.shape[2]), topos_new_coordinates.shape[3]), order='F')
     
+        # Left Top observation point position 
+        x0_index, y0_index = Left_Top_PtObs( xObs, yObs, coordinates_x_PIV, coordinates_y_PIV ) 
         
         #%%  Define and apply mask in the observation
         '''
@@ -1431,14 +1466,14 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         Mask_final = np.concatenate((Mask_final, Mask_final))
         # Transform the data inside in boolean. 1->True and 0->False
         Mask_final_bool = Mask_final.astype(bool)
-    
-        print('\nThe points that will be observed (with MASK): ')
-        print('  The x coordinates : '+str(coordinates_x_PIV_with_MASK))
-        print('  The y coordinates : '+str(coordinates_y_PIV_with_MASK))
         
-        f_info.write('\nThe points that will be observed (with MASK): \n')
-        f_info.write('  The x coordinates : '+str(coordinates_x_PIV_with_MASK)+'\n')
-        f_info.write('  The y coordinates : '+str(coordinates_y_PIV_with_MASK)+'\n\n')
+        print('  The points that will be observed (with MASK) are : ')
+        print('    The x coordinates : '+str(coordinates_x_PIV_with_MASK))
+        print('    The y coordinates : '+str(coordinates_y_PIV_with_MASK))
+        
+        f_info.write('  The points that will be observed (with MASK) are: \n')
+        f_info.write('    The x coordinates : '+str(coordinates_x_PIV_with_MASK)+'\n')
+        f_info.write('    The y coordinates : '+str(coordinates_y_PIV_with_MASK)+'\n\n')
 
         # Plots for debug
         if plot_debug:
@@ -2520,6 +2555,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         time = np.arange(bt_MCMC.shape[0])*float(dt_DNS)
         n_simu=1
         
+    particles_1pcl = bt_MCMC[:, :,0]
     particles_mean = np.mean(bt_MCMC[:, :, :], axis=2)
     particles_median = np.median(bt_MCMC[:, :, :], axis=2)
     quantiles = np.quantile(bt_MCMC[:, :, :], q=[0.025, 0.975], axis=2)
@@ -2553,6 +2589,8 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                 plt.plot(time_bt_tot, bt_tot[:, index], 'k--',
                          label='True state', linewidth=linewidth_)
 
+        line2 = plt.plot(time, particles_1pcl[:, index], '-', color='m',
+                        label='Red LUM first particle', linewidth=linewidth_)
         line1 = plt.plot(time, particles_mean[:, index], '-', color=color_mean_LU,
                          label='Red LUM particles mean', linewidth=linewidth_)
      
@@ -2661,93 +2699,64 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_txt.write(str(particles_mean[-1][-1])+"\n")
     f_txt.close()  
     
+    param['truncated_error2'] = param['truncated_error2'][0:(
+        int(param['N_test']/n_simu)+1)]
+    time = np.array(time)
+    
+    N_ = particles_mean.shape[0]
+            
+    n_simu = 1
+    time = time[:N_:n_simu]
+    index_time = (time <= time_bt_tot[-1])
+    N_tot = np.sum(index_time)
+    N_ = N_tot
+    param['N_tot'] = N_tot
+    param['N_test'] = N_tot-1
+    
+    struct_bt_MCMC = {}
+
+    struct_bt_MCMC['mean'] = particles_mean\
+        .copy()[:N_:n_simu]
+    struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
+        .copy()[:N_:n_simu]
+        
+    if code_load_run and not code_ROM_from_matlab:
+        struct_bt_MCMC['bias'] = bias.copy()[:N_:n_simu]
+        struct_bt_MCMC['rmse'] = rmse.copy()[:N_:n_simu]
+        struct_bt_MCMC['minDist'] = minDist.copy()[:N_:n_simu]
+        
+    time = time[:N_:n_simu]
+        
+   
+    bt_tot_interp = np.zeros(struct_bt_MCMC['mean'].shape)
+    for index in range(bt_tot.shape[1]):
+        interpolant_bt_tot_k = interpolate.interp1d(
+            time_bt_tot, bt_tot[:, index])
+        bt_tot_interp[:, index] = interpolant_bt_tot_k(time)
+
+    # if code_DATA_from_matlab:
+    interpolant_error = interpolate.interp1d(
+        time_bt_tot, param['truncated_error2'][:, 0])
+    param['truncated_error2'] = interpolant_error(time)
+    param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
+    param['lambda'] = lambda_values
+    param['nb_modes']=nb_modes
+    param['code_DATA_from_matlab'] = code_DATA_from_matlab
+    param['code_load_run'] = code_load_run
+    
     if EV:
-        param['truncated_error2'] = param['truncated_error2'][0:(
-            int(param['N_test']/n_simu)+1)]
-        time = np.array(time)
-
-        n_simu = 1
-        N_ = particles_mean.shape[0]
-        time = time[:N_:n_simu]
-        index_time = (time <= time_bt_tot[-1])
-        N_tot = np.sum(index_time)
-        N_ = N_tot
-        param['N_tot'] = N_tot
-        param['N_test'] = N_tot-1
-
-        struct_bt_MCMC = {}
-        struct_bt_MCMC['mean'] = particles_mean\
-            .copy()[:N_:n_simu]
-        struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
-            .copy()[:N_:n_simu]
         struct_bt_MEV_noise = {}
         struct_bt_MEV_noise['mean'] = particles_mean_EV\
             .copy()[:N_:n_simu]
         struct_bt_MEV_noise['var'] = np.var(bt_forecast_EV[:, :, :], axis=2)\
             .copy()[:N_:n_simu]
-        time = time[:N_:n_simu]
-                
-        bt_tot_interp = np.zeros(struct_bt_MCMC['mean'].shape)
-        for index in range(bt_tot.shape[1]):
-            interpolant_bt_tot_k = interpolate.interp1d(
-                time_bt_tot, bt_tot[:, index])
-            bt_tot_interp[:, index] = interpolant_bt_tot_k(time)
-        interpolant_error = interpolate.interp1d(
-            time_bt_tot, param['truncated_error2'][:, 0])
-        param['truncated_error2'] = interpolant_error(time)
-        param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
 
         plot_bt_dB_MCMC_varying_error_DA(file_plots_res,
                                          param, bt_tot_interp, struct_bt_MEV_noise, struct_bt_MCMC, time)
 
 # diff using similar function as [plot_bt_dB_MCMC_varying_error_DA] without EV
 # => Cf. [plot_bt_dB_MCMC_varying_error_DA_NoEV]
-    if not EV:  # NULL value for [EV] part!              
-        param['truncated_error2'] = param['truncated_error2'][0:(
-            int(param['N_test']/n_simu)+1)]
-        time = np.array(time)
-
-        n_simu = 1
-        N_ = particles_mean.shape[0]
-        time = time[:N_:n_simu]
-        index_time = (time <= time_bt_tot[-1])
-        N_tot = np.sum(index_time)
-        N_ = N_tot
-        param['N_tot'] = N_tot
-        param['N_test'] = N_tot-1
-
-        struct_bt_MCMC = {}
-        struct_bt_MCMC['mean'] = particles_mean\
-            .copy()[:N_:n_simu]
-        struct_bt_MCMC['var'] = np.var(bt_MCMC[:, :, :], axis=2)\
-            .copy()[:N_:n_simu]
-           
-        time = time[:N_:n_simu]
-
-        bt_tot_interp = np.zeros(struct_bt_MCMC['mean'].shape)
-        for index in range(bt_tot.shape[1]):
-            interpolant_bt_tot_k = interpolate.interp1d(
-                time_bt_tot, bt_tot[:, index])
-            bt_tot_interp[:, index] = interpolant_bt_tot_k(time)
- # ##################### A CORRIGER ###########################
- #        if code_DATA_from_matlab:
- #            interpolant_error = interpolate.interp1d(
- #                time_bt_tot, param['truncated_error2'][:, 0])
- #            param['truncated_error2'] = interpolant_error(time)
- #            param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
-
- #            plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
- #                                                  param, bt_tot_interp, struct_bt_MCMC, time)
- # ##################### A CORRIGER ###########################
- 
- ##################### A CORRIGER ###########################
-        # if code_DATA_from_matlab:
-        interpolant_error = interpolate.interp1d(
-            time_bt_tot, param['truncated_error2'][:, 0])
-        param['truncated_error2'] = interpolant_error(time)
-        param['truncated_error2'] = param['truncated_error2'][..., np.newaxis]
-        param['nb_modes']=nb_modes
-        param['code_DATA_from_matlab'] = code_DATA_from_matlab
+    if not EV:  # NULL value for [EV] part!
         plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res,
                                               param, bt_tot_interp, struct_bt_MCMC, time)
  ##################### A CORRIGER ###########################
@@ -2792,12 +2801,13 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     f_info.write('  - Files in Plot Folder : ' +
                  str(os.listdir(file_plots_res)) + ' \n\n')
 
-    del C_deter
-    del C_sto
-    del L_deter
-    del L_sto
-    del I_deter
-    del I_sto
+    if not code_load_run:
+        del C_deter
+        del C_sto
+        del L_deter
+        del L_sto
+        del I_deter
+        del I_sto
 
     # closing INFO file
     

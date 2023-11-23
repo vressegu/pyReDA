@@ -650,17 +650,12 @@ uxLUT.ScalarRangeInitialized = 1.0
 #uxLUT.RescaleTransferFunctionToDataRange(True)
 
 # this part (RescaleTransferFunction) must be defined before after a Render()
-uxLUT.RescaleTransferFunction(-0.9, 1.9)
-if case_dir == "mean":
+if ( case_dir.find( "mean" ) != -1 ) :
   uxLUT.RescaleTransferFunction(-0.9, 1.9)
-#if case_dir == "spatialModes_2modes":
-if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
+if ( case_dir.find( "spatialModes_" ) != -1 ) :
   uxLUT.RescaleTransferFunction(-0.2, 0.2)
-#if case_dir == "residualSpeed_2":
-if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+if ( case_dir.find( "residualSpeed_" ) != -1 ) :
   uxLUT.RescaleTransferFunction(-0.7, 0.7)
-if case_dir == "sillageDNSRe300":
-  uxLUT.RescaleTransferFunction(-0.9, 1.9)
 uxLUT.ScalarRangeInitialized = 1.0
 
 # get color legend/bar for uxLUT in view renderView1
@@ -689,17 +684,12 @@ uxPWF.ScalarRangeInitialized = 1
 uxPWF.Points = [1, 0.0, 0.5, 0.0, 8, 1.0, 0.5, 0.0]
 
 # this part (RescaleTransferFunction) must be defined before after a Render()
-uxPWF.RescaleTransferFunction(-0.9, 1.9)
-if case_dir == "mean":
+if ( case_dir.find( "mean" ) != -1 ) :
   uxPWF.RescaleTransferFunction(-0.9, 1.9)
-#if case_dir == "spatialModes_2modes":
-if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
+if ( case_dir.find( "spatialModes_" ) != -1 ) :
   uxPWF.RescaleTransferFunction(-0.2, 0.2)
-#if case_dir == "residualSpeed_2":
-if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+if ( case_dir.find( "residualSpeed_" ) != -1 ) :
   uxPWF.RescaleTransferFunction(-0.7, 0.7)
-if case_dir == "sillageDNSRe300":
-  uxPWF.RescaleTransferFunction(-0.9, 1.9)
 
 # trace defaults for the display properties.
 slice_Ux1Display.Representation = 'Surface With Edges'
@@ -1093,25 +1083,18 @@ if code_view_slice_Ux1 == 1:
   Render()
   view = GetActiveView()
   view.ViewSize = [ viewSize_length, viewSize_height ]
-  
+ 
   # this part (RescaleTransferFunction) must be defined before after a Render()
-  uxLUT.RescaleTransferFunction(-0.9, 1.9)
-  uxPWF.RescaleTransferFunction(-0.9, 1.9)
-  if case_dir == "mean":
+  if ( case_dir.find( "mean" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.9, 1.9)
     uxPWF.RescaleTransferFunction(-0.9, 1.9)
-  #if case_dir == "spatialModes_2modes":
-  if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
+  if ( case_dir.find( "spatialModes_" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.2, 0.2)
     uxPWF.RescaleTransferFunction(-0.2, 0.2)
-  #if case_dir == "residualSpeed_2":
-  if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+  if ( case_dir.find( "residualSpeed_" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.7, 0.7)
     uxPWF.RescaleTransferFunction(-0.7, 0.7)
-  if case_dir == "sillageDNSRe300":
-    uxLUT.RescaleTransferFunction(-0.9, 1.9)
-    uxPWF.RescaleTransferFunction(-0.9, 1.9)
-  
+ 
   if code_view_withGrid == 1:
     slice_Ux1Display.Representation = 'Surface With Edges'
     slice_Ux1Display.PointSize = 1.0
@@ -1208,24 +1191,17 @@ if code_view_pointVolumeInterpolator_Ux == 1:
   Render()
   view = GetActiveView()
   view.ViewSize = [ viewSize_length, viewSize_height ]
-  
+    
   # this part (RescaleTransferFunction) must be defined before after a Render()
-  uxLUT.RescaleTransferFunction(-0.9, 1.9)
-  uxPWF.RescaleTransferFunction(-0.9, 1.9)
-  if case_dir == "mean":
+  if ( case_dir.find( "mean" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.9, 1.9)
     uxPWF.RescaleTransferFunction(-0.9, 1.9)
-  #if case_dir == "spatialModes_2modes":
-  if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
+  if ( case_dir.find( "spatialModes_" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.2, 0.2)
     uxPWF.RescaleTransferFunction(-0.2, 0.2)
-  #if case_dir == "residualSpeed_2":
-  if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+  if ( case_dir.find( "residualSpeed_" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.7, 0.7)
     uxPWF.RescaleTransferFunction(-0.7, 0.7)
-  if case_dir == "sillageDNSRe300":
-    uxLUT.RescaleTransferFunction(-0.9, 1.9)
-    uxPWF.RescaleTransferFunction(-0.9, 1.9)
 
   if code_view_withGrid == 1:
     pointVolumeInterpolator_UxDisplay.Representation = 'Surface With Edges'
@@ -1336,24 +1312,17 @@ if code_view_slice_Ux2 == 1:
   Render()
   view = GetActiveView()
   view.ViewSize = [ viewSize_length, viewSize_height ]
-  
+
   # this part (RescaleTransferFunction) must be defined before after a Render()
-  uxLUT.RescaleTransferFunction(-0.9, 1.9)
-  uxPWF.RescaleTransferFunction(-0.9, 1.9)
-  if case_dir == "mean":
+  if ( case_dir.find( "mean" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.9, 1.9)
     uxPWF.RescaleTransferFunction(-0.9, 1.9)
-  #if case_dir == "spatialModes_2modes":
-  if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
+  if ( case_dir.find( "spatialModes_" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.2, 0.2)
     uxPWF.RescaleTransferFunction(-0.2, 0.2)
-  #if case_dir == "residualSpeed_2":
-  if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+  if ( case_dir.find( "residualSpeed_" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.7, 0.7)
     uxPWF.RescaleTransferFunction(-0.7, 0.7)
-  if case_dir == "sillageDNSRe300":
-    uxLUT.RescaleTransferFunction(-0.9, 1.9)
-    uxPWF.RescaleTransferFunction(-0.9, 1.9)
 
   if code_view_withGrid == 1:
     slice_Ux2Display.Representation = 'Surface With Edges'

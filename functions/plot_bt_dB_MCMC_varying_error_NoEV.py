@@ -695,10 +695,18 @@ def plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res, \
     #    struct_bt_MCMC['one_realiz'] = np.sum(np.power(struct_bt_MCMC['one_realiz']-bt_tot,2), axis=1)[...,np.newaxis]/nrj_tot + err_fix
         
         struct_bt_MCMC['var'] = struct_bt_MCMC['var']/nrj_tot
+        if param['code_load_run']:
+            struct_bt_MCMC['bias'] = np.sum(param['lambda'],axis=0) * np.power( struct_bt_MCMC['bias'] ,2)/nrj_tot + err_fix
+            struct_bt_MCMC['rmse'] = np.sum(param['lambda'],axis=0) * np.power( struct_bt_MCMC['rmse'] ,2)/nrj_tot + err_fix
+            struct_bt_MCMC['minDist'] = np.sum(param['lambda'],axis=0) * np.power( struct_bt_MCMC['minDist'] ,2)/nrj_tot + err_fix
     else:
         err_fix =  param['truncated_error2'] 
         bt_0 = np.sum(np.power(bt_tot,2),axis=1)[...,np.newaxis]
         struct_bt_MCMC['mean'] = np.sum(np.power(struct_bt_MCMC['mean']-bt_tot,2), axis=1)[...,np.newaxis]        
+        if param['code_load_run']:
+            struct_bt_MCMC['bias'] = np.sum(param['lambda'],axis=0) * np.power( struct_bt_MCMC['bias'] ,2) 
+            struct_bt_MCMC['rmse'] = np.sum(param['lambda'],axis=0) * np.power( struct_bt_MCMC['rmse'] ,2)
+            struct_bt_MCMC['minDist'] = np.sum(param['lambda'],axis=0) * np.power( struct_bt_MCMC['minDist'] ,2)
     
     #%% Plots
     
@@ -721,6 +729,18 @@ def plot_bt_dB_MCMC_varying_error_DA_NoEV(file_plots_res, \
     plt.plot(time,np.sqrt(struct_bt_MCMC['mean'][:,k]),
                      color=color_mean_LU,\
                      label = 'Red LUM bias',linewidth=linewidth_)
+    
+    if param['code_load_run']:
+        plt.plot(time,np.sqrt(struct_bt_MCMC['bias'][:int(N_test+1),k]),
+                          '--r',\
+                          label = 'Red LUM bias C++',linewidth=linewidth_)
+        plt.plot(time,np.sqrt(struct_bt_MCMC['rmse'][:int(N_test+1),k]),
+                         '--b',\
+                         label = 'Red LUM rmse C++',linewidth=linewidth_)
+        plt.plot(time,np.sqrt(struct_bt_MCMC['minDist'][:int(N_test+1),k]),
+                         '--g',\
+                         label = 'Red LUM minDist C++',linewidth=linewidth_)
+        
     
     
     

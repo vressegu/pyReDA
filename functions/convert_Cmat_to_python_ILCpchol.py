@@ -58,6 +58,13 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
                                    
     # search "-v" sequencies in [redlumcpp_code_version] and keep last part of the word
     bool_recentROM = recentROM ( redlumcpp_code_version, 3, 0 )
+    bool_massMatrix = recentROM ( redlumcpp_code_version, 3, 3 )
+    if bool_massMatrix:
+        prefix = 'M'
+        add_0vB = ''
+    else:
+        prefix = ''
+        add_0vB = '_0'
         
     if bool_recentROM or \
        PATH_MAT == PATH_MAT_test + \
@@ -84,7 +91,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     nx=nb_modes; ny=1;
     I_sto = np.zeros( (nx,ny), dtype=np.float64 ) 
     if code_adv_cor:
-        file_name = PATH_MAT+'/L' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
+        file_name = PATH_MAT+'/' + prefix + 'L' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
         coeff=1.
         f = open(file_name,'r')
         i = 0
@@ -98,7 +105,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
                I_sto[i][j]=a[j]*coeff
            i=i+1
         f.close()    
-    file_name = PATH_MAT+'/S' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
+    file_name = PATH_MAT+'/' + prefix + 'S' + path_PFD + '_1_vector' + add_0v + '_' + nb_modes_str + '_0_mat.txt'
     coeff=1.
     f = open(file_name,'r')
     i = 0
@@ -119,7 +126,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     nx=nb_modes; ny=nx;
     L_sto = np.zeros( (nx,ny), dtype=np.float64 ) 
     if code_adv_cor:
-        file_name = PATH_MAT+'/L' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
+        file_name = PATH_MAT+'/' + prefix + 'L' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
         coeff=1.
         f = open(file_name,'r')
         i = 0
@@ -133,7 +140,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
                L_sto[i][j]=a[j]*coeff
            i=i+1
         f.close()    
-    file_name = PATH_MAT+'/S' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
+    file_name = PATH_MAT+'/' + prefix + 'S' + path_PFD + add_0m + '_' + nb_modes_str + '_0_mat.txt'
     coeff=1.
     f = open(file_name,'r')
     i = 0
@@ -161,7 +168,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     ### I_deter = -C_PFD_1_vector_2_0 + B_1_vector_0_2_0/Re ###
     nx=nb_modes; ny=1;
     I_deter = np.zeros( (nx,ny), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/C' + path_PFD + '_1_vector_' + nb_modes_str + '_0_mat.txt'
+    file_name = PATH_MAT+'/' + prefix + 'C' + path_PFD + '_1_vector_' + nb_modes_str + '_0_mat.txt'
     coeff=-1.
     f = open(file_name,'r')
     i = 0
@@ -175,7 +182,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
            I_deter[i][j]=a[j]*coeff
        i=i+1
     f.close()    
-    file_name = PATH_MAT+'/B_1_vector_0_' + nb_modes_str + '_0_mat.txt'
+    file_name = PATH_MAT+'/' + prefix + 'B_1_vector' + add_0vB + '_' + nb_modes_str + '_0_mat.txt'
     coeff=1./Re
     f = open(file_name,'r')
     i = 0
@@ -194,7 +201,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     ### L_deter = -C_PFD_2_matrix_0_2_0 + B_0_2_0/Re ###
     nx=nb_modes; ny=nx;
     L_deter = np.zeros( (nx,ny), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/C' + path_PFD + '_2_matrix_0_' + nb_modes_str + '_0_mat.txt'
+    file_name = PATH_MAT+'/' + prefix + 'C' + path_PFD + '_2_matrix_0_' + nb_modes_str + '_0_mat.txt'
     coeff=-1.
     f = open(file_name,'r')
     i = 0
@@ -208,7 +215,7 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
            L_deter[i][j]=a[j]*coeff
        i=i+1
     f.close()    
-    file_name = PATH_MAT+'/B' + path_PFD + '_0_' + nb_modes_str + '_0_mat.txt'
+    file_name = PATH_MAT+'/' + prefix + 'B' + path_PFD + '_0_' + nb_modes_str + '_0_mat.txt'
     # file_name = PATH_MAT+'/B_0_' + nb_modes_str + '_0_mat.txt'
     coeff=1./Re
     f = open(file_name,'r')
@@ -232,34 +239,22 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     ### C_deter = z0=C_PFD_0_2_0_t0 z1=-C_PFD_0_2_0_t1 ###
     nx=nb_modes; ny=nx; nz=nx;
     C_deter = np.zeros( (nx,ny,nz), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/C' + path_PFD + '_0_' + nb_modes_str + '_0/C0_mat.txt'
-    coeff=-1.
-    f = open(file_name,'r')
-    i = 0
-    while True:
-      line = f.readline()
-      if not line: 
-        break
-      else:            
-       a = np.fromstring(line, dtype=float, sep=' ')
-       for j in range(len(a)):
-           C_deter[i][j][0]=a[j]*coeff
-       i=i+1
-    f.close()    
-    file_name = PATH_MAT+'/C' + path_PFD + '_0_' + nb_modes_str + '_0/C1_mat.txt'
-    coeff=-1.
-    f = open(file_name,'r')
-    i = 0
-    while True:
-      line = f.readline()
-      if not line: 
-        break
-      else:            
-       a = np.fromstring(line, dtype=float, sep=' ')
-       for j in range(len(a)):
-           C_deter[i][j][1]= a[j]*coeff
-       i=i+1
-    f.close()    
+    for k in range(nz):
+        file_name = PATH_MAT+'/' + prefix + 'C' + path_PFD + \
+            '_0_' + nb_modes_str + '_0/' + prefix + 'C' + str(k) + '_mat.txt'
+        coeff=-1.
+        f = open(file_name,'r')
+        i = 0
+        while True:
+          line = f.readline()
+          if not line: 
+            break
+          else:            
+           a = np.fromstring(line, dtype=float, sep=' ')
+           for j in range(len(a)):
+               C_deter[i][j][k]=a[j]*coeff
+           i=i+1
+        f.close()  
     #print(" -> C_deter="+str(C_deter))
     
     ### C_deter -> C_deter~Transpose(C_deter) (Cf. functions_Cpp_to_matlab/read_Cpp_deter.m)
@@ -272,9 +267,9 @@ def convert_Cmat_to_python_ILCpchol(PATH_MAT,Re_str,nb_modes_str,bool_PFD=True,c
     #pchol_cov_noises = N_PFD_2x3_2x3
     nx=nb_modes*(nb_modes+1); ny=nx;
     pchol_cov_noises = np.zeros( (nx,ny), dtype=np.float64 ) 
-    file_name = PATH_MAT+'/N' + path_PFD + '_' + \
+    file_name = PATH_MAT+'/' + prefix + 'N_red' + path_PFD + '_' + \
                 nb_modes_str + 'x' + str(nb_modes+1) + '_' + \
-                nb_modes_str + 'x' + str(nb_modes+1) + '_mat.txt'
+                nb_modes_str + '_mat.txt'
     coeff=1.
     f = open(file_name,'r')
     i = 0
