@@ -49,7 +49,15 @@ if __name__ == '__main__':
     noBugSubsampl = False
     
     vect_nb_mutation_steps = [-1]                # Number of mutation steps in particle filter 
+
+    # temporalScheme = "euler"
+    # temporalScheme = "adams-bashforth"
+
     n_particle = 100
+    # HilbertSpace = "L2wBC"
+    # HilbertSpace = "H1"
+    HilbertSpace = "L2"
+    freqBC = 100
 
     # parameters defined in [run_info.txt] file
     #
@@ -77,6 +85,8 @@ if __name__ == '__main__':
     param_file = Path(MORAANE_PATH).joinpath('pyReDA/run_info.txt')
     print("     Cf. run_file [", str(param_file)+"]")
     
+    if not ('temporalScheme' in locals()):
+        temporalScheme = "euler"
     vect_nb_modes, type_data, SECONDS_OF_SIMU, EV = super_main_globalParam_from_info_txt_file(param_file)
     
     if vect_nb_modes == None:
@@ -114,6 +124,8 @@ if __name__ == '__main__':
     f_info.write("  - nb_period_test         = " + str(nb_period_test) + "\n")
     f_info.write("  - no_subampl_in_forecast = " + str(no_subampl_in_forecast) + "\n")
     f_info.write("  - n_particle             = " + str(n_particle) + "\n")
+    f_info.write("  - temporalScheme             = " + str(temporalScheme) + "\n")
+    f_info.write("  - HilbertSpace             = " + str(HilbertSpace) + "\n")
     f_info.write("  - test_fct               = " + str(test_fct) + "\n")
     f_info.write("  - svd_pchol              = " + str(svd_pchol) + "\n")
     f_info.write("  - stochastic_integration = " + str(stochastic_integration) + "\n")
@@ -138,6 +150,7 @@ if __name__ == '__main__':
                                 main_from_existing_ROM(k,threshold,type_data,nb_period_test,\
                                                        no_subampl_in_forecast,reconstruction,\
                                                        adv_corrected,modal_dt,n_particle,\
+                                                       temporalScheme,HilbertSpace,freqBC,\
                                                        test_fct,svd_pchol,\
                                                        stochastic_integration,\
                                                        estim_rmv_fv,eq_proj_div_free,\
