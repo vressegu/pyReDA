@@ -80,7 +80,7 @@ alias WRITE_ERROR 'echo "\033[31;7m \\!\\!\\! OUPS \\!\\!\\!   \!*  \\!\\!\\!\03
 
 # pvbatch PATH : check aliases defined in called scripts
 
-foreach file_csh ( cov_before_gaussSmoothing.csh openfoamDNS_to_pseudoPIV.csh )
+foreach file_csh ( cov_after_gaussSmoothing.csh openfoamDNS_to_pseudoPIV.csh )
 
   set pvbatch_alias = ` cat util/${file_csh} | grep pvbatch | grep alias | tail -1 | awk '{ print $3 }' | sed s/"'"//g `
   if ( -e ${pvbatch_alias} ) then
@@ -164,8 +164,8 @@ while ( ${code_dir_util} == 0 )
   if ( (!(-e ${dir_util}/openfoamDNS_to_pseudoPIV.csh)) || \
         (!(-e ${dir_util}/openfoamDNS_to_pseudoPIV_param.txt)) || \
         (!(-e ${dir_util}/calculator_PointVolumeInterpolation_model.py)) ||  \
-        (!(-e ${dir_util}/cov_before_gaussSmoothing.csh)) ||  \
-        (!(-e ${dir_util}/cov_before_gaussSmoothing_model.py)) ||  \
+        (!(-e ${dir_util}/cov_after_gaussSmoothing.csh)) ||  \
+        (!(-e ${dir_util}/cov_after_gaussSmoothing_model.py)) ||  \
         (!(-e ${dir_util}/dim_DNS_cyl.csh)) ) set code_dir_util = 0
   
   if ( ${code_dir_util} == 1 ) then
@@ -1075,20 +1075,20 @@ foreach CASE ( ${All_CASE} )
         #set code_residualSpeed = ` echo ${D} | grep "residualSpeed_" | wc -l `
         if (( ${code_residualSpeed} != 0 ) && ( ${code_Nb_t} == 1 )) then
         
-          # covariance is calculated by paraview script (like [util/cov_before_gaussSmoothing_model.py])
+          # covariance is calculated by paraview script (like [util/cov_after_gaussSmoothing_model.py])
           # before slicing and smoothing 
           # NOTE : cov(x*y)=mean(x*y)-mean(x)*mean(y) should be equal to mean(x*y) 
           #              since mean(x) and mean(y) should be =0
           
           cd ${dir_work_up}
           \cp -R ${dir_util} .
-          \cp util/cov_before_gaussSmoothing.csh .
-          tcsh cov_before_gaussSmoothing.csh ${D} ${DIR0} ${DIR1} ${t_first} ${t_last}
-          \cp cov_before_gaussSmoothing.csh ${D}
+          \cp util/cov_after_gaussSmoothing.csh .
+          tcsh cov_after_gaussSmoothing.csh ${D} ${DIR0} ${DIR1} ${t_first} ${t_last}
+          \cp cov_after_gaussSmoothing.csh ${D}
           \rm -R ${D}/tmp*
           
           set info = "Cf. files in ${dir_work} :\n\t1) PIV_new_covInv_U(...).png\n"
-          set info = "${info}\t2) cov_before_gaussSmoothing/cov_mean_(...).png :\n"
+          set info = "${info}\t2) cov_after_gaussSmoothing/cov_mean_(...).png :\n"
           set info = "${info}\t\tLeft  = cov ( mean(ui x uj)-mean(ui) x mean(uj) )\n"
           set info = "${info}\t\tRight = cov ( mean(ui x uj) )"
           WRITE_LINE; WRITE_INFO "${info}";  WRITE_LINE
@@ -1145,8 +1145,8 @@ end
 #              ├── run_info.txt
 #              └── util
 #                    ├── calculator_PointVolumeInterpolation_model.py
-#                    ├── cov_before_gaussSmoothing.csh
-#                    ├── cov_before_gaussSmoothing_model.py
+#                    ├── cov_after_gaussSmoothing.csh
+#                    ├── cov_after_gaussSmoothing_model.py
 #                    ├── dim_DNS_cyl.csh
 #                    ├── openfoamDNS_to_pseudoPIV_param.txt
 #                    └── openfoamDNS_to_pseudoPIV.csh
@@ -1329,11 +1329,11 @@ end
 #      - [util/calculator_PointVolumeInterpolation_model.py] : 
 #        python script model used by the script [openfoamDNS_to_pseudoPIV.csh]
 #        
-#      - [util/cov_before_gaussSmoothing.csh] :
+#      - [util/cov_after_gaussSmoothing.csh] :
 #        shell script used to calculated (1/cov) in case of [residualSpeed_...]
 #        
-#      - [util/cov_before_gaussSmoothing_model.py]
-#        python script model used by the script [cov_before_gaussSmoothing.csh]
+#      - [util/cov_after_gaussSmoothing_model.py]
+#        python script model used by the script [cov_after_gaussSmoothing.csh]
 #         
 #         tree example :
 #         ├── data_red_lum_cpp
@@ -1342,8 +1342,8 @@ end
 #              ├── run_info.txt
 #              └── util
 #                    ├── calculator_PointVolumeInterpolation_model.py
-#                    ├── cov_before_gaussSmoothing.csh
-#                    ├── cov_before_gaussSmoothing_model.py
+#                    ├── cov_after_gaussSmoothing.csh
+#                    ├── cov_after_gaussSmoothing_model.py
 #                    ├── dim_DNS_cyl.csh
 #                    ├── openfoamDNS_to_pseudoPIV_param.txt
 #                    └── openfoamDNS_to_pseudoPIV.csh
@@ -1402,11 +1402,11 @@ end
 # 1) This script calls the script [util/openfoamDNS_to_pseudoPIV.csh]
 #
 # 2) For the case [residualSpeed_*], after calling the script [util/openfoamDNS_to_pseudoPIV.csh], 
-#   the script [util/cov_before_gaussSmoothing.csh] is also used, 
+#   the script [util/cov_after_gaussSmoothing.csh] is also used, 
 #
 # ------------------------------------------------------------------------------
 #
-# A) example of Files used by the script [util/cov_before_gaussSmoothing.csh] :
+# A) example of Files used by the script [util/cov_after_gaussSmoothing.csh] :
 #
 #      A.1) Info file used that MUST be PRESENT in the UP directory :
 #
@@ -1416,7 +1416,7 @@ end
 #
 #      A.2) model file that MUST be PRESENT in CURRENT [util] directory :
 #
-#         A.2.a) python model files for [pvbatch] script :[util/cov_before_gaussSmoothing_model.py]
+#         A.2.a) python model files for [pvbatch] script :[util/cov_after_gaussSmoothing_model.py]
 #
 # ------------------------------------------------------------------------------
 #
@@ -1491,7 +1491,7 @@ end
 #         B.3.a) to verify cylinder diameter (must be equal to DNS_Dcyl=1) :
 #             [util/dim_DNS_cyl.csh]
 #         B.3.b) for the case of [residualSpeed_*] only :
-#             [util/cov_before_gaussSmoothing.csh]
+#             [util/cov_after_gaussSmoothing.csh]
 #
 #      B.4) parameters file : [openfoamDNS_to_pseudoPIV_param.txt]
 #            for example :
@@ -1538,7 +1538,7 @@ end
 #
 #
 #   C) directories created in WORKING directory :
-#       for the case of [residualSpeed_*] only, the folder [cov_before_gaussSmoothing]
+#       for the case of [residualSpeed_*] only, the folder [cov_after_gaussSmoothing]
 #
 #   D) Files created :
 #
