@@ -125,7 +125,7 @@
 #
 #      B.3) script file that MUST be PRESENT in CURRENT [util] directory :
 #         B.3.a) for the case of [residualSpeed_*] only :
-#             [util/cov_before_gaussSmoothing.csh]
+#             [util/cov_after_gaussSmoothing.csh]
 #
 #      B.4) parameters file : [openfoamDNS_to_pseudoPIV_param.txt]
 #            for example :
@@ -180,7 +180,7 @@
 #
 #
 #   C) directories created in PRESENT directory :
-#       for the case of [residualSpeed_*] only, the folder [cov_before_gaussSmoothing]
+#       for the case of [residualSpeed_*] only, the folder [cov_after_gaussSmoothing]
 #
 #   D) Files created :
 #

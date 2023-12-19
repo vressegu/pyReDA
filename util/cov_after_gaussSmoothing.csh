@@ -123,50 +123,79 @@ foreach D ( ${All_D} )
    
   set DNS_xcyl=`cat ../openfoamDNS_to_pseudoPIV.info | grep "DNS_xcyl=" | awk -F'=' '{ print $2 }' `
   set DNS_ycyl=`cat ../openfoamDNS_to_pseudoPIV.info | grep "DNS_ycyl=" | awk -F'=' '{ print $2 }' `
-
-  if -e cov_Uxyz.py \rm cov_Uxyz.py
-  cat ${dir_ici}/util/cov_after_gaussSmoothing_model.py | \
-    sed s/"CASE_DIR_NAME"/"${case_dir}"/g | \
-    sed s/"LAST_DIR_NAME"/"${last_dir}"/g | \
-    sed s/"PATH_DIR_NAME"/"${path_dir_SED}"/g | \
-    sed s/"XCYL_VALUE"/"${DNS_xcyl}"/g | \
-    sed s/"YCYL_VALUE"/"${DNS_ycyl}"/g | \
-    sed s/"X1_DOM_VALUE"/"${DNS_xmin}"/g | \
-    sed s/"Y1_DOM_VALUE"/"${DNS_ymin}"/g | \
-    sed s/"Z1_DOM_VALUE"/"${DNS_zmin}"/g | \
-    sed s/"X2_DOM_VALUE"/"${DNS_xmax}"/g | \
-    sed s/"Y2_DOM_VALUE"/"${DNS_ymax}"/g | \
-    sed s/"Z2_DOM_VALUE"/"${DNS_zmax}"/g | \
-    sed s/"T_FIRST_VALUE"/"${t_first}"/g | \
-    sed s/"T_LAST_VALUE"/"${t_last}"/g  | \
-    sed s/"ZSLICE_VALUE"/"${Zslice}"/g | \
-    sed s/"RADIUS_VALUE"/"${DNS_Gauss}"/g | \
-    sed s/"ORIGIN_X_VALUE"/"${DNS_crop_x0}"/g | \
-    sed s/"ORIGIN_Y_VALUE"/"${DNS_crop_y0}"/g | \
-    sed s/"SCALE_X_VALUE"/"${DNS_BOX_Lx}"/g | \
-    sed s/"SCALE_Y_VALUE"/"${DNS_BOX_Ly}"/g | \
-    sed s/"RESOLUTION_X_VALUE"/"${DNS_BOX_Rx}"/g | \
-    sed s/"RESOLUTION_Y_VALUE"/"${DNS_BOX_Ry}"/g > cov_Uxyz.py
     
+  if -e list_fic_time.txt \rm list_fic_time.txt
+  echo -n "t="
   foreach t ( ${All_t} )
+
+    if -e cov_after_gaussSmoothing.py \rm cov_after_gaussSmoothing.py
+    cat ${dir_ici}/util/cov_after_gaussSmoothing_model.py | \
+      sed s/"CASE_DIR_NAME"/"${case_dir}"/g | \
+      sed s/"LAST_DIR_NAME"/"${last_dir}"/g | \
+      sed s/"PATH_DIR_NAME"/"${path_dir_SED}"/g | \
+      sed s/"XCYL_VALUE"/"${DNS_xcyl}"/g | \
+      sed s/"YCYL_VALUE"/"${DNS_ycyl}"/g | \
+      sed s/"X1_DOM_VALUE"/"${DNS_xmin}"/g | \
+      sed s/"Y1_DOM_VALUE"/"${DNS_ymin}"/g | \
+      sed s/"Z1_DOM_VALUE"/"${DNS_zmin}"/g | \
+      sed s/"X2_DOM_VALUE"/"${DNS_xmax}"/g | \
+      sed s/"Y2_DOM_VALUE"/"${DNS_ymax}"/g | \
+      sed s/"Z2_DOM_VALUE"/"${DNS_zmax}"/g | \
+      sed s/"T_FIRST_VALUE"/"${t_first}"/g | \
+      sed s/"T_LAST_VALUE"/"${t_last}"/g  | \
+      sed s/"ZSLICE_VALUE"/"${Zslice}"/g | \
+      sed s/"RADIUS_VALUE"/"${DNS_Gauss}"/g | \
+      sed s/"ORIGIN_X_VALUE"/"${DNS_crop_x0}"/g | \
+      sed s/"ORIGIN_Y_VALUE"/"${DNS_crop_y0}"/g | \
+      sed s/"SCALE_X_VALUE"/"${DNS_BOX_Lx}"/g | \
+      sed s/"SCALE_Y_VALUE"/"${DNS_BOX_Ly}"/g | \
+      sed s/"RESOLUTION_X_VALUE"/"${DNS_BOX_Rx}"/g | \
+      sed s/"RESOLUTION_Y_VALUE"/"${DNS_BOX_Ry}"/g > cov_after_gaussSmoothing.py
+      
+    if ( ${t} != ${t_first} ) then
+      \mv cov_after_gaussSmoothing.py tmp.py
+      cat tmp.py | sed s/"AddMetaData=1"/"AddMetaData=0"/g > cov_after_gaussSmoothing.py
+      \cp cov_after_gaussSmoothing.py ..
+    endif
   
+    if -e 0 \rm -R 0
+    if -e 1 \rm -R 1
     if (!(-e ${t})) \cp -R ${DIR0}/${DIR1}/${D}/${t} .
+    pvbatch cov_after_gaussSmoothing.py
+    \rm -R ${t}
+    mkdir ../${t}
+    echo -n "$t "
+    if ( ${t} == ${t_first} ) then
+      set tname = ` echo ${t} | awk '{ printf("%.0f",10000*$1) }' `
+      if -e XYcrop.txt \rm XYcrop.txt
+      cat U.csv | grep -v "U:" | awk -F',' '{ print $1, $2 }' > XYcrop.txt
+      echo "XYcrop.txt" > list_fic_time.txt
+      if -e U${tname}.txt \rm U${tname}.txt
+      cat U.csv | grep -v "U:" | awk -F',' '{ print $4, $5, $6 }' > U${tname}.txt
+      echo "U${tname}.txt" >> list_fic_time.txt
+    else
+      set tname = ` echo ${t} | awk '{ printf("%.0f",10000*$1) }' `
+      if -e U${tname}.txt \rm U${tname}.txt
+      cat U.csv | grep -v "U:" | awk -F',' '{ print $1, $2, $3 }' > U${tname}.txt
+      echo "U${tname}.txt" >> list_fic_time.txt
+    endif
 
   end
   
-  #\rm *.png
-  pvbatch cov_Uxyz.py
-  \cp cov_Uxyz.py ..
-  \cp cov_*.png ..
-  \cp mean_*.png ..
+  echo "\n"
   
-  # CSV file => inverse COV+diag_matrix() as PIV file
+  # temporal statistic
+  
+  set Nrow = ` cat U${tname}.txt | wc -l `
+  set Ntime = ` cat list_fic_time.txt | wc -l | awk '{ print $1-1 }' `
+  \cp ${dir_ici}/util/cov_after_gaussSmoothing_stat.C .
+  
+  g++ -I/usr/local/include/eigen3 -std=c++11 cov_after_gaussSmoothing_stat.C -o cov_after_gaussSmoothing_stat
+  ./cov_after_gaussSmoothing_stat list_fic_time.txt ${Nrow} ${Ntime}
    
-  # point coordinates
-  if -e xy.txt \rm xy.txt
-  cat mean_xy.csv | sed s/","/" "/g | grep -v Point | awk '{ print $1,$2 }' > xy.txt
-  
-  # PIV_Dcyl != 1 or PIV_Dcyl = 1
+  # CSV file => inverse COV+diag_matrix() as PIV file
+
+  # PIV point coordinates : PIV_Dcyl != 1 or PIV_Dcyl = 1
   set DNS_Dcyl=`cat ../openfoamDNS_to_pseudoPIV.info | grep "DNS_Dcyl=" | awk -F'=' '{ print $2 }' `
   set DNS_crop_x0=`cat ../openfoamDNS_to_pseudoPIV.info | grep "DNS_crop_x0=" | awk -F'=' '{ print $2 }' `
   set DNS_crop_y0=`cat ../openfoamDNS_to_pseudoPIV.info | grep "DNS_crop_y0=" | awk -F'=' '{ print $2 }' `
@@ -177,8 +206,8 @@ foreach D ( ${All_D} )
   set PIV_ymin=`cat ../openfoamDNS_to_pseudoPIV.info | grep "PIV_ymin=" | awk -F'=' '{ print $2 }' `
 
   if -e XY.txt \rm XY.txt
-  cat mean_xy.csv | grep -v Point | \
-    awk -F',' -v P_d=${PIV_Dcyl} -v D_d=${DNS_Dcyl} -v D_x0=${DNS_crop_x0} -v P_x0=${PIV_xmin} -v D_y0=${DNS_crop_y0} -v P_y0=${PIV_ymin} '{ \
+  cat XYcrop.txt | \
+    awk -v P_d=${PIV_Dcyl} -v D_d=${DNS_Dcyl} -v D_x0=${DNS_crop_x0} -v P_x0=${PIV_xmin} -v D_y0=${DNS_crop_y0} -v P_y0=${PIV_ymin} '{ \
     printf("%10.6f %10.6f\n", ($1-D_x0+0.)*(P_d+0.)/(D_d+0.)+P_x0+0., ($2-D_y0+0.)*(P_d+0.)/(D_d+0.)+P_y0+0) }' > XY.txt
    
   # inv(cov+diag_mat(0.006**2)) (Cf. http://w3.gel.ulaval.ca/~fortier/MAT19961/powerpoint2000/sec2-3-4/sld016.htm)
@@ -358,6 +387,7 @@ foreach D ( ${All_D} )
   echo 'plot [PIV_DNS_xr1-0.01:PIV_DNS_xr2+0.01][PIV_DNS_yr1-0.01:PIV_DNS_yr2+0.01] \' >> ${fic_gnp}
   echo '  "Inv_COVxy.dat" u (($1-(PIV_xcyl))/PIV_Dcyl):(($2-(PIV_ycyl))/PIV_Dcyl):4 w p pt 5 ps 1 palette title "PIV new : Z=1. inv(cov(uy*uy))+matDiag('${A_mat_diag}'**2)."' >> ${fic_gnp}
   echo 'set cbrange [-100:100]' >> ${fic_gnp}
+  echo 'set cbrange [-1:1]' >> ${fic_gnp}
   echo 'set output "PIV_new_covInv_Uxy.png"' >> ${fic_gnp}
   echo 'plot [PIV_DNS_xr1-0.01:PIV_DNS_xr2+0.01][PIV_DNS_yr1-0.01:PIV_DNS_yr2+0.01] \' >> ${fic_gnp}
   echo '  "Inv_COVxy.dat" u (($1-(PIV_xcyl))/PIV_Dcyl):(($2-(PIV_ycyl))/PIV_Dcyl):5 w p pt 5 ps 1 palette title "PIV new : Z=1. inv(cov(ux*uy))+matDiag('${A_mat_diag}'**2)"' >> ${fic_gnp}
@@ -371,21 +401,14 @@ foreach D ( ${All_D} )
   
   cd ..
   
-#  \rm -R tmp_dir
-  foreach var (xx yy zz xy yz zx )
-    convert -resize "1200x800" cov_${var}.png tmp1.png
-    convert -resize "1200x800" mean_${var}.png  tmp2.png
-    montage tmp1.png tmp2.png  -geometry +1+1 -border 1 -bordercolor "orange" -tile 2x1 cov_mean_${var}.png
-  end
-  
   if (!(-e cov_after_gaussSmoothing)) mkdir cov_after_gaussSmoothing
-  \mv cov_*.png cov_after_gaussSmoothing
-  \mv mean_*.png cov_after_gaussSmoothing
-  \mv cov_Uxyz.py cov_after_gaussSmoothing
+  \cp ${dir_ici}/util/cov_after_gaussSmoothing.csh cov_after_gaussSmoothing
+  \cp cov_after_gaussSmoothing.py cov_after_gaussSmoothing
+  \cp ${dir_ici}/util/cov_after_gaussSmoothing_stat.C cov_after_gaussSmoothing
   \cp Inv_COVxy.* cov_after_gaussSmoothing
   \cp PIV_new_covInv_*.png  cov_after_gaussSmoothing
   
-  echo ""; echo "Cf. cov_after_gaussSmoothing/cov_mean_*.png (in ${dir_ici}/${D})"; echo ""
+  echo ""; echo "Cf. cov_after_gaussSmoothing/*.png (in ${dir_ici}/${D})"; echo ""
  
 end
 
