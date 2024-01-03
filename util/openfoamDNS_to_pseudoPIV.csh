@@ -18,9 +18,9 @@
 ##
 ## Paraview operation (pvbatch [python file]) : Openfoam DNS file -> CSV file
 ##
-## step1 = calculator -> Ux scalar
-## step2 = Ux gaussian interpolation
-## step3 = slice Z=Lz/2 of the Ux gaussian interpolation
+## step1 = calculator -> Ux(y) scalar
+## step2 = Ux(y) gaussian interpolation
+## step3 = slice Z=Lz/2 of the Ux(y) gaussian interpolation
 ## 
 ##           => CSV file
 ##
@@ -125,7 +125,7 @@
 #
 #      B.3) script file that MUST be PRESENT in CURRENT [util] directory :
 #         B.3.a) for the case of [residualSpeed_*] only :
-#             [util/cov_after_gaussSmoothing.csh]
+#             [util/cov_before_gaussSmoothing.csh]
 #
 #      B.4) parameters file : [openfoamDNS_to_pseudoPIV_param.txt]
 #            for example :
@@ -165,6 +165,7 @@
 #                	0	#    code_csv_slice_Uy1 : =1 if CSV file showing Uy(Z=Zslice) openfoam result
 #                	1	#    code_csv_slice_Ux2 : =1 if CSV file showing Ux(Z=Zslice) openfoam after smoothing
 #                	1	#    code_csv_slice_Uy2 : =1 if CSV file showing Uy(Z=Zslice) openfoam after smoothing
+#                	1	#    code_csv_slice_Uz2 : =1 if CSV file showing Uz(Z=Zslice) openfoam after smoothing
 #                	
 #
 #      B.5) optional files
@@ -180,7 +181,7 @@
 #
 #
 #   C) directories created in PRESENT directory :
-#       for the case of [residualSpeed_*] only, the folder [cov_after_gaussSmoothing]
+#       for the case of [residualSpeed_*] only, the folder [cov_before_gaussSmoothing]
 #
 #   D) Files created :
 #
@@ -735,7 +736,13 @@ set code_csv_slice_Ux1 = ` cat ${fic_param} | grep "code_csv_slice_Ux1" | awk -F
 set code_csv_slice_Uy1 = ` cat ${fic_param} | grep "code_csv_slice_Uy1" | awk -F'#' '{ print $1 }' `
 set code_csv_slice_Ux2 = ` cat ${fic_param} | grep "code_csv_slice_Ux2" | awk -F'#' '{ print $1 }' `
 set code_csv_slice_Uy2 = ` cat ${fic_param} | grep "code_csv_slice_Uy2" | awk -F'#' '{ print $1 }' `
- 
+set code_csv_slice_Uz2 = ` cat ${fic_param} | grep "code_csv_slice_Uz2" | awk -F'#' '{ print $1 }' `
+
+if ( ${code_csv_slice_Uz2} == "" ) then
+  set code_csv_slice_Uz2 = 0
+  echo "${code_csv_slice_Uz2} # code_csv_slice_Uz2 : =1 if CSV file showing Uz(Z=Lz/2) openfoam after smoothing" >> ${fic_param} 
+endif
+
 # mode view without grid : POINTS (no smoothing for VISU) or SURFACE (VISU with smoothing)
 set mode_view_NoGrid = "SURFACE"
 set mode_view_NoGrid = "POINTS"
@@ -773,7 +780,8 @@ cat util/calculator_PointVolumeInterpolation_model.py | \
   sed s/"CODE_CSV_SLICE_UX1_VALUE"/"${code_csv_slice_Ux1}"/g | \
   sed s/"CODE_CSV_SLICE_UY1_VALUE"/"${code_csv_slice_Uy1}"/g | \
   sed s/"CODE_CSV_SLICE_UX2_VALUE"/"${code_csv_slice_Ux2}"/g | \
-  sed s/"CODE_CSV_SLICE_UY2_VALUE"/"${code_csv_slice_Uy2}"/g > slice.py
+  sed s/"CODE_CSV_SLICE_UY2_VALUE"/"${code_csv_slice_Uy2}"/g | \
+  sed s/"CODE_CSV_SLICE_UZ2_VALUE"/"${code_csv_slice_Uz2}"/g > slice.py
 
 # slice INFO file
 
@@ -876,9 +884,9 @@ if -e slice_Uxy2.csv then
   set Nz = `cat slice_Uxy2.csv | grep -v Points | \
     awk -F',' '{ x=$3+0. ; if ( NF!=0 ) printf ( "%.0f\n", 1000000.*x ) }' | sort -n | uniq | awk '{ x=$1+0. ; printf ( "%.6f\n",x/1000000. ) }' | wc -l `
 
-  if -e slice_Uxy2.txt \rm slice_Uxy2.txt
+  if -e XYcrop.txt \rm XYcrop.txt
   cat slice_Uxy2.csv | \
-    grep -v Points | awk -F',' '{ print $1,$2 }' > slice_Uxy2.txt
+    grep -v Points | awk -F',' '{ print $1,$2 }' > XYcrop.txt
 
   # gnuplot file
   
@@ -898,9 +906,9 @@ if -e slice_Uxy2.csv then
   echo "y0=${DNS_ycyl}" >> ${fic_gnp}
   echo 'set output "slice_grid.png"'  >> ${fic_gnp}
   if -e slice_Uxy1.txt then
-    echo 'plot [x0-2.5:x0+1.5][y0-2.:y0+2.] "slice_Uxy1.txt" u 1:2 w p pt 6 lc rgb "red" title "grid1", "slice_Uxy2.txt" u 1:2 w p pt 7 lc rgb "blue" title "grid2"' >> ${fic_gnp}
+    echo 'plot [x0-2.5:x0+1.5][y0-2.:y0+2.] "slice_Uxy1.txt" u 1:2 w p pt 6 lc rgb "red" title "grid1", "XYcrop.txt" u 1:2 w p pt 7 lc rgb "blue" title "grid2"' >> ${fic_gnp}
   else
-    echo 'plot [x0-2.5:x0+1.5][y0-2.:y0+2.] "slice_Uxy2.txt" u 1:2 w p pt 7 lc rgb "blue" title "grid2"' >> ${fic_gnp}
+    echo 'plot [x0-2.5:x0+1.5][y0-2.:y0+2.] "XYcrop.txt" u 1:2 w p pt 7 lc rgb "blue" title "grid2"' >> ${fic_gnp}
   endif
 
   gnuplot ${fic_gnp}

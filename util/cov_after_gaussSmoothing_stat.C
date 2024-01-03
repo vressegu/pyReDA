@@ -1,3 +1,59 @@
+//
+// Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Decembre 2023 - Janvier 2024]
+//
+// ------------------------------------------------------------------------------
+//
+// Files read are defined in [file_XYUxyz]
+//
+//    for example : the file [list_fic_time.txt] created by the script [openfoamDNS_to_pseudoPIV_all.csh]
+//    this file is like this :
+//       first line : file with  (x,y) coordinates (ex: XYcrop.txt) corresponding to the following U*.txt file name
+//       second line and other : file with U value for each time (U5000000.txt U5012500.txt ...)
+//
+// Example : 
+//
+//    [list_fic_time.txt]
+//       XYcrop.txt
+//       U5000000.txt
+//       U5012500.txt
+//       U5025000.txt
+//       ...
+//
+//    [XYcrop.txt]
+//       4.04082 -4.22067
+//       4.08815 -4.22067
+//       ...
+//
+//    [U5000000.txt]
+//       "Ux" "Uy" "Uz"
+//       -2.72815e-05 -5.03747e-05 -7.77155e-06
+//       ...
+//
+// The main file can use 3 input arguments :
+//
+//    1) file listing [file_XYUxyz]
+//    2) number of lines for each files of the listing
+//    3) number of times = number of files of the listing
+//
+// Output files are CSV files :
+//
+//    A) mean values :
+//         [mean_xx.csv] : mean (ux*ux)
+//         [mean_yy.csv] : mean (uy*uy)
+//         [mean_zz.csv] : mean (uz*uz)
+//         [mean_xy.csv] : mean (ux*uy)
+//         [mean_yz.csv] : mean (uy*uz)
+//         [mean_zx.csv] : mean (uz*ux)
+//
+//    B) cov values :
+//         [cov_xx.csv] : cov (ux*ux) = mean (ux*ux)-mean (ux)*mean (ux)
+//         [cov_yy.csv] : cov (uy*uy) = mean (uy*uy)-mean (uy)*mean (uy)
+//         [cov_zz.csv] : cov (uz*uz) = mean (uz*uz)-mean (uz)*mean (uz)
+//         [cov_xy.csv] : cov (ux*uy) = mean (ux*uy)-mean (ux)*mean (uy)
+//         [cov_yz.csv] : cov (uy*uz) = mean (uy*uz)-mean (uy)*mean (uz)
+//         [cov_zx.csv] : cov (uz*ux) = mean (uz*ux)-mean (uz)*mean (ux)
+//
+// ------------------------------------------------------------------------------
 
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -47,12 +103,12 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
   std::string file_XYUxyz;
   std::ifstream  pt_file_in1, pt_file_in2;
   double read_value=0.;
-  
+ 
  // Eigen::MatrixXd XYUxyz;
  // XYUxyz.resize(Nrow, Ntime); XYUxyz = Eigen::MatrixXd::Zero(Nrow, Ntime);
  
-  XY.resize(Nrow,2); XY = Eigen::MatrixXd::Zero(Nrow, 2);
-  Uxyz.resize(Nrow, Ntime*3); Uxyz = Eigen::MatrixXd::Zero(Nrow, Ntime*3);
+  XY.resize(Nrow+1,2); XY = Eigen::MatrixXd::Zero(Nrow+1, 2);
+  Uxyz.resize(Nrow+1, Ntime*3); Uxyz = Eigen::MatrixXd::Zero(Nrow+1, Ntime*3);
 
   pt_file_in1.open ( file_list_XYUxyz );
   if ( pt_file_in1.is_open() )
@@ -76,7 +132,7 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
           pt_file_in2.open ( file_XYUxyz );
           if ( pt_file_in2.is_open() )
           {
-            std::cout << "Reading file "; str_format_io( file_XYUxyz, 45 );
+            std::cout << "  Reading file "; str_format_io( file_XYUxyz, 45 );
             int i2 = 0, j2 = 0, k2=0;
             while ( pt_file_in2.good() )
             {
@@ -117,7 +173,7 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
     }
     pt_file_in1.close ();
     pt_file_in1.clear ();
-    std::cout << "\nReading file "; str_format_io( file_XYUxyz, 45 );
+    std::cout << "\nReading file "; str_format_io( file_list_XYUxyz, 45 );
     std::cout << " : " << std::fixed << std::setw(8) << i1 << " lines read\n" << std::endl;
   }
   
@@ -125,7 +181,7 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
   Eigen::MatrixXd meanU = Eigen::MatrixXd::Zero(Nrow,3);
   for (int i=0; i<Nrow;i++) 
   {
-     for (int j=0; j<Ntime-2;j++) 
+     for (int j=0; j<Ntime;j++) 
      {
        for (int k=0; k<3; k++ )
        {
@@ -147,13 +203,13 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
   Eigen::MatrixXd meanUab = Eigen::MatrixXd::Zero(Nrow,3);
   for (int i=0; i<Nrow;i++) 
   {
-     for (int j=0; j<Ntime-2;j++) 
+     for (int j=0; j<Ntime;j++) 
      {
        for (int k=0; k<3; k++ )
        {
          if ( j%3 == k ) meanUaa(i,k) = meanUaa(i,k)+Uxyz(i,j)*Uxyz(i,j);
-         int l=k+1; if (l==3) l=0;
-         if ( j%3 == k ) meanUab(i,k) = meanUab(i,k)+Uxyz(i,j)*Uxyz(i,l);
+         int l=k+1; if (l==3) l=-2;
+         if ( j%3 == k ) meanUab(i,k) = meanUab(i,k)+Uxyz(i,j)*Uxyz(i,j+l);
       }
     }
   }
