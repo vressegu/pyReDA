@@ -83,4 +83,6 @@ beta_3 1.
 
 ## plot debug
 plot_debug False
-#plot_debug True
+#plot_debug True# y max distance from first observation point to cylinder center
+xObs 1.313
+yObs 1.270
