@@ -264,16 +264,16 @@ def define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, infla
     pathDEIM = ""
     if (bool_DEIM):
         pathDEIM = "DEIM"
-        bool_interpFieldCenteredOrNot=False
+        bool_interpFieldCenteredOrNot=True
         if (bool_interpFieldCenteredOrNot):
             pathDEIM += "c"
-            bool_useHypRedSto=False
+            bool_useHypRedSto=True
             if (bool_useHypRedSto):
                 pathDEIM += "Sto"        
         if (inflatNut):
             pathDEIM += "Inflat"
-        DEIMInterpolatedField=""
-        name_nMagicPoints=""
+        DEIMInterpolatedField="fullStressFunction"
+        name_nMagicPoints=str(PARAM.nb_modes)
         pathDEIM += "_" + DEIMInterpolatedField+ "_m" + name_nMagicPoints + "_"
         
     # Cf. parameter [ROMTemporalScheme] in main/redlum-ithaca/src/IthacaFVResolution.C
