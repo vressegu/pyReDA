@@ -1,6 +1,7 @@
 #!/bin/tcsh
 #
 # Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Juin 2022 : Avril 2023]
+#                                                                                  [February 2024]
 #
 # MORAANE project : Scalian - INRAE
 #
@@ -96,15 +97,17 @@ if ((-e ${dir_ROM}/${dir_TrueState}) && (-e ${dir_ROM}/${dir_RedLumPart})) then
   echo ""; echo "creating PNG files for t=[${t_first}:${t_last}]"; echo ""
 
   foreach t ( ${All_t} )
-
+    
     echo -n " ${t}"
     set t_IsoQ = ` echo ${t} | awk '{ printf("%5.0f",$1*100.) }' `
 
-    montage \
-      ${dir_ROM}/${dir_TrueState}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png  \
-      ${dir_ROM}/${dir_RedLumPart}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png \
-      -geometry +1+1 -tile 2x1 ${dir_montage}/t${t_IsoQ}.png
-
+    if ((-e ${dir_ROM}/${dir_TrueState}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png) && (-e ${dir_ROM}/${dir_RedLumPart}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png)) then
+      montage \
+        ${dir_ROM}/${dir_TrueState}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png  \
+        ${dir_ROM}/${dir_RedLumPart}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png \
+        -geometry +1+1 -tile 2x1 ${dir_montage}/t${t_IsoQ}.png
+    endif
+    
   end
   
   echo ""

@@ -11,7 +11,10 @@
 
 ### vect_nb_modes : list of nb_modes values separated by a comma (for example 8,6,4,2)
 # vect_nb_modes 4,2
-vect_nb_modes 4
+vect_nb_modes 2,4,8,16
+vect_nb_modes 2,4,8
+vect_nb_modes 2,4,8
+vect_nb_modes 2
 
 ### type_data : DATASET
 ### for example :
@@ -24,6 +27,8 @@ type_data DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_truncated
 
 ### simulation time duration in seconds
 SECONDS_OF_SIMU 12.05
+#SECONDS_OF_SIMU 100.
+SECONDS_OF_SIMU 20
 
 ### Eddy viscosity : 
 ###   if EV=2 : Eddy Viscosity model with random IC only 
@@ -36,16 +41,16 @@ EV 0
 
 ### Openfoam dataset
 type_data_C  DNS300-D1_Lz1pi  
-#type_data_C  DNS300-GeoLES3900
+type_data_C  DNS300-GeoLES3900
+type_data_C  sillage_LESRe3900
 #type_data_C  StationnaryRegime_TestSeparated_Re300
 
-### bool_PFD = True if the ROM correct for pressure at full order
+### bool_PFD = True if the ROM correct for pressure
 ### (using Leray projection : Proj. onto the space of Free Divergence functions)
 ### command redlumcpp-fullOrderPressure
-### bool_PFD = 2 if the ROM correct for pressure at reduced order
-### command redlumcpp-reducedOrderPressure
 ### command redlumcpp-neglectedOrderPressure otherwise
 bool_PFD True
+#bool_PFD True
 
 ### test basis parameter : if True, MatLab data is used, else openfoam/C++ data is used
 code_DATA_from_matlab False
@@ -56,12 +61,12 @@ code_ROM_from_matlab False
 #code_ROM_from_matlab True
 
 ### test with assimilation : if False, beta_2=0, beta_3=1, init_centred_on_ref=True and assimilation_period>=SECONDS_OF_SIMU-1
-#code_Assimilation False
+code_Assimilation True
 code_Assimilation True
 
 ### If True, does not simulate but load existing (matlab or C++) run instead
 code_load_run False
-#code_load_run True
+code_load_run True
 
 ### if True, INIT condition centered on real condition
 init_centred_on_ref False
@@ -73,6 +78,36 @@ redlumcpp_code_version ROMDNS-v1
 ### openfoam_data PATH
 PATH_openfoam_data /media/laurence.wallian/Val4To/RedLUM/data_red_lum_cpp
 
+type_data_C  DNS300-D1_Lz1pi_500-700
+redlumcpp_code_version ROM-v3.3.3_bbb
+PATH_openfoam_data /workspace/MORAANE/exemple_openfoam
+
+PATH_openfoam_data /media/laurence.wallian/Val4To/RedLUM/data_red_lum_cpp
+type_data_C Geo2D
+redlumcpp_code_version ROMDNS-v3.3.3
+
+type_data_C  DNS300-GeoLES3900
+redlumcpp_code_version ROMDNS-L2-v3.2.1_test
+#redlumcpp_code_version ROMDNS-v3.2.1_test
+redlumcpp_code_version ROMDNS-v3.2.3_SUPERTEST
+#redlumcpp_code_version ROMDNS-L2-v3.2.3_test
+
+#type_data_C  DNS300-D1_Lz1pi_500-700
+#redlumcpp_code_version ROM-v3.3.3_bbb
+#PATH_openfoam_data /workspace/MORAANE/exemple_openfoam
+
+PATH_openfoam_data /workspace/MORAANE/exemple_openfoam
+type_data_C  DNS300-D1_Lz1pi_500-700
+redlumcpp_code_version ROM-v3.2.3
+
+PATH_openfoam_data /media/laurence.wallian/WD_Ressegui/RedLUM/data_red_lum_cpp
+type_data_C DNS300-GeoLES3900
+redlumcpp_code_version ROMDNS-v3.3.2
+
+PATH_openfoam_data /media/laurence.wallian/WD_Ressegui/RedLUM/data_red_lum_cpp
+type_data_C DNS300-GeoLES3900
+redlumcpp_code_version ROMDNS-v3.3.2
+
 ### beta_2 : controls the  noise in the initialization of the filter, if =0, NO noise added to INIT condition
 beta_2 1.
 
@@ -83,6 +118,10 @@ beta_3 1.
 
 ## plot debug
 plot_debug False
-#plot_debug True# y max distance from first observation point to cylinder center
+#plot_debug True
+
+# y max distance from first observation point to cylinder center
 xObs 1.313
 yObs 1.270
+#xObs 1.6
+#yObs 1.5

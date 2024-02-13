@@ -75,6 +75,9 @@ def param_from_ITHACADict_file ( param_file ):
     # 4) t1_testBase : Final time for test basis
     # 5) n_simu : Time step decreasing factor for ROM time integration
     # 6) inflatNut : for case LES only
+    # 7) interpFieldCenteredOrNot : for case LES only
+    # 8) HypRedSto : for case LES only
+    # 9) DEIMInterpolatedField : for case LES only
     
     if param_file.exists():
         f_param = open(param_file, 'r')               
@@ -85,6 +88,7 @@ def param_from_ITHACADict_file ( param_file ):
               break
           else:
             line = line.replace(';','') # suppress COMMA
+            line = line.replace('"','') # suppress QUOTE
             line = line.replace('\t',' ') # replace TAB by one BLANK
             line = line.replace('\n',' ') # replace RETURN by one BLANK
             line = re.sub(' +', ' ', line) # replace multiple BLANKs by a single BLANK
@@ -114,5 +118,14 @@ def param_from_ITHACADict_file ( param_file ):
               if re.search('inflatNut ', line):
                 if str(a[0]) == 'inflatNut': 
                     inflatNut = int(a[-2])
+              if re.search('interpFieldCenteredOrNot ', line):
+                if str(a[0]) == 'interpFieldCenteredOrNot': 
+                    interpFieldCenteredOrNot = int(a[-2])
+              if re.search('HypRedSto ', line):
+                if str(a[0]) == 'HypRedSto': 
+                    HypRedSto = int(a[-2])
+              if re.search('DEIMInterpolatedField ', line):
+                if str(a[0]) == 'DEIMInterpolatedField': 
+                    DEIMInterpolatedField = str(a[-2])
   
-    return t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut
+    return t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut, interpFieldCenteredOrNot, HypRedSto, DEIMInterpolatedField
