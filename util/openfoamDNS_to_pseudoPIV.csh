@@ -962,6 +962,8 @@ if -e slice_Uxy2.csv then
   set All_PIV_x = ` cat PIV_new_x.txt `
   
   set dx_max = ` echo ${All_PIV_x} | sort -n | awk '{ d=$NF-$1; d=sqrt(d*d); print d }' `
+  # case x_max<0 =>
+  set dx_max = 10000
 
   if -e PIV_new_yinv.txt \rm PIV_new_yinv.txt
   cat ${PIV_file_model_new} | grep -v "#" | grep -v "=" | \
