@@ -5,6 +5,14 @@ Created on Tue Apr  2 11:36:02 2019
 @author: matheus.ladvig
 """
 import numpy as np
+
+from numpy.random import Generator, MT19937, PCG64, Philox, SFC64
+rng_MT19937 = Generator(MT19937(0))
+rng_PCG64 = Generator(PCG64(0))
+rng_Philox = Generator(Philox(0))
+rng_SFC64 = Generator(SFC64(0))
+
+
 def evol_forward_bt_MCMC(I,L,C, pchol_cov_noises, dt, bt,bt_fv,bt_m,mutation,noise_past,pho):
     
 #    Compute the next bt
@@ -43,12 +51,12 @@ def evol_forward_bt_MCMC(I,L,C, pchol_cov_noises, dt, bt,bt_fv,bt_m,mutation,noi
     del L
     del C
     
-    noises_centered = np.random.normal(size=(pchol_cov_noises.shape[1],nb_pc1))
-#    noises_centered = np.random.normal(size=((n+1)*n,nb_pc1))
+    noises_centered = rng_MT19937.normal(size=(pchol_cov_noises.shape[1],nb_pc1))
+#    noises_centered = rng_SFC64.normal(size=((n+1)*n,nb_pc1))
     if mutation == True:
 #        pho = 0.995
-        noises_centered = pho*noise_past + np.sqrt(1-pho**2)*np.random.normal(size=(pchol_cov_noises.shape[1],nb_pc1))
-#        noises_centered = pho*noise_past + np.sqrt(1-pho**2)*np.random.normal(size=((n+1)*n,nb_pc1))
+        noises_centered = pho*noise_past + np.sqrt(1-pho**2)*rng_MT19937.normal(size=(pchol_cov_noises.shape[1],nb_pc1))
+#        noises_centered = pho*noise_past + np.sqrt(1-pho**2)*rng_SFC64.normal(size=((n+1)*n,nb_pc1))
         
         
     noises = np.matmul(pchol_cov_noises,noises_centered)*np.sqrt(dt)
