@@ -1,6 +1,7 @@
 #!/bin/tcsh
 #
 # Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Juin 2022 : Avril 2023]
+#                                                                                  [February 2024]
 #
 # MORAANE project : Scalian - INRAE
 #
@@ -96,15 +97,17 @@ if ((-e ${dir_ROM}/${dir_TrueState}) && (-e ${dir_ROM}/${dir_RedLumPart})) then
   echo ""; echo "creating PNG files for t=[${t_first}:${t_last}]"; echo ""
 
   foreach t ( ${All_t} )
-
+    
     echo -n " ${t}"
     set t_IsoQ = ` echo ${t} | awk '{ printf("%5.0f",$1*100.) }' `
 
-    montage \
-      ${dir_ROM}/${dir_TrueState}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png  \
-      ${dir_ROM}/${dir_RedLumPart}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png \
-      -geometry +1+1 -tile 2x1 ${dir_montage}/t${t_IsoQ}.png
-
+    if ((-e ${dir_ROM}/${dir_TrueState}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png) && (-e ${dir_ROM}/${dir_RedLumPart}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png)) then
+      montage \
+        ${dir_ROM}/${dir_TrueState}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png  \
+        ${dir_ROM}/${dir_RedLumPart}/IsoQ/IsoQ2_Z15_t${t_IsoQ}.png \
+        -geometry +1+1 -tile 2x1 ${dir_montage}/t${t_IsoQ}.png
+    endif
+    
   end
   
   echo ""
@@ -133,8 +136,14 @@ if ((-e ${dir_ROM}/${dir_TrueState}) && (-e ${dir_ROM}/${dir_RedLumPart})) then
   end
 
   if -e ${mp4_file} \rm ${mp4_file}
-  #ffmpeg -r 10 -i tmp_movie/%04d.png ${mp4_file}
-  ffmpeg -r 18 -i tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p  ${mp4_file}
+  set code_ppt = 1 # if =1, readable in powerpoint and by VLC when Preference/Codec/Hardware-accelerated desactivated
+  if ( ${code_ppt} == 1 ) then
+    #ffmpeg -r 18 -i tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p ${mp4_file}
+    cat tmp_movie/*.png | ffmpeg -f image2pipe -i - -crf 18 -vcodec libx264 -pix_fmt yuv420p ${mp4_file}
+  else
+    #ffmpeg -r 10 -i tmp_movie/%04d.png ${mp4_file}
+    cat tmp_movie/*.png | ffmpeg -r 10 -f image2pipe -i - ${mp4_file}
+  endif
   
   cd ${dir_ici}
   
