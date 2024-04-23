@@ -213,13 +213,15 @@ def define_file_format (bool_npy):
 
 ##################################################################################################
 # defining folder result
-def define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
+def define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField):
  
     code_Assimilation = PARAM.code_Assimilation
     adv_corrected = PARAM.adv_corrected
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
     dt_run = PARAM.dt_DNS / n_simu
+    
+    print("dt_run="+str(dt_run)+"=dt_DNS/n_simu="+str(PARAM.dt_DNS)+"/"+str(n_simu))
     
     # file format : "*.npy" or "*.txt"
     redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0])) 
@@ -264,17 +266,32 @@ def define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, infla
     pathDEIM = ""
     if (bool_DEIM):
         pathDEIM = "DEIM"
-        bool_interpFieldCenteredOrNot=True
+        #bool_interpFieldCenteredOrNot=True
         if (bool_interpFieldCenteredOrNot):
             pathDEIM += "c"
-            bool_useHypRedSto=True
+            #bool_useHypRedSto=True
             if (bool_useHypRedSto):
                 pathDEIM += "Sto"        
         if (inflatNut):
             pathDEIM += "Inflat"
-        DEIMInterpolatedField="fullStressFunction"
+        #DEIMInterpolatedField="fullStressFunction"
         name_nMagicPoints=str(PARAM.nb_modes)
         pathDEIM += "_" + DEIMInterpolatedField+ "_m" + name_nMagicPoints + "_"
+        
+    # pathDEIM = ""
+    # if (bool_DEIM):
+    #     pathDEIM = "DEIM"
+    #     bool_interpFieldCenteredOrNot=False
+    #     if (bool_interpFieldCenteredOrNot):
+    #         pathDEIM += "c"
+    #         bool_useHypRedSto=False
+    #         if (bool_useHypRedSto):
+    #             pathDEIM += "Sto"        
+    #     if (inflatNut):
+    #         pathDEIM += "Inflat"
+    #     DEIMInterpolatedField=""
+    #     name_nMagicPoints=""
+    #     pathDEIM += "_" + DEIMInterpolatedField+ "_m" + name_nMagicPoints + "_"
         
     # Cf. parameter [ROMTemporalScheme] in main/redlum-ithaca/src/IthacaFVResolution.C
     pathTemporalScheme = ""
@@ -411,7 +428,7 @@ def load_bt_tot(PARAM):
 
 ##################################################################################################
 # loading error
-def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
+def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut,  bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField):
 
     PATH_ROM = PARAM.PATH_ROM
     print(PARAM.PATH_ROM)
@@ -419,7 +436,7 @@ def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
     
-    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)  
+    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut,  bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField)  
             
     filebias = folder + '/bias_temporalModes_U.npy'
     filermse = folder + '/rmse_temporalModes_U.npy'
@@ -444,7 +461,7 @@ def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
 
 ##################################################################################################
 # defining bt_MCMC
-def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
+def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField):
     
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
@@ -453,7 +470,7 @@ def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
     
-    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)  
+    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField)  
 
     file = folder + '/approx_temporalModes_U_'
         
@@ -461,6 +478,7 @@ def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
     bt_MCMC = np.tile(bt_temp, (n_particles, 1, 1))
     bt_MCMC= np.transpose(bt_MCMC, (1, 2, 0))  
     # print('bt_MCMC:'+str(bt_MCMC.shape))
+    print(folder)
                
     for k in range(n_particles): 
         if (file_format=="npy"):
