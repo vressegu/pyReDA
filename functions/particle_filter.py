@@ -9,11 +9,7 @@ import collections
 from evol_forward_bt_MCMC import evol_forward_bt_MCMC
 from scipy import optimize
 
-from numpy.random import Generator, MT19937, PCG64, Philox, SFC64
-rng_MT19937 = Generator(MT19937(0))
-rng_PCG64 = Generator(PCG64(0))
-rng_Philox = Generator(Philox(0))
-rng_SFC64 = Generator(SFC64(0))
+
 
 def resample(weigths):
     
@@ -24,7 +20,7 @@ def resample(weigths):
     if np.sum(weigths) < 1:
         weigths[-1] = weigths[-1] + (1 - np.sum(weigths))
     
-    indexes = rng_MT19937.choice(nb_weigths,nb_weigths, p=weigths)
+    indexes = np.random.choice(nb_weigths,nb_weigths, p=weigths)
     
     return indexes
     
@@ -137,7 +133,7 @@ def calculate_acceptance_prob_champ_all_particles_and_sample(particles_candidate
     particles_final = np.zeros((particles_candidate.shape[0]-1,particles_candidate.shape[1]))
     noise_final = np.zeros(noises.shape)
     for i in range(len(prob)):
-        if rng_MT19937.uniform(0,1)<prob[i]:
+        if np.random.uniform(0,1)<prob[i]:
 
             particles_final[:,i] = particles_candidate[:-1,i]
             noise_final[...,i] = noises_candidate[...,i]

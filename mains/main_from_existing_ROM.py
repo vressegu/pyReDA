@@ -56,12 +56,6 @@ from change_mode_sign import change_mode_sign_HPivK
 
 from collections import namedtuple
 
-from numpy.random import Generator, MT19937, PCG64, Philox, SFC64
-rng_MT19937 = Generator(MT19937(0))
-rng_PCG64 = Generator(PCG64(0))
-rng_Philox = Generator(Philox(0))
-rng_SFC64 = Generator(SFC64(0))
-
 import shutil
 import os
 import math
@@ -128,8 +122,8 @@ type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   redlumcpp_code_version, PATH_openfoam_data, \
   beta_2, beta_3, xObs, yObs = main_globalParam_from_info_txt_file(param_file)
   
-tmp_string = type_data_C[0:3]
-bool_DEIM = (tmp_string != "DNS") # False if DNS, True if LES
+tmp_string = type_data_C[0:2]
+bool_DEIM = (tmp_string == "DNS") # False if DNS, True if LES
 
 if code_load_run:
     # if code_Assimilation:
@@ -253,6 +247,7 @@ mask_obs = True      # True            # Activate spatial mask in the observed d
 #                then factor_of_PIV_time_subsampling_gl = int(5/10 / dt_PIV)
 
 case_choice = 1
+#case_choice = 2
 #case_choice = "Case_Full"
 subsampling_PIV_grid_factor_gl, nbPoints_x_gl, \
  nbPoints_y_gl, assimilation_period_gl = switch_case(case_choice)
@@ -605,11 +600,11 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                  str(subsampling_PIV_grid_factor) + "\n")
     f_info.write(str("\n"))
     
-    # ###### default values ####################
+    ###### default values ####################
     # n_simu = 100 # Time step decreasing factor for ROM time integration
     # # update param_ref
     # param_ref['n_simu'] = n_simu
-    # ########################################
+    ########################################
 
     switcher = {
         'DNS300_inc3d_3D_2017_04_02_NOT_BLURRED_blocks_truncated': 300,
@@ -714,16 +709,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             
             param_file = PATH_ROM.joinpath(Path('../system/ITHACAdict'))
             print("ITHACADict=", str(param_file)+"\n")
-            t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut, interpFieldCenteredOrNot, HypRedSto, DEIMInterpolatedField = param_from_ITHACADict_file ( param_file )
-            
-            # LES parameters : inflatNut, interpFieldCenteredOrNot, useHypRedSto, DEIMInterpolatedField
-            bool_interpFieldCenteredOrNot = True
-            if interpFieldCenteredOrNot == 0:
-              bool_interpFieldCenteredOrNot = False
-            bool_useHypRedSto = True
-            if  HypRedSto == 0:
-              bool_useHypRedSto = False
-              
+            t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut = param_from_ITHACADict_file ( param_file )
             if not bool_DEIM:
                 inflatNut=0
             
@@ -969,7 +955,6 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
     param['temporalScheme'] = param_ref['temporalScheme']
     param['HilbertSpace'] = param_ref['HilbertSpace']
     param['freqBC'] = param_ref['freqBC']
-    
     n_simu = param_ref['n_simu']
 
     print("\nOther default parameters :")
@@ -1227,10 +1212,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                f_info.write(
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
-                   bt_MCMC = load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, \
-                               bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField)
-                   bias, rmse, minDist = load_errors(PARAM, n_simu, n_particles, bool_PFD, \
-                             bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField)
+                   bt_MCMC = load_bt_MCMC( \
+                             PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)
+                   bias, rmse, minDist = load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)
 
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
@@ -1397,10 +1381,9 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
         # The topos that we have estimated reshaped to posterior matrix multiplications
         Hpiv_Topos = np.reshape(topos_new_coordinates, (int(
             topos_new_coordinates.shape[0]*topos_new_coordinates.shape[1]*topos_new_coordinates.shape[2]), topos_new_coordinates.shape[3]), order='F')
-################## added 25/10/23 ##################
+    
         # Left Top observation point position 
         x0_index, y0_index = Left_Top_PtObs( xObs, yObs, coordinates_x_PIV, coordinates_y_PIV ) 
-################## added 25/10/23 ##################
         
         #%%  Define and apply mask in the observation
         '''

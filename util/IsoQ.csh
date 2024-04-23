@@ -1,7 +1,6 @@
 #!/bin/tcsh
 #
 # Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Juin 2022 : Avril 2023]
-#                                                                                  [February 2024]
 #
 # MORAANE project : Scalian - INRAE
 #
@@ -150,7 +149,7 @@ if ( ${code} == 1 ) then
       awk -v N=${N2} '{ if (NR<N) print $0 }' tmp.txt > system/controlDict
       echo "timeEnd ${timeEnd};" >> system/controlDict
       awk -v N=${N2} '{ if (NR>N) print $0 }' tmp.txt >> system/controlDict
-
+      
       postProcess -func Q
     
     endif

@@ -213,15 +213,13 @@ def define_file_format (bool_npy):
 
 ##################################################################################################
 # defining folder result
-def define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField):
+def define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
  
     code_Assimilation = PARAM.code_Assimilation
     adv_corrected = PARAM.adv_corrected
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
     dt_run = PARAM.dt_DNS / n_simu
-    
-    print("dt_run="+str(dt_run)+"=dt_DNS/n_simu="+str(PARAM.dt_DNS)+"/"+str(n_simu))
     
     # file format : "*.npy" or "*.txt"
     redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0])) 
@@ -266,32 +264,17 @@ def define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, infla
     pathDEIM = ""
     if (bool_DEIM):
         pathDEIM = "DEIM"
-        #bool_interpFieldCenteredOrNot=True
+        bool_interpFieldCenteredOrNot=False
         if (bool_interpFieldCenteredOrNot):
             pathDEIM += "c"
-            #bool_useHypRedSto=True
+            bool_useHypRedSto=False
             if (bool_useHypRedSto):
                 pathDEIM += "Sto"        
         if (inflatNut):
             pathDEIM += "Inflat"
-        #DEIMInterpolatedField="fullStressFunction"
-        name_nMagicPoints=str(PARAM.nb_modes)
+        DEIMInterpolatedField=""
+        name_nMagicPoints=""
         pathDEIM += "_" + DEIMInterpolatedField+ "_m" + name_nMagicPoints + "_"
-        
-    # pathDEIM = ""
-    # if (bool_DEIM):
-    #     pathDEIM = "DEIM"
-    #     bool_interpFieldCenteredOrNot=False
-    #     if (bool_interpFieldCenteredOrNot):
-    #         pathDEIM += "c"
-    #         bool_useHypRedSto=False
-    #         if (bool_useHypRedSto):
-    #             pathDEIM += "Sto"        
-    #     if (inflatNut):
-    #         pathDEIM += "Inflat"
-    #     DEIMInterpolatedField=""
-    #     name_nMagicPoints=""
-    #     pathDEIM += "_" + DEIMInterpolatedField+ "_m" + name_nMagicPoints + "_"
         
     # Cf. parameter [ROMTemporalScheme] in main/redlum-ithaca/src/IthacaFVResolution.C
     pathTemporalScheme = ""
@@ -331,6 +314,9 @@ def load_lambda(PARAM):
 
     lambda_values = np.zeros(nb_modes)
     print("data=f(C++) => lambda=f(ITHACAoutput/temporalModes_*modes")
+    # PATH_media = '/media/laurence.wallian/WD_Ressegui/Boulot/'
+    # PATH_bt = PATH_media+'RedLUM/RedLum_from_OpenFoam/RedLum_D1_Lz1pi_Re'+str(int(Re))+'/'
+    # print("PATH_bt="+str(PATH_bt))
     
     if (file_format=="npy"):
         N_t = int((t1_learningBase-t0_learningBase)/dt_DNS)+1
@@ -382,7 +368,6 @@ def load_bt_tot(PARAM):
     t0_testBase = PARAM.t0_testBase
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
-    
     redlumcpp_code_version = os.path.basename(os.path.normpath(PATH_ROM.parents[0]))
     bool_npy = recentROM( redlumcpp_code_version, 3, 1 )    
     file_format = define_file_format (bool_npy)
@@ -423,9 +408,10 @@ def load_bt_tot(PARAM):
 
     return truncated_error2, bt_tot
 
+
 ##################################################################################################
 # loading error
-def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut,  bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField):
+def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
 
     PATH_ROM = PARAM.PATH_ROM
     print(PARAM.PATH_ROM)
@@ -433,7 +419,7 @@ def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut,  boo
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
     
-    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut,  bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField)  
+    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)  
             
     filebias = folder + '/bias_temporalModes_U.npy'
     filermse = folder + '/rmse_temporalModes_U.npy'
@@ -458,7 +444,7 @@ def load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut,  boo
 
 ##################################################################################################
 # defining bt_MCMC
-def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField):
+def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut):
     
     nb_modes = PARAM.nb_modes
     PATH_ROM = PARAM.PATH_ROM
@@ -467,7 +453,7 @@ def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, boo
     t1_testBase = PARAM.t1_testBase
     dt_DNS = PARAM.dt_DNS
     
-    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField)  
+    folder, file_format = define_folder_results(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)  
 
     file = folder + '/approx_temporalModes_U_'
         
@@ -475,7 +461,6 @@ def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, boo
     bt_MCMC = np.tile(bt_temp, (n_particles, 1, 1))
     bt_MCMC= np.transpose(bt_MCMC, (1, 2, 0))  
     # print('bt_MCMC:'+str(bt_MCMC.shape))
-    print(folder)
                
     for k in range(n_particles): 
         if (file_format=="npy"):
@@ -510,8 +495,7 @@ def load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut, boo
     return bt_MCMC
 
 
-##################################################################################################
-# topos
+
 def convert_Cmat_to_python_Topos(MX_PIV_all, index_XY_PIV, data_assimilate_dim_str, PARAM):
      
     data_assimilate_dim=int(data_assimilate_dim_str)
@@ -611,7 +595,7 @@ def convert_Cmat_to_python_Topos(MX_PIV_all, index_XY_PIV, data_assimilate_dim_s
             if not line:
                 break
             else:
-                if nb_line > 3:
+                if nb_line > 1:
                     a = np.fromstring(line, dtype=float, sep=' ')
                     sigmaInv_all[i][0][0] = a[2]
                     sigmaInv_all[i][1][1] = a[3]
@@ -637,8 +621,6 @@ def convert_Cmat_to_python_Topos(MX_PIV_all, index_XY_PIV, data_assimilate_dim_s
     return topos, Sigma_inverse
 
 
-##################################################################################################
-# Fake PIV
 def convert_Cmat_to_python_FakePIV(MX_PIV_all, index_XY_PIV, PARAM):
      
     SECONDS_OF_SIMU = PARAM.SECONDS_OF_SIMU
