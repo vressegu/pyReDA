@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     no_subampl_in_forecast = False 
     vect_reconstruction = [False] # for the super_main_from_existing_ROM
-    vect_adv_corrected = [False,True]
+    #vect_adv_corrected = [False,True]
     vect_adv_corrected = [True]
     test_fct = 'b'
     svd_pchol = 2
@@ -50,13 +50,13 @@ if __name__ == '__main__':
     
     vect_nb_mutation_steps = [-1]                # Number of mutation steps in particle filter 
 
-    temporalScheme = "euler"
-    #temporalScheme = "adams-bashforth"
-    
-    n_particle = 1000
+    # temporalScheme = "euler"
+    # temporalScheme = "adams-bashforth"
+
+    n_particle = 100
     # HilbertSpace = "L2wBC"
-    HilbertSpace = "H1"
-    #HilbertSpace = "H1"
+    # HilbertSpace = "H1"
+    HilbertSpace = "L2"
     freqBC = 100
 
     # parameters defined in [run_info.txt] file
