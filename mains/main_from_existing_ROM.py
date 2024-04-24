@@ -122,8 +122,8 @@ type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   redlumcpp_code_version, PATH_openfoam_data, \
   beta_2, beta_3, xObs, yObs = main_globalParam_from_info_txt_file(param_file)
   
-tmp_string = type_data_C[0:3]
-bool_DEIM = (tmp_string != "DNS") # False if DNS, True if LES
+tmp_string = type_data_C[0:2]
+bool_DEIM = (tmp_string == "DNS") # False if DNS, True if LES
 
 if code_load_run:
     # if code_Assimilation:
