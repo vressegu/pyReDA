@@ -29,6 +29,12 @@ time_text = "t=%6.2f" % time
 title1 = IsoQ_text + " colored by U "
 title2 = ": "+time_text
 
+timeStart = 1100
+timeEnd = 1200
+
+timeStart = TIME_START_VALUE
+timeEnd = TIME_END_VALUE
+
 # color 
 U_color_rainbow = [ 
   1, 0.3, 0.3, 0.9, 
@@ -409,17 +415,23 @@ Render()
  
 view = GetActiveView()
 view.ViewSize = [ 1200, 800 ]
+
+print("--- START ---")
+
 for n,t in enumerate (tsteps):
-  print ("rendering for time %f"%t)
-  time_text = "t=%6.2f" % (t)
-  title2 = ": "+time_text
-  uLUTColorBar.ComponentTitle = str(title2)
-  view.ViewTime = t
-  png_file='IsoQ/IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, time*100)
-  png_file='IsoQ/IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, t*100)
-  WriteImage(png_file, Magnification=0.5)
+  
+  if ( (t >= timeStart) and (t<=timeEnd) ):
+    print ("rendering for time %f if t=[%f:%f]" % (t, timeStart, timeEnd))
+    time_text = "t=%6.2f" % (t)
+    title2 = ": "+time_text
+    uLUTColorBar.ComponentTitle = str(title2)
+    view.ViewTime = t
+    png_file='IsoQ/IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, time*100)
+    png_file='IsoQ/IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, t*100)
+    WriteImage(png_file, Magnification=0.5)
 
+print("--- END ---")
 
-if __name__ == '__main__':
-    # generate extracts
-    SaveExtracts(ExtractsOutputDirectory='extracts')
+#if __name__ == '__main__':
+    ## generate extracts
+    #SaveExtracts(ExtractsOutputDirectory='extracts')

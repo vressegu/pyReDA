@@ -1,6 +1,7 @@
 #!/bin/tcsh
 #
 # Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Juin 2022 : Avril 2023]
+#                                                                                  [February 2024]
 #
 # MORAANE project : Scalian - INRAE
 #
@@ -21,15 +22,15 @@
 # USAGE : tcsh IsoQ.csh arg1 arg2 arg3
 # 
 #  Input parameters :
-#    - arg1 : Start time (default : 600)
-#    - arg2 : End time (default : 670)
-#    - arg3 : openfoam data folder (default : present directory)
+#    - arg1 : openfoam data folder (default : present directory)
 #                 NOTE : it can be 
 #                              1) an exact openfoam result 
 #                                  (.../RedLUM/data_red_lum_cpp/DNS.../openfoam_data)
 #                              2) a pseudo openfoam case (obtained by extractU_from_ROM.csh)
 #                                   2.a) reconstructed from ROM result (.../TrueState_...modes)
 #                                   2.b) reconstructed from pyReDA result (.../RedLumPart_...modes...)
+#    - arg2 : Start time (default : 600)
+#    - arg3 : End time (default : 670)
 #
 #------------------------------------------------------------------------------
 
@@ -45,13 +46,23 @@ alias lsd  ' ls -l | awk '\''{i=0; i=index($1,"d"); if (i==1) print $9 }'\'' '
 
 #------------------------------------------------------------------------------
 
+# PATH for openfoam time directories :  for example .../RedLum_from_OpenFoam/D1_Lz*pi_Re*/openfoam_data
+
+# dir_data folder : default value
+set dir_data = `pwd `
+
+# dir_data folder : input value
+if ( $1 != "" ) set dir_data = $1
+
+set dir_data_SED = ` echo ${dir_data} | sed s/"\/"/"\\\/"/g`
+
 # first time for IsoQ picture
 
 # time first : default value
 set timeStart = 600
 
 # time first : input value
-if ( $1 != "" ) set timeStart = $1
+if ( $2 != "" ) set timeStart = $2
 
 # last time for IsoQ picture
 
@@ -59,17 +70,7 @@ if ( $1 != "" ) set timeStart = $1
 set timeEnd = 670
 
 # time last : input value
-if ( $2 != "" ) set timeEnd = $2
-
-# PATH for openfoam time directories :  for example .../RedLum_from_OpenFoam/D1_Lz*pi_Re*/openfoam_data
-
-# dir_data folder : default value
-set dir_data = `pwd `
-
-# dir_data folder : input value
-if ( $3 != "" ) set dir_data = $3
-
-set dir_data_SED = ` echo ${dir_data} | sed s/"\/"/"\\\/"/g`
+if ( $3 != "" ) set timeEnd = $3
 
 #  ------------------------------------------------------------------------------
 
@@ -149,7 +150,7 @@ if ( ${code} == 1 ) then
       awk -v N=${N2} '{ if (NR<N) print $0 }' tmp.txt > system/controlDict
       echo "timeEnd ${timeEnd};" >> system/controlDict
       awk -v N=${N2} '{ if (NR>N) print $0 }' tmp.txt >> system/controlDict
-      
+
       postProcess -func Q
     
     endif
@@ -201,7 +202,10 @@ if ( ${code} == 1 ) then
     sed s/"PATH_to_DATA"/"${dir_data_SED}"/g | \
     sed s/"Q_VALUE"/"${IsoQ}"/g | \
     sed s/"Z_VALUE"/"${Zplan}"/g | \
-    sed s/"TIME_VALUE"/"${t}"/g > IsoQ.py
+    sed s/"TIME_VALUE"/"${t}"/g  | \
+    sed s/"TIME_START_VALUE"/"${timeStart}"/g  | \
+    sed s/"TIME_END_VALUE"/"${timeEnd}"/g > IsoQ.py
+        
   pvbatch IsoQ.py
 
 endif

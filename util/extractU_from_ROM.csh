@@ -1,6 +1,7 @@
 #!/bin/tcsh
 #
 # Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Juin 2022 : Avril 2023]
+#                                                                                  [February 2024]
 #
 # MORAANE project : Scalian - INRAE
 #
@@ -113,13 +114,15 @@ set code_dir  = ` echo ${temporal_file} | sed s/"\.txt"//g | grep "temporalModeS
 if ( ${code_dir} == 1 ) then
     set dir_extractU = TrueState_${nb_modes}modes
 else
-    set ROM_DATA = ` echo ${temporal_file} | sed s/"\/"/"\n"/g | sed s/"_modes_"/"\n"/g | grep "ROM" | grep -v "ROM-" `
+    set ROM_DATA = ` echo ${temporal_file} | sed s/"\/"/"\n"/g | sed s/"_modes_"/"\n"/g | grep "ROM" | grep -v "ROM-" | tail -1 `
     set Nb_time_step = ` echo ${temporal_file} | sed s/"\/"/"\n"/g | sed s/"_nPcl_"/"\n_nPcl_"/g | grep "_nPcl_" | sed s/"_nPcl_"//g `
     set Other_info = ` echo ${temporal_file} | sed s/"\/temporalModeDAresult\.txt"//g | awk -F'/' '{ print $NF }' `
     set dir_extractU = RedLumPart_${nb_modes}modes_${ROM_DATA}${Other_info}
 endif
-
 set src_ROM_case = ${dir_data_space}/../..
+
+set Nb_time_step = 1
+
 
 set openfoam_path = ${src_ROM_case}/../openfoam_data
 cd ${openfoam_path}
@@ -156,14 +159,16 @@ set last_mode = ` echo ${All_mode} | awk '{ print $NF }' `
 
 # temporal mode file
 if -e temporal_mode_U_mat.txt \rm temporal_mode_U_mat.txt
-if ( ${dir_extractU} == TrueState_${nb_modes}modes ) then
-  awk -v N=${Nb_time_step} '{ if (NR%N == 0) print $0 }' ${temporal_file} > temporal_mode_U_mat.txt 
-else
-  awk -v N=${Nb_time_step} '{ if (NR%N == 1) print $0 }' ${temporal_file} > temporal_mode_U_mat.txt 
-endif
+# if ( ${dir_extractU} == TrueState_${nb_modes}modes ) then
+#   awk -v N=${Nb_time_step} '{ if (NR%N == 0) print $0 }' ${temporal_file} > temporal_mode_U_mat.txt 
+# else
+#   awk -v N=${Nb_time_step} '{ if (NR%N == 1) print $0 }' ${temporal_file} > temporal_mode_U_mat.txt 
+# endif
+awk -v N=${Nb_time_step} '{ if (NR%N == 0) print $0 }' ${temporal_file} > temporal_mode_U_mat.txt 
 
 # new value for the number of defined times
 set n_t_last = ` cat temporal_mode_U_mat.txt | wc -l | awk -v n=${n_t_last} '{ if ($1<n) print $1; else print n}' `
+echo "value of extract times : $n_t_last"
 
 #------------------------------------------------------------------------------
 

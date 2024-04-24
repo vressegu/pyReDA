@@ -709,7 +709,16 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             
             param_file = PATH_ROM.joinpath(Path('../system/ITHACAdict'))
             print("ITHACADict=", str(param_file)+"\n")
-            t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut = param_from_ITHACADict_file ( param_file )
+            t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut, interpFieldCenteredOrNot, HypRedSto, DEIMInterpolatedField = param_from_ITHACADict_file ( param_file )
+            
+            # LES parameters : inflatNut, interpFieldCenteredOrNot, useHypRedSto, DEIMInterpolatedField
+            bool_interpFieldCenteredOrNot = True
+            if interpFieldCenteredOrNot == 0:
+              bool_interpFieldCenteredOrNot = False
+            bool_useHypRedSto = True
+            if  HypRedSto == 0:
+              bool_useHypRedSto = False
+              
             if not bool_DEIM:
                 inflatNut=0
             
@@ -1212,9 +1221,10 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
                f_info.write(
                    "    (function used : Cf. pyReDA/functions/convert_Cmat_to_python_Topos_FakePIV.py)" + "\n\n")
                if code_load_run:
-                   bt_MCMC = load_bt_MCMC( \
-                             PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)
-                   bias, rmse, minDist = load_errors(PARAM, n_simu, n_particles, bool_PFD, bool_DEIM, inflatNut)
+                   bt_MCMC = load_bt_MCMC(PARAM, n_simu, n_particles, bool_PFD, \
+                               bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField)
+                   bias, rmse, minDist = load_errors(PARAM, n_simu, n_particles, bool_PFD, \
+                             bool_DEIM, inflatNut, bool_interpFieldCenteredOrNot, bool_useHypRedSto, DEIMInterpolatedField)
 
             param['truncated_error2'] = truncated_error2
             dt_bt_tot = param['dt'] / \
