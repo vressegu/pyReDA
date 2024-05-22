@@ -181,7 +181,7 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
   Eigen::MatrixXd meanU = Eigen::MatrixXd::Zero(Nrow,3);
   for (int i=0; i<Nrow;i++) 
   {
-     for (int j=0; j<Ntime;j++) 
+     for (int j=0; j<3*Ntime;j++) 
      {
        for (int k=0; k<3; k++ )
        {
@@ -203,12 +203,12 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
   Eigen::MatrixXd meanUab = Eigen::MatrixXd::Zero(Nrow,3);
   for (int i=0; i<Nrow;i++) 
   {
-     for (int j=0; j<Ntime;j++) 
+     for (int j=0; j<3*Ntime;j++) 
      {
        for (int k=0; k<3; k++ )
        {
          if ( j%3 == k ) meanUaa(i,k) = meanUaa(i,k)+Uxyz(i,j)*Uxyz(i,j);
-         int l=k+1; if (l==3) l=-2;
+         int l=1; if (k+l==3) l=-2;
          if ( j%3 == k ) meanUab(i,k) = meanUab(i,k)+Uxyz(i,j)*Uxyz(i,j+l);
       }
     }
