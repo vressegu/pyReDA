@@ -57,7 +57,7 @@ code_ROM_from_matlab False
 
 ### test with assimilation : if False, beta_2=0, beta_3=1, init_centred_on_ref=True and assimilation_period>=SECONDS_OF_SIMU-1
 #code_Assimilation False
-code_Assimilation True
+code_Assimilation False
 
 ### If True, does not simulate but load existing (matlab or C++) run instead
 code_load_run False
