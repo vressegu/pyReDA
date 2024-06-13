@@ -174,12 +174,12 @@ def main_globalParam_from_info_txt_file ( param_file ):
                 # bool_PFD : True if the ROM correct for pressure   
                 if re.search('bool_PFD', line):
                     if str(a[0]) != '#':
-                        if str(a[1]) == 'False':
-                            bool_PFD = False
+                        if str(a[1]) == 'True':
+                            bool_PFD = True
                         elif str(a[1]) == '2':
                             bool_PFD = 2
                         else:
-                            bool_PFD = True
+                            bool_PFD = False
                 # code_DATA_from_matlab : test basis parameter            
                 if re.search('code_DATA_from_matlab', line):
                     if str(a[0]) != '#':
