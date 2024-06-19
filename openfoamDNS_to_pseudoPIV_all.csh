@@ -1019,7 +1019,14 @@ foreach CASE ( ${All_CASE} )
             
             if ( ${movie_type} == "mp4" ) then
             
-              ffmpeg -r 10 -i ${dir_work_up}/tmp_movie/%04d.png ${dir_work}/${mp4_file}
+              set code_ppt = 0 # if =1, readable in powerpoint and by VLC when Preference/Codec/Hardware-accelerated desactivated
+              if ( ${code_ppt} == 1 ) then
+                #ffmpeg -r 18 -i ${dir_work_up}/tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p ${dir_work}/${mp4_file}
+                cat ${dir_work_up}/tmp_movie/*.png | ffmpeg -f image2pipe -i - -crf 18 -vcodec libx264 -pix_fmt yuv420p ${dir_work}/${mp4_file}
+              else
+                #ffmpeg -r 10 -i ${dir_work_up}/tmp_movie/%04d.png ${dir_work}/${mp4_file}
+                cat ${dir_work_up}/tmp_movie/*.png | ffmpeg -r 10 -f image2pipe -i - ${dir_work}/${mp4_file}
+              endif
               set info = "Cf. file ${dir_work}/${mp4_file}\n (mplayer -speed 0.5 ${dir_work}/${mp4_file}) "
            
             else
