@@ -14,9 +14,9 @@
 ##
 ## Paraview operation (pvbatch command) : Openfoam DNS file -> CSV file
 ##
-## step1 = calculator -> Ux scalar
-## step2 = Ux gaussian interpolation
-## step3 = slice Z=Zslice (=Lz/2) of the Ux gaussian interpolation
+## step1 = calculator -> Ux(y) scalar
+## step2 = Ux(y) gaussian interpolation
+## step3 = slice Z=Zslice (=Lz/2) of the Ux(y) gaussian interpolation
 ## 
 ##           => CSV file
 ##
@@ -78,6 +78,7 @@
 #      code_csv_slice_uy1=CODE_CSV_SLICE_UY1_VALUE : =1 if CSV file showing Uy(Z=Zslice) openfoam result
 #      code_csv_slice_ux2=CODE_CSV_SLICE_UX2_VALUE : =1 if CSV file showing Ux(Z=Zslice) openfoam after smoothing
 #      code_csv_slice_uy2=CODE_CSV_SLICE_UY2_VALUE : =1 if CSV file showing Uy(Z=Zslice) openfoam after smoothing
+#      code_csv_slice_uz2=CODE_CSV_SLICE_UZ2_VALUE : =1 if CSV file showing Uz(Z=Zslice) openfoam after smoothing
 #
 ######################################
 
@@ -199,9 +200,10 @@ code_view_slice_Uy2=CODE_VIEW_SLICE_UY2_VALUE
 code_csv_slice_Ux1=CODE_CSV_SLICE_UX1_VALUE
 code_csv_slice_Uy1=CODE_CSV_SLICE_UY1_VALUE
 
-# CSV files [slice_Ux2.csv] and [slice_Uy2.csv] : CSV files created if =1
+# CSV files [slice_Ux2.csv], [slice_Uy2.csv] and [slice_Uz2.csv] : CSV files created if =1
 code_csv_slice_Ux2=CODE_CSV_SLICE_UX2_VALUE
 code_csv_slice_Uy2=CODE_CSV_SLICE_UY2_VALUE
+code_csv_slice_Uz2=CODE_CSV_SLICE_UZ2_VALUE
 
 ### other view conditions ##
 
@@ -488,7 +490,7 @@ slice_Uy2.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
 ######## Uz ###########
  
 #if case_dir == "residualSpeed_2":
-if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+if code_csv_slice_Uz2 == 1:
 
   # create a new 'Calculator'
   calculator_Uz = Calculator(registrationName='Calculator_Uz', Input=base_Calcfoam)
@@ -864,7 +866,7 @@ if case_dir == "mean":
 if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
   uyLUT.RescaleTransferFunction(-0.2, 0.2)
 #if case_dir == "residualSpeed_2":
-if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+if code_csv_slice_Uz2 == 1:
   uyLUT.RescaleTransferFunction(-0.7, 0.7)
 if case_dir == "sillageDNSRe300":
   uyLUT.RescaleTransferFunction(-0.9, 0.9)
@@ -904,7 +906,7 @@ if case_dir == "mean":
 if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
   uyPWF.RescaleTransferFunction(-0.2, 0.2)
 #if case_dir == "residualSpeed_2":
-if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+if code_csv_slice_Uz2 == 1:
   uyPWF.RescaleTransferFunction(-0.7, 0.7)
 if case_dir == "sillageDNSRe300":
   uyPWF.RescaleTransferFunction(-0.9, 0.9)
@@ -1030,6 +1032,47 @@ slice_Uy2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5,
 slice_Uy2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
 
 
+
+#if case_dir == "residualSpeed_":
+if code_csv_slice_Uz2 == 1:
+
+  uzLUT = GetColorTransferFunction('Uz')
+  
+  # show data from slice_Uz2
+  slice_Uz2Display = Show(slice_Uz2, renderView1, 'GeometryRepresentation')
+
+  # trace defaults for the display properties.
+  slice_Uz2Display.Representation = 'Surface With Edges'
+  slice_Uz2Display.ColorArrayName = ['POINTS', 'Uz']
+  slice_Uz2Display.LookupTable = uzLUT
+  slice_Uz2Display.SelectTCoordArray = 'None'
+  slice_Uz2Display.SelectNormalArray = 'None'
+  slice_Uz2Display.SelectTangentArray = 'None'
+  slice_Uz2Display.OSPRayScaleArray = 'Uz'
+  slice_Uz2Display.OSPRayScaleFunction = 'PiecewiseFunction'
+  slice_Uz2Display.SelectOrientationVectors = 'U'
+  slice_Uz2Display.ScaleFactor = 2.0033000472933056
+  slice_Uz2Display.SelectScaleArray = 'Uz'
+  slice_Uz2Display.GlyphType = 'Arrow'
+  slice_Uz2Display.GlyphTableIndexArray = 'Uz'
+  slice_Uz2Display.GaussianRadius = 0.10016500236466527
+  slice_Uz2Display.SetScaleArray = ['POINTS', 'Uz']
+  slice_Uz2Display.ScaleTransferFunction = 'PiecewiseFunction'
+  slice_Uz2Display.OpacityArray = ['POINTS', 'Uz']
+  slice_Uz2Display.OpacityTransferFunction = 'PiecewiseFunction'
+  slice_Uz2Display.DataAxesGrid = 'GridAxesRepresentation'
+  slice_Uz2Display.PolarAxes = 'PolarAxesRepresentation'
+
+  # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+  slice_Uz2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+
+  # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+  slice_Uz2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
+  # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
+  slice_Uz2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
+
 # show color legend
 slice_Uy1Display.SetScalarBarVisibility(renderView1, True)
 
@@ -1145,7 +1188,7 @@ if code_view_slice_Uy1 == 1:
     uyLUT.RescaleTransferFunction(-0.2, 0.2)
     uyPWF.RescaleTransferFunction(-0.2, 0.2)
   #if case_dir == "residualSpeed_2":
-  if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+  if code_csv_slice_Uz2 == 1:
     uyLUT.RescaleTransferFunction(-0.7, 0.7)
     uyPWF.RescaleTransferFunction(-0.7, 0.7)
   if case_dir == "sillageDNSRe300":
@@ -1260,7 +1303,7 @@ if code_view_pointVolumeInterpolator_Uy == 1:
     uyLUT.RescaleTransferFunction(-0.2, 0.2)
     uyPWF.RescaleTransferFunction(-0.2, 0.2)
   #if case_dir == "residualSpeed_2":
-  if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+  if code_csv_slice_Uz2 == 1:
     uyLUT.RescaleTransferFunction(-0.7, 0.7)
     uyPWF.RescaleTransferFunction(-0.7, 0.7)
   if case_dir == "sillageDNSRe300":
@@ -1381,7 +1424,7 @@ if code_view_slice_Uy2 == 1:
     uyLUT.RescaleTransferFunction(-0.2, 0.2)
     uyPWF.RescaleTransferFunction(-0.2, 0.2)
   #if case_dir == "residualSpeed_2":
-  if ((case_dir == "residualSpeed_2") or (case_dir == "residualSpeed_4")  or (case_dir == "residualSpeed_8")  or (case_dir == "residualSpeed_16")):
+  if code_csv_slice_Uz2 == 1:
     uyLUT.RescaleTransferFunction(-0.7, 0.7)
     uyPWF.RescaleTransferFunction(-0.7, 0.7)
   if case_dir == "sillageDNSRe300":
@@ -1496,27 +1539,27 @@ if code_csv_slice_Uy2 == 1:
   FieldAssociation='Point Data',
   AddMetaData=0, 
   AddTime=0)
+
+if code_csv_slice_Uz2 == 1:
+
+  # SaveData('slice_Uz2.csv',proxy=slice_Uz2)
   
-  if case_dir == "residualSpeed_2":
-  
-    # SaveData('slice_Uz2.csv',proxy=slice_Uz2)
-    
-    SaveData('slice_Uz2.csv',
-    proxy=slice_Uz2,
-    ChooseArraysToWrite=1,
-    PointDataArrays=['Uz'],
-    CellDataArrays=[],
-    FieldDataArrays=[],
-    VertexDataArrays=[],
-    EdgeDataArrays=[],
-    RowDataArrays=[],
-    Precision=6,
-    WriteTimeSteps=10,
-    Filenamesuffix='%d',
-    UseScientificNotation=0,
-    FieldAssociation='Point Data',
-    AddMetaData=0, 
-    AddTime=0)
+  SaveData('slice_Uz2.csv',
+  proxy=slice_Uz2,
+  ChooseArraysToWrite=1,
+  PointDataArrays=['Uz'],
+  CellDataArrays=[],
+  FieldDataArrays=[],
+  VertexDataArrays=[],
+  EdgeDataArrays=[],
+  RowDataArrays=[],
+  Precision=6,
+  WriteTimeSteps=10,
+  Filenamesuffix='%d',
+  UseScientificNotation=0,
+  FieldAssociation='Point Data',
+  AddMetaData=0, 
+  AddTime=0)
 
 
 if __name__ == '__main__':
