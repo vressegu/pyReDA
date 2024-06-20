@@ -106,6 +106,8 @@ foreach D ( ${All_D} )
   set Utxt_first = `  cat list_fic_time.txt | grep U | head -1 `
   set Nrow = ` cat ${Utxt_first} | wc -l `
   set Ntime = ` cat list_fic_time.txt | wc -l | awk '{ print $1-1 }' `
+    
+\cp   ~/Bureau/MORAANE/pyReDA/util/cov_after_gaussSmoothing_stat.C ${dir_work_up}/util
   \cp ${dir_work_up}/util/cov_after_gaussSmoothing_stat.C .
   
   g++ -I/usr/local/include/eigen3 -std=c++11 cov_after_gaussSmoothing_stat.C -o cov_after_gaussSmoothing_stat
