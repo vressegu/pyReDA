@@ -122,8 +122,8 @@ type_data_C, bool_PFD, code_DATA_from_matlab, code_ROM_from_matlab, \
   redlumcpp_code_version, PATH_openfoam_data, \
   beta_2, beta_3, xObs, yObs = main_globalParam_from_info_txt_file(param_file)
   
-tmp_string = type_data_C[0:2]
-bool_DEIM = (tmp_string == "DNS") # False if DNS, True if LES
+tmp_string = type_data_C[0:3]
+bool_DEIM = not (tmp_string == "DNS") # False if DNS, True if LES
 
 if code_load_run:
     # if code_Assimilation:
@@ -709,6 +709,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             
             param_file = PATH_ROM.joinpath(Path('../system/ITHACAdict'))
             print("ITHACADict=", str(param_file)+"\n")
+
             t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut, interpFieldCenteredOrNot, HypRedSto, DEIMInterpolatedField = param_from_ITHACADict_file ( param_file )
             
             # LES parameters : inflatNut, interpFieldCenteredOrNot, useHypRedSto, DEIMInterpolatedField
