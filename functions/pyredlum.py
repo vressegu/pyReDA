@@ -189,7 +189,7 @@ class pyRedLUM:
 
         self.info(f"Saving plots to {self.save_dir}",1)
 
-        plt.savefig(f"{self.save_dir}/plots/{name}.png")
+        plt.savefig(f"{self.save_dir}/plots/{name}")
         plt.savefig(f"{self.save_dir}/plots/pdf/{name}.pdf")
 
 
