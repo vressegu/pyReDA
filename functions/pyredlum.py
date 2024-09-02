@@ -9,7 +9,7 @@ import re
 
 def load_once(attr_name):
     """
-    function that allows to load the data only once when calling a function that loads the data
+    function that allows to load the data only once when calling a method that loads the data
     """
     def decorator(func):
         @wraps(func)
@@ -26,7 +26,7 @@ def load_once(attr_name):
 
 class pyRedLUM:
     """
-    Class that handles the data structure of the output of the RedLUM cope
+    Class that handles the data structure of the output of the RedLUM code
     """
 
     def __init__(self, res_folder="./",save_dir ="./",verbose=0):
@@ -77,7 +77,7 @@ class pyRedLUM:
 
     @load_once("lambda")
     def load_lambda(self):
-        lambdaFile = f"{self.res_folder}/../EigenValuesandVector_{self.get_nmodes()}modes/Eigenvalues_U.npy"
+        lambdaFile = f"{self.res_folder}/../EigenValuesandVector_{self.get_nmodes()}modes/EigenvaluesNormalized_U.npy"
         eigen = np.load(lambdaFile)
         return eigen
 
