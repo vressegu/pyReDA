@@ -124,7 +124,7 @@ class pyRedLUM:
             try:
                 error[err] = np.load(f"{self.res_folder}/{err}_temporalModes_U.npy")
             except:
-                print(f"{self.res_folder}/{error_list}_temporalModes_U.npy not found ! kipping it. ")
+                print(f"{self.res_folder}/{err}_temporalModes_U.npy not found ! skipping it. ")
 
         return error
 
