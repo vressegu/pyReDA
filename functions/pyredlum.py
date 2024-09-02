@@ -38,6 +38,7 @@ class pyRedLUM:
         self.res_folder = res_folder
         self.save_dir = save_dir
         self.verbose = verbose
+        self.sota_type = sota_type
 
     def info(self,message,verbose):
         """
