@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 from pathlib import Path
-from param_from_Dict_file import param_from_controlDict_file,param_from_ITHACADict_file
+from param_from_Dict_file import param_from_ITHACADict_file
 from glob import glob
 import numpy as np
 import os
 from functools import wraps
+import re
 
 def load_once(attr_name):
     """
@@ -70,8 +71,7 @@ class pyRedLUM:
     @load_once("dt")
     def get_dt(self):
         self.info("Loading dt in controlDict",2)
-        controlDict = Path(f"{self.res_folder}/../../system/controlDict")
-        param = param_from_controlDict_file(controlDict)
+        param = self.param_from_controlDict_file()
         return param[0]
 
     @load_once("lambda")
@@ -132,6 +132,50 @@ class pyRedLUM:
     # ===================
     # Helper function
     # ===================
+
+    def param_from_controlDict_file(self):
+
+        # 1) dt_DNS : DNS files saving period (>> DNS time step)
+        # 2) t0_DNS : start time for DNS
+        # 3) t1_DNS : end time for DNS
+
+        param_file = Path(f"{self.res_folder}/../../system/controlDict")
+
+        if param_file.exists():
+            f_param = open(param_file, 'r')
+            N_bracket = 0
+            while True:
+                line = f_param.readline()
+                if not line:
+                    break
+                else:
+                    line = line.replace(';', '')  # suppress COMMA
+                    line = line.replace('\t', ' ')  # replace TAB by one BLANK
+                    line = line.replace('\n', ' ')  # replace RETURN by one BLANK
+                    line = re.sub(' +', ' ', line)  # replace multiple BLANKs by a single BLANK
+                    line = re.sub(' {', '{', line)  # brackets must be the first word
+                    line = re.sub(' }', '}', line)  # brackets must be the first word
+                    # => line is now a string with last character=BLANK
+                    a = line.split('/');
+                    line = a[0];
+                    a = line.split(' ')
+                    if a[0] == '{':
+                        N_bracket = N_bracket + 1
+                    if a[0] == '}':
+                        N_bracket = N_bracket - 1
+                    if N_bracket == 0:
+                        if re.search('writeInterval ', line):
+                            if str(a[0]) == 'writeInterval':
+                                dt_DNS = float(a[-2])
+                        if re.search('startTime ', line):
+                            if str(a[0]) == 'startTime':
+                                t0_DNS = float(a[-2])
+                        if re.search('endTime ', line):
+                            if str(a[0]) == 'endTime':
+                                t1_DNS = float(a[-2])
+
+        return dt_DNS, t0_DNS, t1_DNS
+
     def save_plot(self, name):
         """
         Function that saves the current active plot in png and pdf format
