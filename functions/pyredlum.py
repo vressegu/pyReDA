@@ -1,3 +1,5 @@
+import matplotlib as mpl
+mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["#000000", "#E69F00", "#56B4E9","#009E73","#0072B2","#D55E00","CC79A7","#F0E442"])
 import matplotlib.pyplot as plt
 from pathlib import Path
 from param_from_Dict_file import param_from_ITHACADict_file
@@ -29,7 +31,7 @@ class pyRedLUM:
     Class that handles the data structure of the output of the RedLUM code
     """
 
-    def __init__(self, res_folder="./",save_dir ="./",verbose=0,sota_type=None):
+    def __init__(self, res_folder="./",save_dir ="./",verbose=0,sota_type=None,name=None):
         """
         :param res_folder: Folder containing the results in npy format
         :param save_dir: Path where you should change your
@@ -39,6 +41,7 @@ class pyRedLUM:
         self.save_dir = save_dir
         self.verbose = verbose
         self.sota_type = sota_type
+        self.name = name
 
     def info(self,message,verbose):
         """
