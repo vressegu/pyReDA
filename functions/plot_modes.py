@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 # import mplcyberpunk
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["#000000", "#E69F00", "#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","CC79A7"])
 # plt.style.use("cyberpunk")
-from icecream import ic
 
 def plot_all_modes(pr):
 
