@@ -65,7 +65,7 @@ case = pyRedLUM(
 ```
 
 This initialises `case` which is an instance of the pyRedLUM class.
-`case` is then given as input to the `plot_all_modes` in `plot_modes_bp.py` for instance. This function allows to plot all the modes of a given result folder. 
+`case` is then given as input to, for instance, the `plot_all_modes` function in `plot_modes_bp.py`. This function allows to plot all the modes of a given result folder. 
 
 ## Advantage of the Python way
 - Unlike the CLI version of the code, one can easily write a script that loops over a set of directory results, allowing 
@@ -82,5 +82,4 @@ If you modify them, it may cause conflicts when pulling new version of the code.
 
 
 # Coming Features
-
-- [] creating a hierarchy of the `plots` folder separating modes plots and bias plots.
+- [ ] creating a hierarchy of the `plots` folder separating modes plots and bias plots.
