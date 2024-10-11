@@ -57,6 +57,7 @@ class pyRedLUM:
     # ================
     # Getter function
     # ================
+
     def get_error_list(self):
         """
         Initialize the list of error files expected to be found in self.res_folder
@@ -78,11 +79,32 @@ class pyRedLUM:
         param = self.param_from_controlDict_file()
         return param[0]
 
+    @load_once("nSnapshots")
+    def get_nSnapshots(self):
+
+        param = self.param_from_controlDict_file()
+
+        # t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut, interpFieldCenteredOrNot, HypRedSto, DEIMInterpolatedField, n_particles
+        ithacadict = self.param_from_ITHACADict_file()
+
+        dt = param[0]
+        t0 = ithacadict[0]
+        t1 = ithacadict[1]
+
+        n = (t1 - t0) / dt
+
+        return n
+
     @load_once("lambda")
     def load_lambda(self):
-        lambdaFile = f"{self.res_folder}/../EigenValuesandVector_{self.get_nmodes()}modes/EigenvaluesNormalized_U.npy"
+        lambdaFile = f"{self.res_folder}/../EigenValuesandVector_{self.get_nmodes()}modes/Eigenvalues_U.npy"
         eigen = np.load(lambdaFile)
-        return eigen
+        lambdaFile2 = f"{self.res_folder}/../EigenValuesandVector_{self.get_nmodes()}modes/EigenvectorLambda_U.npy"
+        n = self.get_nSnapshots() # Normalize by the number of snapshots
+        lb = np.load(lambdaFile2) / np.sqrt(n)
+        eigen_norm = eigen / n
+        return lb
+
 
     @load_once("nmodes")
     def get_nmodes(self):
@@ -97,6 +119,7 @@ class pyRedLUM:
         nmode = self.get_nmodes()
         modeRef = np.load(f"{self.res_folder}/../temporalModesSimulation_{nmode}modes/U.npy")
         return modeRef
+
     # ==========================
     # Functions loading the data
     # ==========================
@@ -180,6 +203,81 @@ class pyRedLUM:
 
         return dt_DNS, t0_DNS, t1_DNS
 
+    def param_from_ITHACADict_file(self):
+
+        # 1) t0_learningBase : initial time for learning basis
+        # 2) t1_learningBase : Final time for learning basis
+        # 3) t0_testBase : initial time for test basis
+        # 4) t1_testBase : Final time for test basis
+        # 5) n_simu : Time step decreasing factor for ROM time integration
+        # 6) inflatNut : for case LES only
+        # 7) interpFieldCenteredOrNot : for case LES only
+        # 8) HypRedSto : for case LES only
+        # 9) DEIMInterpolatedField : for case LES only
+        param_file = Path(f"{self.res_folder}/../../system/ITHACAdict")
+
+        if param_file.exists():
+            inflatNut = ''
+            interpFieldCenteredOrNot = ''
+            HypRedSto = ''
+            DEIMInterpolatedField = ''
+            f_param = open(param_file, 'r')
+            N_bracket = 0
+            while True:
+                line = f_param.readline()
+                if not line:
+                    break
+                else:
+                    line = line.replace(';', '')  # suppress COMMA
+                    line = line.replace('"', '')  # suppress QUOTE
+                    line = line.replace('\t', ' ')  # replace TAB by one BLANK
+                    line = line.replace('\n', ' ')  # replace RETURN by one BLANK
+                    line = re.sub(' +', ' ', line)  # replace multiple BLANKs by a single BLANK
+                    line = re.sub(' {', '{', line)  # brackets must be the first word
+                    line = re.sub(' }', '}', line)  # brackets must be the first word
+                    # => line is now a string with last character=BLANK
+                    a = line.split('/');
+                    line = a[0];
+                    a = line.split(' ')
+                    if a[0] == '{':
+                        N_bracket = N_bracket + 1
+                    if a[0] == '}':
+                        N_bracket = N_bracket - 1
+                    if N_bracket == 0:
+                        if re.search('InitialTime ', line):
+                            if str(a[0]) == 'InitialTime':
+                                t0_learningBase = float(a[-2])
+                        if re.search('FinalTime ', line):
+                            if str(a[0]) == 'FinalTime':
+                                t1_learningBase = float(a[-2])
+                                t0_testBase = t1_learningBase
+                        if re.search('FinalTimeSimulation ', line):
+                            if str(a[0]) == 'FinalTimeSimulation':
+                                t1_testBase = float(a[-2])
+                        if re.search('nSimu ', line):
+                            if str(a[0]) == 'nSimu':
+                                n_simu = int(a[-2])
+                        if re.search('nParticules ', line):
+                            if str(a[0]) == 'nParticules':
+                                n_particles = int(a[-2])
+                        if re.search('nmodes ', line):
+                            if str(a[0]) == 'nmodes':
+                                n_modes = int(a[-2])
+                        if re.search('inflatNut ', line):
+                            if str(a[0]) == 'inflatNut':
+                                inflatNut = int(a[-2])
+                        if re.search('interpFieldCenteredOrNot ', line):
+                            if str(a[0]) == 'interpFieldCenteredOrNot':
+                                interpFieldCenteredOrNot = int(a[-2])
+                        if re.search('HypRedSto ', line):
+                            if str(a[0]) == 'HypRedSto':
+                                HypRedSto = int(a[-2])
+                        if re.search('DEIMInterpolatedField ', line):
+                            if str(a[0]) == 'DEIMInterpolatedField':
+                                DEIMInterpolatedField = str(a[-2])
+
+        return t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut, interpFieldCenteredOrNot, HypRedSto, DEIMInterpolatedField, n_particles
+
     def save_plot(self, name):
         """
         Function that saves the current active plot in png and pdf format
@@ -190,9 +288,9 @@ class pyRedLUM:
         os.makedirs(f"{self.save_dir}/plots", exist_ok=True)
         os.makedirs(f"{self.save_dir}/plots/pdf", exist_ok=True)
 
-        self.info(f"Saving plots to {self.save_dir}",1)
+        self.info(f"Saving plots to {self.save_dir}/plots/{name}",1)
 
-        plt.savefig(f"{self.save_dir}/plots/{name}")
+        plt.savefig(f"{self.save_dir}/plots/{name}.png")
         plt.savefig(f"{self.save_dir}/plots/pdf/{name}.pdf")
 
 
