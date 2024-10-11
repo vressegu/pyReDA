@@ -24,7 +24,7 @@ export PYTHONPATH=$PYTHONPATH:/path/to/pyReDa/functions
 ## Usage
 
 The CLI version of pyRedLUM allows to generate fast and easy plots through the use of the `redlum-plot.py` script.
-To do so, first go to the directory containing the result you want to plot (folder starting with "Reduced_coeff" ITHACAoutput) and then type .
+To do so, first go to the directory containing the result you want to plot (folder starting with "Reduced_coeff" ITHACAoutput) and then type:
 
 ```bash
 redlum-plot.py [--name / -n, --verbose / -v]
@@ -34,15 +34,11 @@ There are two __optional__ arguments which are the following
 - --name (or -n) allows to specify the name of the case, this will be used in the name of the plots generated. By default 
 - --verbose (or -v) it allows to allow a certain level of verbosity in the code. If something looks weird put it to 
 
+For questions about arguments type `redlum-plot.py --help` and it will display all the explanation of the different available arguments.
+
+Plots are stored in a `plots` directory where you executed redlum-plot.py. Images are by default saved in png and in pdf format (in the `directory`)
 ## Example 
-Below are two example of plot produced by pyRedLUM for a run using 16 modes at Reynolds 3900.
-
-<div style="width: 60%; height: 60%">
-
-![](doc/bias_example.png)
-
-</div>
-
+You can find below one example of a plot produced by pyRedLUM with CLI for a run using 4 modes at $Re=300$.
 
 <div style="width: 80%; height: 80%">
 
@@ -83,3 +79,8 @@ to generate lots of plots without too much effort.
 __I recommend you to copy these files and make your own version of it. Blueprints may evolve, have new features. 
 If you modify them, it may cause conflicts when pulling new version of the code.__
 
+
+
+# Coming Features
+
+- [] creating a hierarchy of the `plots` folder separating modes plots and bias plots.
