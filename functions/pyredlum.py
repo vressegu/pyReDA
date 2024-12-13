@@ -109,8 +109,8 @@ class pyRedLUM:
     @load_once("nmodes")
     def get_nmodes(self):
         self.info("Loading nmode",2)
-        # List the number of IC modes to get the number of modes
-        nmodes = len(glob(f"{self.res_folder}/IC_*.npy"))
+        # List the number of IC modes of velocity to get the number of modes
+        nmodes = len(glob(f"{self.res_folder}/IC_temporalModes_U*.npy"))
         return nmodes
 
     @load_once("mode_ref")
@@ -306,6 +306,3 @@ class pyRedLUM:
 
     def finalize_plot(self,fig):
         pass
-
-
-
