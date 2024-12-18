@@ -243,6 +243,19 @@ WHAT ERRORS may occur
      - [util/cov_before_gaussSmoothing.csh] :
        shell script used to calculated (1/cov) in case of [residualSpeed_...]
        
+       NOTE : Eigen library must be installed, for example in [/usr/local] directory as does the script [install\_eigen.csh] :
+       
+              wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+              tar xvfz eigen-3.4.0.tar.gz
+              cd eigen-3.4.0
+              set source_dir = `pwd` 
+              set build_dir = build_eigen
+              mkdir ${build_dir}
+              cd ${build_dir}
+              cmake ${source_dir} -DCMAKE_INSTALL_PREFIX=/usr/local
+              sudo make install
+              cd ..
+              sudo chmod ugo+rX -R /usr/local/include/eigen3
      - [util/cov_before_gaussSmoothing_model.py]
        python script model used by the script [cov_before_gaussSmoothing.csh]
         

@@ -53,6 +53,20 @@
 //         [cov_yz.csv] : cov (uy*uz) = mean (uy*uz)-mean (uy)*mean (uz)
 //         [cov_zx.csv] : cov (uz*ux) = mean (uz*ux)-mean (uz)*mean (ux)
 //
+// NOTE : Eigen library must be installed, for example in [/usr/local] directory as does the script [install\_eigen.csh] :
+//        
+//               wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+//               tar xvfz eigen-3.4.0.tar.gz
+//               cd eigen-3.4.0
+//               set source_dir = `pwd` 
+//               set build_dir = build_eigen
+//               mkdir ${build_dir}
+//               cd ${build_dir}
+//               cmake ${source_dir} -DCMAKE_INSTALL_PREFIX=/usr/local
+//               sudo make install
+//               cd ..
+//               sudo chmod ugo+rX -R /usr/local/include/eigen3
+// 
 // ------------------------------------------------------------------------------
 
 #ifdef __GNUC__
