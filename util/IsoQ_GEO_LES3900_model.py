@@ -411,7 +411,7 @@ Render()
 #view = GetActiveView()
 #view.ViewSize = [ 1200, 800 ]
 #png_file='IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, time*100)
-#WriteImage(png_file, Magnification=0.5)
+#SaveScreenshot(png_file,view)
  
 view = GetActiveView()
 view.ViewSize = [ 1200, 800 ]
@@ -428,7 +428,7 @@ for n,t in enumerate (tsteps):
     view.ViewTime = t
     png_file='IsoQ/IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, time*100)
     png_file='IsoQ/IsoQ%.0f_Z%.0f_t%.0f.png' % (IsoQ*10, planZ*10, t*100)
-    WriteImage(png_file, Magnification=0.5)
+    SaveScreenshot(png_file,view)
 
 print("--- END ---")
 
