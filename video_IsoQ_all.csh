@@ -221,9 +221,14 @@ foreach ROM_DATA ( ${All_ROM_DATA} )
         end
 
         if -e ${mp4_file} \rm ${mp4_file}
-        #ffmpeg -r 10 -i ${dir_montage}/tmp_movie/%04d.png ${mp4_file}
-        
-        ffmpeg -r 18 -i ${dir_montage}/tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p  ${mp4_file}
+        set code_ppt = 1 # if =1, readable in powerpoint and by VLC when Preference/Codec/Hardware-accelerated desactivated
+        if ( ${code_ppt} == 1 ) then
+          #ffmpeg -r 18 -i ${dir_montage}/tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p ${mp4_file}
+          cat ${dir_montage}/tmp_movie/*.png | ffmpeg -f image2pipe -i - -crf 18 -vcodec libx264 -pix_fmt yuv420p ${mp4_file}
+        else
+          #ffmpeg -r 10 -i ${dir_montage}/tmp_movie/%04d.png ${mp4_file}
+          cat ${dir_montage}/tmp_movie/*.png | ffmpeg -r 10 -f image2pipe -i - ${mp4_file} 
+        endif
         
         cd ${dir_ici}
         

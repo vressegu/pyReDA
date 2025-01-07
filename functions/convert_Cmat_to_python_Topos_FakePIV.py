@@ -613,7 +613,7 @@ def convert_Cmat_to_python_Topos(MX_PIV_all, index_XY_PIV, data_assimilate_dim_s
             if not line:
                 break
             else:
-                if nb_line > 1:
+                if nb_line > 3:
                     a = np.fromstring(line, dtype=float, sep=' ')
                     sigmaInv_all[i][0][0] = a[2]
                     sigmaInv_all[i][1][1] = a[3]

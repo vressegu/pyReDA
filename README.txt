@@ -28,7 +28,7 @@ Authors & citations :
 #########################################
 
 Authors :
-Laurence Wallian, Valentin Resseguier
+Matheus Ladvig, Laurence Wallian, Valentin Resseguier
 
 How to cite:
 Resseguier, V., Ladvig, M., & Heitz, D. (2022). Real-time estimation and prediction of unsteady flows using reduced-order models coupled with few measurements. Journal of Computational Physics, 471, 111631.
