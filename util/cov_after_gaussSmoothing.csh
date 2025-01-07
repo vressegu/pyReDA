@@ -21,12 +21,29 @@
 #          files in [DIR0/ROM_PIV/DIR1/cov_after_gaussSmoothing] : list_fic_time.txt and other U*.txt files
 #          files in [DIR0/util] : cov_after_gaussSmoothing_stat.C
 #
-# NOTE : script [openfoamDNS_to_pseudoPIV_all.csh] must have been run before
+# NOTE 1 : script [openfoamDNS_to_pseudoPIV_all.csh] must have been run before
 #              with a command like this :
 #                       tcsh openfoamDNS_to_pseudoPIV_all.csh 1.5 ROM residualSpeed_2_U
 #              according to the [run_info.txt] file
 #
+# NOTE 2 : Eigen library must be installed, for example in [/usr/local] directory as does the script [install\_eigen.csh] :
+#        
+#               wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+#               tar xvfz eigen-3.4.0.tar.gz
+#               cd eigen-3.4.0
+#               set source_dir = `pwd` 
+#               set build_dir = build_eigen
+#               mkdir ${build_dir}
+#               cd ${build_dir}
+#               cmake ${source_dir} -DCMAKE_INSTALL_PREFIX=/usr/local
+#               sudo make install
+#               cd ..
+#               sudo chmod ugo+rX -R /usr/local/include/eigen3
 #------------------------------------------------------------------------------
+
+# eigen include PATH
+
+set eigen_includePATH = /usr/local/include/eigen3
 
 # pvbatch PATH
 
@@ -110,7 +127,7 @@ foreach D ( ${All_D} )
 \cp   ~/Bureau/MORAANE/pyReDA/util/cov_after_gaussSmoothing_stat.C ${dir_work_up}/util
   \cp ${dir_work_up}/util/cov_after_gaussSmoothing_stat.C .
   
-  g++ -I/usr/local/include/eigen3 -std=c++11 cov_after_gaussSmoothing_stat.C -o cov_after_gaussSmoothing_stat
+  g++ -I${eigen_includePATH} -std=c++11 cov_after_gaussSmoothing_stat.C -o cov_after_gaussSmoothing_stat
   ./cov_after_gaussSmoothing_stat list_fic_time.txt ${Nrow} ${Ntime}
   
   # CSV file => inverse COV+diag_matrix() as PIV file

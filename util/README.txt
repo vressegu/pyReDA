@@ -129,22 +129,22 @@ WHAT CAN be MODIFIED by the USER in (*) [openfoamDNS_to_pseudoPIV_all.csh] :
          
          for example :
          
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means ROMppp
+          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROMppp] means
             - Zlice=2.3
             - only ROM_PIV is concerned
             
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means ROM---DNS
+          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROM---DNS] means
             - Zlice=2.3
             - FakePIV and ROM_PIV are concerned
 
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means aaDNS
+          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 aaDNS] means
             - Zlice=2.3
             - only FakePIV is concerned
           
           WARNING : the second argument musn't have BLANK characters : 
               the following expressions don't work :
-              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means DNS ROM
-              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means "DNS ROM"
+              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 DNS ROM]
+              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 "DNS ROM"]
           
   3.b) the subdirectories in the case of ROM_PIV
           by default, all subdirectories [mean], [spatialModes_...] and [residualSpeed_...] are used :
@@ -152,15 +152,15 @@ WHAT CAN be MODIFIED by the USER in (*) [openfoamDNS_to_pseudoPIV_all.csh] :
          
          for example :
          
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means ROMppp mean
+          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROMppp mean] means
             - Zlice=2.3
             - only ROM_PIV is concerned
             - only mean is concerned
   
           WARNING : the third argument musn't have BLANK characters and must correspond to an existant directory : 
               the following expressions don't work :
-              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means ROM mean_ppp
-              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means ROM spatialModes_567
+              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROM mean_ppp] means
+              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROM spatialModes_567] means
                  
 4) for preleminary tests, it can also be useful to modify time [t_first] and [t_last] 
 
@@ -243,6 +243,19 @@ WHAT ERRORS may occur
      - [util/cov_before_gaussSmoothing.csh] :
        shell script used to calculated (1/cov) in case of [residualSpeed_...]
        
+       NOTE : Eigen library must be installed, for example in [/usr/local] directory as does the script [install\_eigen.csh] :
+       
+              wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+              tar xvfz eigen-3.4.0.tar.gz
+              cd eigen-3.4.0
+              set source_dir = `pwd` 
+              set build_dir = build_eigen
+              mkdir ${build_dir}
+              cd ${build_dir}
+              cmake ${source_dir} -DCMAKE_INSTALL_PREFIX=/usr/local
+              sudo make install
+              cd ..
+              sudo chmod ugo+rX -R /usr/local/include/eigen3
      - [util/cov_before_gaussSmoothing_model.py]
        python script model used by the script [cov_before_gaussSmoothing.csh]
         

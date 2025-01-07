@@ -1983,7 +1983,7 @@ slice_Mean_xyDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Mean_xyDisplay.Representation = 'Points'
 #slice_Mean_xyDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('mean_xy.png', Magnification=0.5)
+SaveScreenshot('mean_xy.png',view)
 
 Hide(slice_Mean_xy, renderView1)
 slice_Mean_xyDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2008,7 +2008,7 @@ slice_Mean_yzDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Mean_yzDisplay.Representation = 'Points'
 #slice_Mean_yzDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('mean_yz.png', Magnification=0.5)
+SaveScreenshot('mean_yz.png',view)
 
 Hide(slice_Mean_yz, renderView1)
 slice_Mean_yzDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2033,7 +2033,7 @@ slice_Mean_zxDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Mean_zxDisplay.Representation = 'Points'
 #slice_Mean_zxDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('mean_zx.png', Magnification=0.5)
+SaveScreenshot('mean_zx.png',view)
 
 Hide(slice_Mean_zx, renderView1)
 slice_Mean_zxDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2060,7 +2060,7 @@ slice_Cov_xyDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Cov_xyDisplay.Representation = 'Points'
 #slice_Cov_xyDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('cov_xy.png', Magnification=0.5)
+SaveScreenshot('cov_xy.png',view)
 
 Hide(slice_Cov_xy, renderView1)
 slice_Cov_xyDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2085,7 +2085,7 @@ slice_Cov_yzDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Cov_yzDisplay.Representation = 'Points'
 #slice_Cov_yzDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('cov_yz.png', Magnification=0.5)
+SaveScreenshot('cov_yz.png',view)
 
 Hide(slice_Cov_yz, renderView1)
 slice_Cov_yzDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2110,7 +2110,7 @@ slice_Cov_zxDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Cov_zxDisplay.Representation = 'Points'
 #slice_Cov_zxDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('cov_zx.png', Magnification=0.5)
+SaveScreenshot('cov_zx.png',view)
 
 Hide(slice_Cov_zx, renderView1)
 slice_Cov_zxDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2137,7 +2137,7 @@ slice_Mean_xxDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Mean_xxDisplay.Representation = 'Points'
 #slice_Mean_xxDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('mean_xx.png', Magnification=0.5)
+SaveScreenshot('mean_xx.png',view)
 
 Hide(slice_Mean_xx, renderView1)
 slice_Mean_xxDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2162,7 +2162,7 @@ slice_Mean_yyDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Mean_yyDisplay.Representation = 'Points'
 #slice_Mean_yyDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('mean_yy.png', Magnification=0.5)
+SaveScreenshot('mean_yy.png',view)
 
 Hide(slice_Mean_yy, renderView1)
 slice_Mean_yyDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2187,7 +2187,7 @@ slice_Mean_zzDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Mean_zzDisplay.Representation = 'Points'
 #slice_Mean_zzDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('mean_zz.png', Magnification=0.5)
+SaveScreenshot('mean_zz.png',view)
 
 Hide(slice_Mean_zz, renderView1)
 slice_Mean_zzDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2214,7 +2214,7 @@ slice_Cov_xxDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Cov_xxDisplay.Representation = 'Points'
 #slice_Cov_xxDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('cov_xx.png', Magnification=0.5)
+SaveScreenshot('cov_xx.png',view)
 
 Hide(slice_Cov_xx, renderView1)
 slice_Cov_xxDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2239,7 +2239,7 @@ slice_Cov_yyDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Cov_yyDisplay.Representation = 'Points'
 #slice_Cov_yyDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('cov_yy.png', Magnification=0.5)
+SaveScreenshot('cov_yy.png',view)
 
 Hide(slice_Cov_yy, renderView1)
 slice_Cov_yyDisplay.SetScalarBarVisibility(renderView1, False)
@@ -2264,7 +2264,7 @@ slice_Cov_zzDisplay.PointSize = pointSize_for_SurfaceDisplay
 #slice_Cov_zzDisplay.Representation = 'Points'
 #slice_Cov_zzDisplay.PointSize = pointSize_for_PointsDisplay
 
-WriteImage('cov_zz.png', Magnification=0.5)
+SaveScreenshot('cov_zz.png',view)
 
 Hide(slice_Cov_zz, renderView1)
 slice_Cov_zzDisplay.SetScalarBarVisibility(renderView1, False)

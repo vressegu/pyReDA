@@ -1141,11 +1141,11 @@ if code_view_slice_Ux1 == 1:
   if code_view_withGrid == 1:
     slice_Ux1Display.Representation = 'Surface With Edges'
     slice_Ux1Display.PointSize = 1.0
-    WriteImage('Ux_calculator_withGrid.png', Magnification=0.5)
+    SaveScreenshot('Ux_calculator_withGrid.png',view)
 
   slice_Ux1Display.Representation = 'Surface'
   slice_Ux1Display.PointSize = 1.0
-  WriteImage('Ux_calculator_withoutGrid.png', Magnification=0.5)
+  SaveScreenshot('Ux_calculator_withoutGrid.png',view)
   
 ########## first view  =slice_Uy1 
 if code_view_slice_Uy1 == 1:
@@ -1198,11 +1198,11 @@ if code_view_slice_Uy1 == 1:
   if code_view_withGrid == 1:
     slice_Uy1Display.Representation = 'Surface With Edges'
     slice_Uy1Display.PointSize = 1.0
-    WriteImage('Uy_calculator_withGrid.png', Magnification=0.5)
+    SaveScreenshot('Uy_calculator_withGrid.png',view)
 
   slice_Uy1Display.Representation = 'Surface'
   slice_Uy1Display.PointSize = 1.0
-  WriteImage('Uy_calculator_withoutGrid.png', Magnification=0.5)
+  SaveScreenshot('Uy_calculator_withoutGrid.png',view)
 # ----------------------------------------------------------------
 
 ########## second view  =pointVolumeInterpolator_Ux
@@ -1249,7 +1249,7 @@ if code_view_pointVolumeInterpolator_Ux == 1:
   if code_view_withGrid == 1:
     pointVolumeInterpolator_UxDisplay.Representation = 'Surface With Edges'
     pointVolumeInterpolator_UxDisplay.PointSize = pointSize_for_SurfaceDisplay
-    WriteImage('Ux_calculator_pointVolumeInterpolator_withGrid.png', Magnification=0.5)
+    SaveScreenshot('Ux_calculator_pointVolumeInterpolator_withGrid.png',view)
 
   if mode_view_NoGrid == "SURFACE":
     pointVolumeInterpolator_UxDisplay.Representation = 'Surface'
@@ -1259,7 +1259,7 @@ if code_view_pointVolumeInterpolator_Ux == 1:
     pointVolumeInterpolator_UxDisplay.Representation = 'Points'
     pointVolumeInterpolator_UxDisplay.PointSize = pointSize_for_PointsDisplay
   
-  WriteImage('Ux_calculator_pointVolumeInterpolator_withoutGrid.png', Magnification=0.5)
+  SaveScreenshot('Ux_calculator_pointVolumeInterpolator_withoutGrid.png',view)
   
 ########## second view  =pointVolumeInterpolator_Uy
 if code_view_pointVolumeInterpolator_Uy == 1:
@@ -1313,7 +1313,7 @@ if code_view_pointVolumeInterpolator_Uy == 1:
   if code_view_withGrid == 1:
     pointVolumeInterpolator_UyDisplay.Representation = 'Surface With Edges'
     pointVolumeInterpolator_UyDisplay.PointSize = pointSize_for_SurfaceDisplay
-    WriteImage('Uy_calculator_pointVolumeInterpolator_withGrid.png', Magnification=0.5)
+    SaveScreenshot('Uy_calculator_pointVolumeInterpolator_withGrid.png',view)
 
   if mode_view_NoGrid == "SURFACE":
     pointVolumeInterpolator_UyDisplay.Representation = 'Surface'
@@ -1323,7 +1323,7 @@ if code_view_pointVolumeInterpolator_Uy == 1:
     pointVolumeInterpolator_UyDisplay.Representation = 'Points'
     pointVolumeInterpolator_UyDisplay.PointSize = pointSize_for_PointsDisplay
   
-  WriteImage('Uy_calculator_pointVolumeInterpolator_withoutGrid.png', Magnification=0.5)
+  SaveScreenshot('Uy_calculator_pointVolumeInterpolator_withoutGrid.png',view)
 
 ########## third view  =slice_Ux2
 if code_view_slice_Ux2 == 1:
@@ -1370,7 +1370,7 @@ if code_view_slice_Ux2 == 1:
   if code_view_withGrid == 1:
     slice_Ux2Display.Representation = 'Surface With Edges'
     slice_Ux2Display.PointSize = pointSize_for_SurfaceDisplay
-    WriteImage('Ux_calculator_pointVolumeInterpolator_slicepointSize_for_PointsDisplay_withGrid.png', Magnification=0.5)
+    SaveScreenshot('Ux_calculator_pointVolumeInterpolator_slicepointSize_for_PointsDisplay_withGrid.png',view)
 
   if mode_view_NoGrid == "SURFACE":
     slice_Ux2Display.Representation = 'Surface'
@@ -1380,7 +1380,7 @@ if code_view_slice_Ux2 == 1:
     slice_Ux2Display.Representation = 'Points'
     slice_Ux2Display.PointSize = pointSize_for_PointsDisplay
   
-  WriteImage('Ux_calculator_pointVolumeInterpolator_slice_withoutGrid.png', Magnification=0.5)
+  SaveScreenshot('Ux_calculator_pointVolumeInterpolator_slice_withoutGrid.png',view)
   
 ########## third view  =slice_Uy2
 if code_view_slice_Uy2 == 1:
@@ -1434,7 +1434,7 @@ if code_view_slice_Uy2 == 1:
   if code_view_withGrid == 1:
     slice_Uy2Display.Representation = 'Surface With Edges'
     slice_Uy2Display.PointSize = pointSize_for_SurfaceDisplay
-    WriteImage('Uy_calculator_pointVolumeInterpolator_slice_withGrid.png', Magnification=0.5)
+    SaveScreenshot('Uy_calculator_pointVolumeInterpolator_slice_withGrid.png',view)
 
   if mode_view_NoGrid == "SURFACE":
     slice_Uy2Display.Representation = 'Surface'
@@ -1444,7 +1444,7 @@ if code_view_slice_Uy2 == 1:
     slice_Uy2Display.Representation = 'Points'
     slice_Uy2Display.PointSize = pointSize_for_PointsDisplay
   
-  WriteImage('Uy_calculator_pointVolumeInterpolator_slice_withoutGrid.png', Magnification=0.5)
+  SaveScreenshot('Uy_calculator_pointVolumeInterpolator_slice_withoutGrid.png',view)
 
 # ----------------------------------------------------------------
 
