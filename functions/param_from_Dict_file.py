@@ -80,6 +80,10 @@ def param_from_ITHACADict_file ( param_file ):
     # 9) DEIMInterpolatedField : for case LES only
     
     if param_file.exists():
+        inflatNut = ''
+        interpFieldCenteredOrNot = ''
+        HypRedSto = ''
+        DEIMInterpolatedField = ''
         f_param = open(param_file, 'r')               
         N_bracket = 0
         while True:
