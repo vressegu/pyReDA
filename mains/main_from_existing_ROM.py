@@ -709,6 +709,7 @@ def main_from_existing_ROM(nb_modes, threshold, type_data, nb_period_test,
             
             param_file = PATH_ROM.joinpath(Path('../system/ITHACAdict'))
             print("ITHACADict=", str(param_file)+"\n")
+
             t0_learningBase, t1_learningBase, t0_testBase, t1_testBase, n_simu, inflatNut, interpFieldCenteredOrNot, HypRedSto, DEIMInterpolatedField = param_from_ITHACADict_file ( param_file )
             
             # LES parameters : inflatNut, interpFieldCenteredOrNot, useHypRedSto, DEIMInterpolatedField
