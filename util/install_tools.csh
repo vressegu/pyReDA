@@ -2,6 +2,8 @@
 #
 # Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Juin 2022 : Février 2023]
 #
+# update for Ubuntu 22.04 : Janvier 2025
+#
 # MORAANE project : Scalian - INRAE
 #
 #  ------------------------------------------------------------------------------
@@ -13,7 +15,7 @@
 # Instructions to install useful tools for running
 # Cshell [openfoamDNS_to_pseudoPIV_all_VR.csh] script
 
-# OS tested : Ubuntu 18.04 and 20.04 
+# OS tested : Ubuntu 18.04, 20.04 and 22.04
 
 #  ------------------------------------------------------------------------------
 
@@ -21,20 +23,25 @@
 
 sudo apt-get update
 
+### Shell environment : updating [.cshrc] and [.bashrc] files ###
 
-### Cshell environment (after installing tcsh) ###
-
+## Cshell environment (after installing tcsh) ##
 if (!(-e ~/.cshrc)) touch  ~/.cshrc
+## Bourne shell environment (after installing bash) ##
+if (!(-e ~/.bashrc)) touch  ~/.bashrc
 
 ### linux tools ###
 
 set All_Package = ( \
   gawk \
   sed \
-  gnuplot \
   coreutils \
   ffmpeg \
   mencoder \
+  imagemagick \
+  build-essential \
+  libgl1-mesa-dev \
+  wget \
 )
 foreach package ( ${All_Package} )
   echo ""; echo "------ installation package ${package} -----------"; echo ""
@@ -56,6 +63,71 @@ foreach package ( ${All_Package} )
   sudo apt-get install ${package}
 end
 
+# Qt 5 #
+
+echo "\n# Qt 5 installation\n"
+
+wget https://download.qt.io/official_releases/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz
+tar xvfz qt-everywhere-opensource-src-5.15.16.tar.xz
+cd qt-everywhere-src-5.15.16/
+ls
+./configure -prefix /usr/local/Qt/5.15.16 -opensource -confirm-license
+make -j8
+make install
+sudo make install
+cd  ~
+
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib
+setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib
+
+# gnuplot with Qt 5 #
+
+echo "\n# gnuplot installation\n"
+
+wget https://sourceforge.net/projects/gnuplot/files/gnuplot/5.4.2/gnuplot-5.4.2.tar.gz
+
+tar xvfz gnuplot-5.4.2.tar.gz
+cd gnuplot-5.4.2
+./configure -prefix=/usr/local
+make
+sudo make install
+cd ~
+
+# test gnuplot
+if -e /tmp/test_gnuplot.gnp \rm /tmp/test_gnuplot.gnp
+echo "set terminal png" > /tmp/test_gnuplot.gnp
+echo 'set output "/tmp/test_gnuplot.png"' >> /tmp/test_gnuplot.gnp
+echo 'plot sin(x) w l lc rgb "red" title "test gnuplot : sin(x)" ' >> /tmp/test_gnuplot.gnp
+gnuplot /tmp/test_gnuplot.gnp
+if (-e /tmp/test_gnuplot.png ) then
+  echo "\n  gnuplot OK : Cf. /tmp/test_gnuplot.png\n"
+  eog /tmp/test_gnuplot.png
+else
+  echo "\n  \!\!\! OUPS \! BAD gnuplot installation \!\!\! \n"
+  exit()
+endif
+
+## updating ressource files ##
+
+set install_tools_date = ` date | awk '{ printf ("# "); for (i=1;i<=NF;i++) printf("%s ",$i); print(" : part added by pyReDA/util/install_tools.csh")}' `
+
+cd ~
+echo ""
+echo "------ [.cshrc] : --------"
+echo ""
+echo "\n${install_tools_date}" >> ~/.cshrc
+echo 'setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib' >> ~/.cshrc
+echo 'alias gnuplot '"'"'/usr/local/gnuplot \!*'"'" >> ~/.cshrc
+tail -4 ~/.cshrc
+echo ""
+echo "------ [.bashrc] : --------"
+echo ""
+echo "\n${install_tools_date}" >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib' >> ~/.bashrc
+echo 'alias gnuplot='"'"'/usr/local/gnuplot \!*'"'" >> ~/.bashrc
+tail -4 ~/.bashrc
+echo ""
+
 ## paraview 5.10.1 installation ##
 
 cd  ~
@@ -69,24 +141,34 @@ sudo chmod ugo+rX -R ParaView-5.10.1-MPI-Linux-Python3.9-x86_64
   
 ## updating ressource files ##
 
+set install_tools_date = ` date | awk '{ printf ("# "); for (i=1;i<=NF;i++) printf("%s ",$i); print(" : part added by pyReDA/util/install_tools.csh")}' `
+
 cd ~
 echo "" 
-echo "------ [.cshrc] : --------" 
 echo ""
+echo ""
+echo "------ [.cshrc] : --------"
+echo ""
+echo "\n${install_tools_date}" >> ~/.cshrc
 echo "setenv DIR_PARAVIEW /usr/local/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64" >> ~/.cshrc
 echo '  setenv PATH ${PATH}:${DIR_PARAVIEW}/bin:${DIR_PARAVIEW}/lib' >> ~/.cshrc
 echo '  setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${DIR_PARAVIEW}/lib' >> ~/.cshrc
 echo '  alias paraview '"'"'${DIR_PARAVIEW}/bin/paraview'"'" >> ~/.cshrc
+echo '  alias parafoam '"'"'touch log.foam; ${DIR_PARAVIEW}/bin/paraview log.foam'"'" >> ~/.cshrc
 echo '  alias pvbatch  '"'"'${DIR_PARAVIEW}/bin/pvbatch'"'" >> ~/.cshrc
+tail -7 ~/.cshrc
 echo ""
 echo "" 
 echo "------ [.bashrc] : --------" 
 echo ""
+echo "\n${install_tools_date}" >> ~/.bashrc
 echo "export DIR_PARAVIEW=/usr/local/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64" >> ~/.bashrc
 echo '  export PATH=${PATH}:${DIR_PARAVIEW}/bin:${DIR_PARAVIEW}/lib' >> ~/.bashrc
 echo '  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DIR_PARAVIEW}/lib' >> ~/.bashrc
 echo '  alias paraview='"'"'${DIR_PARAVIEW}/bin/paraview'"'" >> ~/.bashrc
+echo '  alias parafoam='"'"'touch log.foam; ${DIR_PARAVIEW}/bin/paraview log.foam'"'" >> ~/.bashrc
 echo '  alias pvbatch='"'"'${DIR_PARAVIEW}/bin/pvbatch'"'" >> ~/.bashrc
+tail -7 ~/.bashrc
 echo ""
   
 ## alternative to updating ressource files : aliases defined in script files ##
@@ -161,15 +243,21 @@ if ( ${choix} == "binary" ) then
   
   # updating ressource files
   
+  set install_tools_date = ` date | awk '{ printf ("# "); for (i=1;i<=NF;i++) printf("%s ",$i); print(" : part added by pyReDA/util/install_tools.csh")}' `
+
   cd ~
   echo "" 
   echo "------ [.cshrc] : --------" 
   echo ""
+  echo "\n${install_tools_date}" >> ~/.cshrc
   echo 'alias paraFoam '"'"/usr/lib/openfoam/openfoam2106/bin/paraFoam"'" >> ~/.cshrc
-  echo "" 
+  tail -3 ~/.cshrc
+  echo ""
   echo "------ [.bashrc] : --------" 
   echo ""
+  echo "\n${install_tools_date}" >> ~/.bashrc
   echo 'alias paraFoam='"'"/usr/lib/openfoam/openfoam2106/bin/paraFoam"'" >> ~/.bashrc
+  tail -3 ~/.bashrc
   echo ""
   
 else
@@ -195,18 +283,30 @@ else
   
   # updating ressource files
 
+  set install_tools_date = ` date | awk '{ printf ("# "); for (i=1;i<=NF;i++) printf("%s ",$i); print(" : part added by pyReDA/util/install_tools.csh")}' `
+
   cd ~
   echo "" 
   echo "------ [.cshrc] : --------" 
   echo ""
+  echo "\n${install_tools_date}" >> ~/.cshrc
   echo 'alias paraFoam '"'"/usr/local/OpenFOAM-v2106/bin/paraFoam"'" >> ~/.cshrc
-  echo "" 
+  tail -3 ~/.cshrc
+  echo ""
   echo "------ [.bashrc] : --------" 
   echo ""
+  echo "\n${install_tools_date}" >> ~/.bashrc
   echo 'alias paraFoam='"'"/usr/local/OpenFOAM-v2106/bin/paraFoam"'" >> ~/.bashrc
+  tail -3 ~/.bashrc
   echo ""
   
 endif
+
+echo "\nCf. ressource files [.cshrc] and [.bashrc] for new aliases :"
+echo "  - gnuplot"
+echo "  - paraview"
+echo "  - parafoam and pvbatch = f(paraview)"
+echo "  - paraFoam = f(OpenFOAM)\n"
 
 #  ------------------------------------------------------------------------------
 
