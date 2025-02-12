@@ -43,6 +43,25 @@ class pyRedLUM:
         self.sota_type = sota_type
         self.name = name
 
+        self.check_pressure_modes()
+
+        for path_dir in [res_folder,save_dir]:
+            if not os.path.exists(path_dir):
+                raise ValueError(f"{path_dir} does not exists")
+
+
+    def check_pressure_modes(self):
+        """
+        Use the case name to know if we expect to see pressure modes
+        """
+
+        if "reducedOrderPressure" in self.name:
+            self.has_p_modes = True
+            self.info("Case has pressure modes",2)
+        else:
+            self.info("Case has no pressure modes",2)
+            self.has_p_modes = False
+
     def info(self,message,verbose):
         """
         Custom print function that handle different level of verbose
@@ -105,7 +124,6 @@ class pyRedLUM:
         eigen_norm = eigen / n
         return lb
 
-
     @load_once("nmodes")
     def get_nmodes(self):
         self.info("Loading nmode",2)
@@ -113,11 +131,25 @@ class pyRedLUM:
         nmodes = len(glob(f"{self.res_folder}/IC_temporalModes_U*.npy"))
         return nmodes
 
+    @load_once("nmodesp")
+    def get_nmodes_p(self):
+        self.info("Loading nmode for pressure",2)
+        # List the number of IC modes of velocity to get the number of modes
+        nmodes = len(glob(f"{self.res_folder}/IC_temporalModes_p*.npy"))
+        return nmodes
+
     @load_once("mode_ref")
     def load_modesRef(self):
         self.info("Loading reference mode",2)
         nmode = self.get_nmodes()
         modeRef = np.load(f"{self.res_folder}/../temporalModesSimulation_{nmode}modes/U.npy")
+        return modeRef
+
+    @load_once("mode_refp")
+    def load_modesRef_p(self):
+        self.info("Loading p reference mode",2)
+        nmode = self.get_nmodes_p()
+        modeRef = np.load(f"{self.res_folder}/../temporalModesSimulation_centered_{nmode}modes/p.npy")
         return modeRef
 
     # ==========================
@@ -129,12 +161,26 @@ class pyRedLUM:
         meanMode = np.load(f"{self.res_folder}/mean_temporalModes_U.npy")
         return meanMode
 
+    @load_once("meanModep")
+    def load_meanModes_p(self):
+        self.info("Loading meanMode",2)
+        meanMode = np.load(f"{self.res_folder}/mean_temporalModes_p.npy")
+        return meanMode
+
     @load_once("ICs")
     def load_ICs(self):
         IC_list = []
         self.info("Loading ICs",2)
         for i in range(1, self.nmodes + 1):
             IC_list.append(np.load(f"{self.res_folder}/IC_temporalModes_U_{i}.npy"))
+        return IC_list
+
+    @load_once("ICsp")
+    def load_ICs_p(self):
+        IC_list = []
+        self.info("Loading ICs",2)
+        for i in range(1, self.nmodes + 1):
+            IC_list.append(np.load(f"{self.res_folder}/IC_temporalModes_p_{i}.npy"))
         return IC_list
 
     @load_once("error")
