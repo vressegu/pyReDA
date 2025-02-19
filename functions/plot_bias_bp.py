@@ -32,23 +32,24 @@ def plot_bias(case,name_out=None):
     plt.tight_layout()
     case.save_plot(name_save)
 
-def compare_bias_sota(case, sota,name_out=None):
+def compare_bias(case1, case2, name_out=None,error_list=[]):
 
     # Load the data
-    error = case.load_errors()
-    nmodes = case.get_nmodes()
-    error_list = error.keys()
+    error1 = case1.load_errors()
+    nmodes1 = case1.get_nmodes()
 
-    error_sota  = sota.load_errors()
-    nmodes_sota = sota.get_nmodes()
+    # Get the list of error to plot
+    if len(error_list) == 0:
+        error_list = error1.keys()
+    print(error_list)
+    error2  = case2.load_errors()
+    nmodes2 = case2.get_nmodes()
 
-    try:
-        nmodes_sota == nmodes
-    except:
-        raise ValueError(f"Not the same number of modes for case ({nmodes}) et sota ({nmodes_sota})")
+    if nmodes2 != nmodes1:
+        raise ValueError(f"Not the same number of modes for case 1 ({nmodes1}) and 2 ({nmodes2})")
 
     # Get the time for the xaxis
-    t = case.get_t_sim()
+    t = case1.get_t_sim()
 
     # Setting up an iterator to have the same color for each error, we then specify dashed lines for the SOTA
     cycle_color = iter(["C0","C1","C2","C3","C4"])
@@ -66,13 +67,13 @@ def compare_bias_sota(case, sota,name_out=None):
         this_color = next(cycle_color)
         ax.plot(
             t,
-            error[err],
+            error1[err],
             color=this_color,
             label=err
         )
         ax.plot(
             t,
-            error_sota[err],
+            error2[err],
             color=this_color,
             linestyle="--",
             # label=err + f"{sota.sota_type}SOTA"
@@ -80,11 +81,9 @@ def compare_bias_sota(case, sota,name_out=None):
 
     ax.legend(frameon=False)
 
-    # plt.ylim(0,1)
-
-
-    fake_line_case, = axl.plot([],[],color="black",label=case.name)
-    fake_line_sota, = axl.plot([],[],color="black",linestyle="--",label=sota.name)
+    # Draw line just to add it to the legend
+    fake_line_case, = axl.plot([], [], color="black", label=case1.name)
+    fake_line_sota, = axl.plot([], [], color="black", linestyle="--", label=case2.name)
     legend = axl.legend(frameon=False,loc="center",ncol=2)
 
 
@@ -95,15 +94,17 @@ def compare_bias_sota(case, sota,name_out=None):
     fig.tight_layout()
 
     if name_out:
-        name_save = f"{name_out}_{nmodes}"
+        name_save = f"{name_out}_{nmodes1}"
     else:
-        name_save = f"compare_bias_{case.name}-_{sota.name}_{nmodes}"
+        name_save = f"compare_bias_{case1.name}-{case2.name}_{nmodes1}"
 
-    sota.save_plot(name_save)
+    print("Saving : ",name_save)
+    case2.save_plot(name_save)
 
 if __name__ == "__main__":
 
-    working_dir = "/home/fregnault/Data/red_lum_cpp_data/DNS300/ROMDNS-v3.4.1"
+    # working_dir = "/home/fregnault/Data/red_lum_cpp_data/DNS300/ROMDNS-v3.4.1"
+    working_dir = "C:/Users/florian.regnault/Documents/data/L2/"
     case = pyRedLUM(
         res_folder=f"{working_dir}/ITHACAoutput/Reduced_coeff_2_0.001_100_neglectedPressure_centered",
         # res_folder=f"{working_dir}/ITHACAoutput/Reduced_coeff_4_0.001_100_neglectedPressure_centered",
@@ -120,7 +121,7 @@ if __name__ == "__main__":
     )
 
 
-    compare_bias_sota(case,sota)
+    compare_bias(case,sota)
 
     plot_bias(sota,f"bias_{sota.sota_type}SOTA")
 
