@@ -48,6 +48,10 @@ foreach package ( ${All_Package} )
   sudo apt-get install ${package}
 end
 
+# new or updated ressource files
+
+set list_add_cshrc = ()
+set list_add_bashrc = ()
 
 ### paraview 5.10.1 ###
 
@@ -75,10 +79,10 @@ ls
 make -j8
 make install
 sudo make install
-cd  ~
+cd ~
 
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib
-setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib
+#export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/Qt/5.15.16/lib
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/usr/local/Qt/5.15.16/lib
 
 # gnuplot with Qt 5 #
 
@@ -115,18 +119,27 @@ cd ~
 echo ""
 echo "------ [.cshrc] : --------"
 echo ""
-echo "\n${install_tools_date}" >> ~/.cshrc
-echo 'setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib' >> ~/.cshrc
-echo 'alias gnuplot '"'"'/usr/local/gnuplot \!*'"'" >> ~/.cshrc
-tail -4 ~/.cshrc
+set add_cshrc = cshrc_gnuplot-5.4.2
+if (!(-e ${add_cshrc})) touch ${add_cshrc}
+echo "\n${install_tools_date}" >> ${add_cshrc}
+echo 'setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib' >> ${add_cshrc}
+echo 'alias gnuplot '"'"'/usr/local/gnuplot \!*'"'" >> ${add_cshrc}
+echo "You may have to add the following lines to your ~/.cshrc file (Cf. ~/${add_cshrc})  :\n"
+tail -4 ${add_cshrc}
 echo ""
 echo "------ [.bashrc] : --------"
 echo ""
-echo "\n${install_tools_date}" >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib' >> ~/.bashrc
-echo 'alias gnuplot='"'"'/usr/local/gnuplot \!*'"'" >> ~/.bashrc
-tail -4 ~/.bashrc
+set add_bashrc = bashrc_gnuplot-5.4.2
+if (!(-e ${add_bashrc})) touch ${add_bashrc}
+echo "\n${install_tools_date}" >> ${add_bashrc}
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/Qt/5.15.16/lib' >> ${add_bashrc}
+echo 'alias gnuplot='"'"'/usr/local/gnuplot \!*'"'" >> ${add_bashrc}
+echo "You may have to add the following lines to your ~/.bashrc file (Cf. ~/${add_bashrc})  :\n"
+tail -4 ${add_bashrc}
 echo ""
+
+set list_add_cshrc = ( ${list_add_cshrc} ${add_cshrc} )
+set list_add_bashrc = ( ${list_add_bashrc} ${add_bashrc} )
 
 ## paraview 5.10.1 installation ##
 
@@ -149,28 +162,37 @@ echo ""
 echo ""
 echo "------ [.cshrc] : --------"
 echo ""
-echo "\n${install_tools_date}" >> ~/.cshrc
-echo "setenv DIR_PARAVIEW /usr/local/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64" >> ~/.cshrc
-echo '  setenv PATH ${PATH}:${DIR_PARAVIEW}/bin:${DIR_PARAVIEW}/lib' >> ~/.cshrc
-echo '  setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${DIR_PARAVIEW}/lib' >> ~/.cshrc
-echo '  alias paraview '"'"'${DIR_PARAVIEW}/bin/paraview'"'" >> ~/.cshrc
-echo '  alias parafoam '"'"'touch log.foam; ${DIR_PARAVIEW}/bin/paraview log.foam'"'" >> ~/.cshrc
-echo '  alias pvbatch  '"'"'${DIR_PARAVIEW}/bin/pvbatch'"'" >> ~/.cshrc
-tail -7 ~/.cshrc
+set add_cshrc = cshrc_ParaView-5.10.1
+if (!(-e ${add_cshrc})) touch ${add_cshrc}
+echo "\n${install_tools_date}" >> ${add_cshrc}
+echo "setenv DIR_PARAVIEW /usr/local/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64" >> ${add_cshrc}
+echo '  setenv PATH ${PATH}:${DIR_PARAVIEW}/bin:${DIR_PARAVIEW}/lib' >> ${add_cshrc}
+echo '  setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${DIR_PARAVIEW}/lib' >> ${add_cshrc}
+echo '  alias paraview '"'"'${DIR_PARAVIEW}/bin/paraview'"'" >> ${add_cshrc}
+echo '  alias parafoam '"'"'touch log.foam; ${DIR_PARAVIEW}/bin/paraview log.foam'"'" >> ${add_cshrc}
+echo '  alias pvbatch  '"'"'${DIR_PARAVIEW}/bin/pvbatch'"'" >> ${add_cshrc}
+echo "You may have to add the following lines to your ~/.cshrc file (Cf. ~/${add_cshrc})  :\n"
+tail -7 ${add_cshrc}
 echo ""
 echo "" 
 echo "------ [.bashrc] : --------" 
 echo ""
-echo "\n${install_tools_date}" >> ~/.bashrc
-echo "export DIR_PARAVIEW=/usr/local/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64" >> ~/.bashrc
-echo '  export PATH=${PATH}:${DIR_PARAVIEW}/bin:${DIR_PARAVIEW}/lib' >> ~/.bashrc
-echo '  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DIR_PARAVIEW}/lib' >> ~/.bashrc
-echo '  alias paraview='"'"'${DIR_PARAVIEW}/bin/paraview'"'" >> ~/.bashrc
-echo '  alias parafoam='"'"'touch log.foam; ${DIR_PARAVIEW}/bin/paraview log.foam'"'" >> ~/.bashrc
-echo '  alias pvbatch='"'"'${DIR_PARAVIEW}/bin/pvbatch'"'" >> ~/.bashrc
-tail -7 ~/.bashrc
+set add_bashrc = bashrc_ParaView-5.10.1
+if (!(-e ${add_bashrc})) touch ${add_bashrc}
+echo "\n${install_tools_date}" >> ${add_bashrc}
+echo "export DIR_PARAVIEW=/usr/local/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64" >> ${add_bashrc}
+echo '  export PATH=${PATH}:${DIR_PARAVIEW}/bin:${DIR_PARAVIEW}/lib' >> ${add_bashrc}
+echo '  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DIR_PARAVIEW}/lib' >> ${add_bashrc}
+echo '  alias paraview='"'"'${DIR_PARAVIEW}/bin/paraview'"'" >> ${add_bashrc}
+echo '  alias parafoam='"'"'touch log.foam; ${DIR_PARAVIEW}/bin/paraview log.foam'"'" >> ${add_bashrc}
+echo '  alias pvbatch='"'"'${DIR_PARAVIEW}/bin/pvbatch'"'" >> ${add_bashrc}
+echo "You may have to add the following lines to your ~/.bashrc file (Cf. ~/${add_bashrc})  :\n"
+tail -7 ${add_bashrc}
 echo ""
-  
+
+set list_add_cshrc = ( ${list_add_cshrc} ${add_cshrc} )
+set list_add_bashrc = ( ${list_add_bashrc} ${add_bashrc} )
+
 ## alternative to updating ressource files : aliases defined in script files ##
 
 echo ''
@@ -249,17 +271,26 @@ if ( ${choix} == "binary" ) then
   echo "" 
   echo "------ [.cshrc] : --------" 
   echo ""
-  echo "\n${install_tools_date}" >> ~/.cshrc
-  echo 'alias paraFoam '"'"/usr/lib/openfoam/openfoam2106/bin/paraFoam"'" >> ~/.cshrc
-  tail -3 ~/.cshrc
+  set add_cshrc = cshrc_paraFoam2106
+  if (!(-e ${add_cshrc})) touch ${add_cshrc}
+  echo "\n${install_tools_date}" >> ${add_cshrc}
+  echo 'alias paraFoam '"'"/usr/lib/openfoam/openfoam2106/bin/paraFoam"'" >> ${add_cshrc}
+  echo "You may have to add the following lines to your ~/.cshrc file (Cf. ~/${add_cshrc})  :\n"
+  tail -3 ${add_cshrc}
   echo ""
   echo "------ [.bashrc] : --------" 
   echo ""
-  echo "\n${install_tools_date}" >> ~/.bashrc
-  echo 'alias paraFoam='"'"/usr/lib/openfoam/openfoam2106/bin/paraFoam"'" >> ~/.bashrc
-  tail -3 ~/.bashrc
+  set add_bashrc = bashrc_paraFoam2106
+  if (!(-e ${add_bashrc})) touch ${add_bashrc}
+  echo "\n${install_tools_date}" >> ${add_bashrc}
+  echo 'alias paraFoam='"'"/usr/lib/openfoam/openfoam2106/bin/paraFoam"'" >> ${add_bashrc}
+  echo "You may have to add the following lines to your ~/.bashrc file (Cf. ~/${add_bashrc})  :\n"
+  tail -3 ${add_bashrc}
   echo ""
-  
+
+  set list_add_cshrc = ( ${list_add_cshrc} ${add_cshrc} )
+  set list_add_bashrc = ( ${list_add_bashrc} ${add_bashrc} )
+
 else
   
   # loading openfoam2106 source and moving it to /usr/local
@@ -289,24 +320,39 @@ else
   echo "" 
   echo "------ [.cshrc] : --------" 
   echo ""
-  echo "\n${install_tools_date}" >> ~/.cshrc
-  echo 'alias paraFoam '"'"/usr/local/OpenFOAM-v2106/bin/paraFoam"'" >> ~/.cshrc
-  tail -3 ~/.cshrc
+  set add_cshrc = cshrc_paraFoam2106
+  if (!(-e ${add_cshrc})) touch ${add_cshrc}
+  echo "\n${install_tools_date}" >> ${add_cshrc}
+  echo 'alias paraFoam '"'"/usr/local/OpenFOAM-v2106/bin/paraFoam"'" >> ${add_cshrc}
+  echo "You may have to add the following lines to your ~/.cshrc file (Cf. ~/${add_cshrc})  :\n"
+  tail -3 ${add_cshrc}
   echo ""
   echo "------ [.bashrc] : --------" 
   echo ""
-  echo "\n${install_tools_date}" >> ~/.bashrc
-  echo 'alias paraFoam='"'"/usr/local/OpenFOAM-v2106/bin/paraFoam"'" >> ~/.bashrc
-  tail -3 ~/.bashrc
+  set add_bashrc = bashrc_paraFoam2106
+  if (!(-e ${add_bashrc})) touch ${add_bashrc}
+  echo "\n${install_tools_date}" >> ${add_bashrc}
+  echo 'alias paraFoam='"'"/usr/local/OpenFOAM-v2106/bin/paraFoam"'" >> ${add_bashrc}
+  echo "You may have to add the following lines to your ~/.bashrc file (Cf. ~/${add_bashrc})  :\n"
+  tail -3 ${add_bashrc}
   echo ""
-  
+
+  set list_add_cshrc = ( ${list_add_cshrc} ${add_cshrc} )
+  set list_add_bashrc = ( ${list_add_bashrc} ${add_bashrc} )
+
 endif
 
-echo "\nCf. ressource files [.cshrc] and [.bashrc] for new aliases :"
-echo "  - gnuplot"
-echo "  - paraview"
-echo "  - parafoam and pvbatch = f(paraview)"
-echo "  - paraFoam = f(OpenFOAM)\n"
+echo "\nCf. ressource files [~/.cshrc] and [~/.bashrc] for new aliases :"
+echo -n "  - gnuplot                            : Cf. "; echo ${list_add_cshrc} | sed s/" "/"\n"/g | grep gnuplot | sed s/"cshrc"/"~\/*shrc"/g
+echo -n "  - paraview                           : Cf. "; echo ${list_add_cshrc} | sed s/" "/"\n"/g | grep ParaView | sed s/"cshrc"/"~\/*shrc"/g
+echo -n "  - parafoam and pvbatch = f(paraview) : Cf. "; echo ${list_add_cshrc} | sed s/" "/"\n"/g | grep ParaView | sed s/"cshrc"/"~\/*shrc"/g
+echo -n "  - paraFoam = f(OpenFOAM)             : Cf. "; echo ${list_add_cshrc} | sed s/" "/"\n"/g | grep paraFoam | sed s/"cshrc"/"~\/*shrc"/g
+
+echo ""
+echo "List of resources file added or updated in /home/$USER directory: "
+echo "   related to ~/.cshrc  file : ${list_add_cshrc}"
+echo "   related to ~/.bashrc file : ${list_add_bashrc}"
+echo ""
 
 #  ------------------------------------------------------------------------------
 
