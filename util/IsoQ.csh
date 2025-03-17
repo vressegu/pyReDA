@@ -19,7 +19,7 @@
 #
 #------------------------------------------------------------------------------
 #
-# USAGE : tcsh IsoQ.csh arg1 arg2 arg3
+# USAGE : tcsh IsoQ.csh arg1 arg2 arg3 arg4 arg5
 # 
 #  Input parameters :
 #    - arg1 : openfoam data folder (default : present directory)
@@ -31,6 +31,8 @@
 #                                   2.b) reconstructed from pyReDA result (.../RedLumPart_...modes...)
 #    - arg2 : Start time (default : 600)
 #    - arg3 : End time (default : 670)
+#    - arg4 : cylinder center absciss X0_cyl (default : 2.5)
+#    - arg5 : cylinder center ordinate Y0_cyl (default : 6.0)
 #
 #------------------------------------------------------------------------------
 
@@ -72,6 +74,27 @@ set timeEnd = 670
 # time last : input value
 if ( $3 != "" ) set timeEnd = $3
 
+# cylinder center
+
+# X : default value
+set X0_cyl = 2.5
+
+# X : input value
+if ( $4 != "" ) set X0_cyl = $4
+
+# Y : default value
+set Y0_cyl = 6.0
+
+# Y : input value
+if ( $5 != "" ) set Y0_cyl = $5
+
+# min and max Z domain
+set Z1 = ` cat constant/polyMesh/points | awk '{ if (NF==3) printf("%.6f\n", $3) }' | sed s/")"//g | sort | uniq | head -1 `
+set Z2 = ` cat constant/polyMesh/points | awk '{ if (NF==3) printf("%.6f\n", $3) }' | sed s/")"//g | sort | uniq | tail -1 `
+
+# paraview version
+set pvbatch_version_value = ` pvbatch -V | awk '{ print $NF }' | awk -F'.' '{ printf("%s.%s",$1,$2) }' `
+
 #  ------------------------------------------------------------------------------
 
 cd ${dir_data}
@@ -79,7 +102,7 @@ if ( (!( -e constant)) || (!(-e system/controlDict)) ) then
 
   echo ""
   echo "OUPS \! NO Directory constant and/or file system/controlDict Found in ${dir_data} \!"
-  echo "OUPS \! Q criterion can NOT be added to simulation results for t=[${timeStart}:${timeEnd}] \! "; echo ""
+  echo "OUPS \!      -> Q criterion can NOT be added to simulation results for t=[${timeStart}:${timeEnd}] \! "; echo ""
   echo ""
   
   cd ${dir_ici}
@@ -90,10 +113,10 @@ else
 
   echo ""
   echo "OK, Directory constant and file system/controlDict Found in ${dir_data} "
-  echo "Q criterion can be added to simulation results for t=[${timeStart}:${timeEnd}]"; echo ""
+  echo "      -> Q criterion can be added to simulation results for t=[${timeStart}:${timeEnd}]"; echo ""
   echo ""
   
-  set IsoQ_model = ${dir_util}/IsoQ_GEO_LES3900_model.py
+  set IsoQ_model = ${dir_util}/IsoQ_model.py
   
   if ( -e ${IsoQ_model} ) then
   
@@ -199,7 +222,12 @@ if ( ${code} == 1 ) then
   set t = ${t_first}
   if -e IsoQ.py \rm IsoQ.py
   cat ${IsoQ_model} | \
+    sed s/"PVBATCH_VERSION_VALUE"/"${pvbatch_version_value}"/g | \
     sed s/"PATH_to_DATA"/"${dir_data_SED}"/g | \
+    sed s/"Z1_VALUE"/"${Z1}"/g | \
+    sed s/"Z2_VALUE"/"${Z2}"/g | \
+    sed s/"X0_CYL_VALUE"/"${X0_cyl}"/g | \
+    sed s/"Y0_CYL_VALUE"/"${Y0_cyl}"/g | \
     sed s/"Q_VALUE"/"${IsoQ}"/g | \
     sed s/"Z_VALUE"/"${Zplan}"/g | \
     sed s/"TIME_VALUE"/"${t}"/g  | \
