@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+import matplotlib
+import argparse
+
+#from plot_modes_bp import plot_all_modes
+from plot_modes_lw import plot_all_modes
+from plot_modes_lw import plot_all_modes_separated
+
+matplotlib.use("Agg")
+from pyredlum import pyRedLUM
+from plot_bias_bp import plot_bias
+#import plot_modes_bp
+import plot_modes_lw
+import os
+
+##
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="redlum-plot",
+        description="redlum-plot is a script that is using the pyRedLUM framework allowing to quickly produce plots of the\
+        RedLUM algorithm"
+    )
+    parser.add_argument("-v","--verbose",type=int,default=0,help="increase output verbosity")
+    parser.add_argument("-n","--name",type=str,default=None,help="Specify name used when saving plots")
+    parser.add_argument("-m","--num_mode",type=int,default=0,help="Specify num_mode used when saving plots")
+    working_dir = os.getcwd()
+    plotting_dir = f"{working_dir}"
+
+    # Getting arguments stored in parser
+    args = parser.parse_args()
+    verbose = args.verbose
+    name = args.name
+    num_mode = args.num_mode
+
+    if name is None:
+        name = os.getcwd().split("/")[-1]
+
+    case = pyRedLUM(
+        res_folder=working_dir,
+        save_dir=plotting_dir,
+        name = name,
+        verbose=verbose
+    )
+    plot_bias(case)
+
+
+    #if (num_mode == 0):
+        #plot_all_modes(case)
+    #else:
+        #plot_all_modes_separated(case=case, name_out=name, num_mode=num_mode)
+
+    # num_mode :
+    #   if = 0 : like [plot_all_modes] -> all modes in a single PNG File
+    #   if = -1 : all modes in a separated PNG File
+    #   if > 0 : a single PNG File for mode=num_mode
+    plot_all_modes_separated(case=case, num_mode=num_mode)
+
+##
