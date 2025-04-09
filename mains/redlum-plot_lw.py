@@ -3,7 +3,7 @@ import matplotlib
 import argparse
 
 #from plot_modes_bp import plot_all_modes
-from plot_modes_lw import plot_all_modes
+#from plot_modes_lw import plot_all_modes
 from plot_modes_lw import plot_all_modes_separated
 
 matplotlib.use("Agg")
