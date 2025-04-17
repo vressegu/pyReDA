@@ -812,21 +812,20 @@ slice_Ux2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5,
 # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
 slice_Ux2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
 
-
-# show color legend
-slice_Ux1Display.SetScalarBarVisibility(renderView1, True)
+# hide color legend
+slice_Ux1Display.SetScalarBarVisibility(renderView1, False)
 
 # hide data in view
 Hide(slice_Ux1, renderView1)
 
-# show color legend
-pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, True)
+# hide color legend
+pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, False)
 
 # hide data in view
 Hide(pointVolumeInterpolator_Ux, renderView1)
 
-# show color legend
-slice_Ux2Display.SetScalarBarVisibility(renderView1, True)
+# hide color legend
+slice_Ux2Display.SetScalarBarVisibility(renderView1, False)
 
 # hide data in view
 Hide(slice_Ux2, renderView1)
@@ -1031,7 +1030,23 @@ slice_Uy2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5,
 # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
 slice_Uy2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
 
+# hide color legend
+slice_Uy1Display.SetScalarBarVisibility(renderView1, False)
 
+# hide data in view
+Hide(slice_Uy1, renderView1)
+
+# hide color legend
+pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, False)
+
+# hide data in view
+Hide(pointVolumeInterpolator_Uy, renderView1)
+
+# hide color legend
+slice_Uy1Display.SetScalarBarVisibility(renderView1, False)
+
+# hide data in view
+Hide(slice_Uy2, renderView1)
 
 #if case_dir == "residualSpeed_":
 if code_csv_slice_Uz2 == 1:
@@ -1072,25 +1087,11 @@ if code_csv_slice_Uz2 == 1:
   # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
   slice_Uz2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
 
+  # hide color legend
+  slice_Uz2Display.SetScalarBarVisibility(renderView1, False)
 
-# show color legend
-slice_Uy1Display.SetScalarBarVisibility(renderView1, True)
-
-# hide data in view
-Hide(slice_Uy1, renderView1)
-
-# show color legend
-pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, True)
-
-# hide data in view
-Hide(pointVolumeInterpolator_Uy, renderView1)
-
-# show color legend
-slice_Uy1Display.SetScalarBarVisibility(renderView1, True)
-
-# hide data in view
-Hide(slice_Uy2, renderView1)
-
+  # hide data in view
+  Hide(slice_Uz2, renderView1)
 
 # ----------------------------------------------------------------
 # setup color maps and opacity mapes used in the visualization
