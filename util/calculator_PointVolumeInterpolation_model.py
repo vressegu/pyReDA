@@ -1,6 +1,8 @@
 ######################################
 #
 # Laurence Wallian - ACTA - OPAALE - INRAE Rennes - Juin 2022-Février 2023
+# 15/07/25 : slice Y=(Ymin+Ymax)/2 added
+#            slice Z=(Zmin+Zmax)/2 instead of Z=Zslice chosen by user
 #
 ######################################
 #
@@ -56,7 +58,8 @@
 #      z2_dom=Z2_DOM_VALUE : max(z) 
 #
 #    Zslice characteristics for CSV and PNG files
-#      Zslice=ZSLICE_VALUE : DNS Z slice value for pseudo PIV
+#      Zslice=ZSLICE_VALUE : DNS Z slice value for pseudo PIV (unused since 15/07/25)
+#      Yslice=YSLICE_VALUE : DNS Y slice value for pseudo PIV (unused since 15/07/25)
 #      Radius=RADIUS_VALUE : gaussian radius for smoothing
 #      Origin_X=ORIGIN_X_VALUE : X left point of the BOX where applying smoothing
 #      Origin_Y=ORIGIN_Y_VALUE : Y lower point of the BOX where applying smoothing
@@ -68,17 +71,17 @@
 #
 #      mode_view_NoGrid=MODE_VIEW_NOGRID_VALUE : =POINTS for no smoothing view, =SURFACE for smoothing view
 #      code_view_whitgrid=CODE_VIEW_WITHGRID_VALUE : =1 if PNG file view with grid 
-#      code_view_slice_ux1=CODE_VIEW_SLICE_UX1_VALUE : =1 if PNG file showing Ux(Z=Zslice) openfoam result
-#      code_view_slice_uy1=CODE_VIEW_SLICE_UY1_VALUE : =1 if PNG file showing Uy(Z=Zslice) openfoam result
+#      code_view_sliceZ_ux1=CODE_VIEW_SLICEZ_UX1_VALUE : =1 if PNG file showing Ux(Z=Zslice) openfoam result
+#      code_view_sliceZ_uy1=CODE_VIEW_SLICEZ_UY1_VALUE : =1 if PNG file showing Uy(Z=Zslice) openfoam result
 #      code_view_PtVol_ux1=CODE_VIEW_POINTVOLUMEINTERPOLATOR_UX_VALUE : =1 if PNG file showing Ux openfoam after smoothing
 #      code_view_PtVol_uy1=CODE_VIEW_POINTVOLUMEINTERPOLATOR_UY_VALUE : =1 if PNG file showing Uy openfoam after smoothing
-#      code_view_slice_ux2=CODE_VIEW_SLICE_UX2_VALUE : =1 if PNG file showing Ux(Z=Zslice) openfoam after smoothing
-#      code_view_slice_uy2=CODE_VIEW_SLICE_UY2_VALUE : =1 if PNG file showing Uy(Z=Zslice) openfoam after smoothing
-#      code_csv_slice_ux1=CODE_CSV_SLICE_UX1_VALUE : =1 if CSV file showing Ux(Z=Zslice) openfoam result
-#      code_csv_slice_uy1=CODE_CSV_SLICE_UY1_VALUE : =1 if CSV file showing Uy(Z=Zslice) openfoam result
-#      code_csv_slice_ux2=CODE_CSV_SLICE_UX2_VALUE : =1 if CSV file showing Ux(Z=Zslice) openfoam after smoothing
-#      code_csv_slice_uy2=CODE_CSV_SLICE_UY2_VALUE : =1 if CSV file showing Uy(Z=Zslice) openfoam after smoothing
-#      code_csv_slice_uz2=CODE_CSV_SLICE_UZ2_VALUE : =1 if CSV file showing Uz(Z=Zslice) openfoam after smoothing
+#      code_view_sliceZ_ux2=CODE_VIEW_SLICEZ_UX2_VALUE : =1 if PNG file showing Ux(Z=Zslice) openfoam after smoothing
+#      code_view_sliceZ_uy2=CODE_VIEW_SLICEZ_UY2_VALUE : =1 if PNG file showing Uy(Z=Zslice) openfoam after smoothing
+#      code_csv_sliceZ_ux1=CODE_CSV_SLICEZ_UX1_VALUE : =1 if CSV file showing Ux(Z=Zslice) openfoam result
+#      code_csv_sliceZ_uy1=CODE_CSV_SLICEZ_UY1_VALUE : =1 if CSV file showing Uy(Z=Zslice) openfoam result
+#      code_csv_sliceZ_ux2=CODE_CSV_SLICEZ_UX2_VALUE : =1 if CSV file showing Ux(Z=Zslice) openfoam after smoothing
+#      code_csv_sliceZ_uy2=CODE_CSV_SLICEZ_UY2_VALUE : =1 if CSV file showing Uy(Z=Zslice) openfoam after smoothing
+#      code_csv_sliceZ_uz2=CODE_CSV_SLICEZ_UZ2_VALUE : =1 if CSV file showing Uz(Z=Zslice) openfoam after smoothing
 #
 ######################################
 
@@ -147,9 +150,14 @@ Lz_dom = z2_dom - z1_dom
 
 ## slice and operations on this slice
 
-# Z value for slice
+# Z value of slice Z=cte
 Zslice = z0_dom
-Zslice = ZSLICE_VALUE
+#Zslice = ZSLICE_VALUE # unused since 15/07/25
+
+# Y value of slice Y=cte
+Yslice = y0_dom
+Yslice = y0_cyl
+#Yslice = YSLICE_VALUE
 
 # init the 'GaussianKernel' selected for 'Kernel' (Example : Radius = 0.203125)
 Radius = RADIUS_VALUE
@@ -167,7 +175,7 @@ Scale_Z=Lz_dom
 # resolution (Example : Resolution = [294, 181, 20])
 Resolution_X=RESOLUTION_X_VALUE
 Resolution_Y=RESOLUTION_Y_VALUE
-Resolution_Z=20
+Resolution_Z=RESOLUTION_Z_VALUE
 
 ### other variables
 
@@ -182,28 +190,28 @@ mode_view_NoGrid = "MODE_VIEW_NOGRID_VALUE"
 # view with option : [Surface With Edges] if =1
 code_view_withGrid=CODE_VIEW_WITHGRID_VALUE
 
-# first view  = slice_Ux1 and slice_Uy1 : PNG files created if =1
-code_view_slice_Ux1=CODE_VIEW_SLICE_UX1_VALUE
-code_view_slice_Uy1=CODE_VIEW_SLICE_UY1_VALUE
+# first view  = sliceZ_Ux1 and sliceZ_Uy1 : PNG files created if =1
+code_view_sliceZ_Ux1=CODE_VIEW_SLICEZ_UX1_VALUE
+code_view_sliceZ_Uy1=CODE_VIEW_SLICEZ_UY1_VALUE
 
 # second view  = pointVolumeInterpolator_Ux and pointVolumeInterpolator_Uy : PNG files created if =1
 code_view_pointVolumeInterpolator_Ux=CODE_VIEW_POINTVOLUMEINTERPOLATOR_UX_VALUE
 code_view_pointVolumeInterpolator_Uy=CODE_VIEW_POINTVOLUMEINTERPOLATOR_UY_VALUE
 
-# third view  = slice_Ux2 and slice_Uy2 : PNG files created if =1
-code_view_slice_Ux2=CODE_VIEW_SLICE_UX2_VALUE
-code_view_slice_Uy2=CODE_VIEW_SLICE_UY2_VALUE
+# third view  = sliceZ_Ux2 and sliceZ_Uy2 : PNG files created if =1
+code_view_sliceZ_Ux2=CODE_VIEW_SLICEZ_UX2_VALUE
+code_view_sliceZ_Uy2=CODE_VIEW_SLICEZ_UY2_VALUE
 
 ## CSV files conditions
 
-# CSV files [slice_Ux1.csv] and [slice_Uy1.csv] : CSV files created if =1
-code_csv_slice_Ux1=CODE_CSV_SLICE_UX1_VALUE
-code_csv_slice_Uy1=CODE_CSV_SLICE_UY1_VALUE
+# CSV files [sliceZ_Ux1.csv] and [sliceZ_Uy1.csv] : CSV files created if =1
+code_csv_sliceZ_Ux1=CODE_CSV_SLICEZ_UX1_VALUE
+code_csv_sliceZ_Uy1=CODE_CSV_SLICEZ_UY1_VALUE
 
-# CSV files [slice_Ux2.csv], [slice_Uy2.csv] and [slice_Uz2.csv] : CSV files created if =1
-code_csv_slice_Ux2=CODE_CSV_SLICE_UX2_VALUE
-code_csv_slice_Uy2=CODE_CSV_SLICE_UY2_VALUE
-code_csv_slice_Uz2=CODE_CSV_SLICE_UZ2_VALUE
+# CSV files [sliceZ_Ux2.csv], [sliceZ_Uy2.csv] and [sliceZ_Uz2.csv] : CSV files created if =1
+code_csv_sliceZ_Ux2=CODE_CSV_SLICEZ_UX2_VALUE
+code_csv_sliceZ_Uy2=CODE_CSV_SLICEZ_UY2_VALUE
+code_csv_sliceZ_Uz2=CODE_CSV_SLICEZ_UZ2_VALUE
 
 ### other view conditions ##
 
@@ -348,17 +356,30 @@ calculator_Ux.ResultArrayName = 'Ux'
 calculator_Ux.Function = 'U_X'
 
 # create a new 'Slice'
-slice_Ux1 = Slice(registrationName='Slice_Ux1', Input=calculator_Ux)
-slice_Ux1.SliceType = 'Plane'
-slice_Ux1.HyperTreeGridSlicer = 'Plane'
-slice_Ux1.SliceOffsetValues = [0.0]
+sliceZ_Ux1 = Slice(registrationName='SliceZ_Ux1', Input=calculator_Ux)
+sliceZ_Ux1.SliceType = 'Plane'
+sliceZ_Ux1.HyperTreeGridSlicer = 'Plane'
+sliceZ_Ux1.SliceOffsetValues = [0.0]
 
 # init the 'Plane' selected for 'SliceType'
-slice_Ux1.SliceType.Origin = [x0_dom, y0_dom, Zslice]
-slice_Ux1.SliceType.Normal = [0.0, 0.0, 1.0]
+sliceZ_Ux1.SliceType.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Ux1.SliceType.Normal = [0.0, 0.0, 1.0]
 
 # init the 'Plane' selected for 'HyperTreeGridSlicer'
-slice_Ux1.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Ux1.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+
+# create a new 'Slice' : slice Y=(Ymin+Ymax)/2 added since 15/07/25
+sliceY_Ux1 = Slice(registrationName='SliceY_Ux1', Input=calculator_Ux)
+sliceY_Ux1.SliceType = 'Plane'
+sliceY_Ux1.HyperTreeGridSlicer = 'Plane'
+sliceY_Ux1.SliceOffsetValues = [0.0]
+
+# init the 'Plane' selected for 'SliceType'
+sliceY_Ux1.SliceType.Origin = [x0_dom, Yslice, z0_dom]
+sliceY_Ux1.SliceType.Normal = [0.0, 1.0, 0.0]
+
+# init the 'Plane' selected for 'HyperTreeGridSlicer'
+sliceY_Ux1.HyperTreeGridSlicer.Origin = [x0_dom, Yslice, z0_dom]
 
 
 ############################################
@@ -404,17 +425,31 @@ pointVolumeInterpolator_Ux.NullValue = 0.0
 
 
 # create a new 'Slice'
-slice_Ux2 = Slice(registrationName='Slice_Ux2', Input=pointVolumeInterpolator_Ux)
-slice_Ux2.SliceType = 'Plane'
-slice_Ux2.HyperTreeGridSlicer = 'Plane'
-slice_Ux2.SliceOffsetValues = [0.0]
+sliceZ_Ux2 = Slice(registrationName='SliceZ_Ux2', Input=pointVolumeInterpolator_Ux)
+sliceZ_Ux2.SliceType = 'Plane'
+sliceZ_Ux2.HyperTreeGridSlicer = 'Plane'
+sliceZ_Ux2.SliceOffsetValues = [0.0]
 
 # init the 'Plane' selected for 'SliceType'
-slice_Ux2.SliceType.Origin = [x0_dom, y0_dom, Zslice]
-slice_Ux2.SliceType.Normal = [0.0, 0.0, 1.0]
+sliceZ_Ux2.SliceType.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Ux2.SliceType.Normal = [0.0, 0.0, 1.0]
 
 # init the 'Plane' selected for 'HyperTreeGridSlicer'
-slice_Ux2.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Ux2.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+
+
+# create a new 'Slice' : slice Y=(Ymin+Ymax)/2 added since 15/07/25
+sliceY_Ux2 = Slice(registrationName='SliceY_Ux2', Input=pointVolumeInterpolator_Ux)
+sliceY_Ux2.SliceType = 'Plane'
+sliceY_Ux2.HyperTreeGridSlicer = 'Plane'
+sliceY_Ux2.SliceOffsetValues = [0.0]
+
+# init the 'Plane' selected for 'SliceType'
+sliceY_Ux2.SliceType.Origin = [x0_dom, Yslice, z0_dom]
+sliceY_Ux2.SliceType.Normal = [0.0, 1.0, 0.0]
+
+# init the 'Plane' selected for 'HyperTreeGridSlicer'
+sliceY_Ux2.HyperTreeGridSlicer.Origin = [x0_dom, Yslice, z0_dom]
 
 ######## Uy ###########
 
@@ -424,18 +459,31 @@ calculator_Uy.ResultArrayName = 'Uy'
 calculator_Uy.Function = 'U_Y'
 
 # create a new 'Slice'
-slice_Uy1 = Slice(registrationName='Slice_Uy1', Input=calculator_Uy)
-slice_Uy1.SliceType = 'Plane'
-slice_Uy1.HyperTreeGridSlicer = 'Plane'
-slice_Uy1.SliceOffsetValues = [0.0]
+sliceZ_Uy1 = Slice(registrationName='SliceZ_Uy1', Input=calculator_Uy)
+sliceZ_Uy1.SliceType = 'Plane'
+sliceZ_Uy1.HyperTreeGridSlicer = 'Plane'
+sliceZ_Uy1.SliceOffsetValues = [0.0]
 
 # init the 'Plane' selected for 'SliceType'
-slice_Uy1.SliceType.Origin = [x0_dom, y0_dom, Zslice]
-slice_Uy1.SliceType.Normal = [0.0, 0.0, 1.0]
+sliceZ_Uy1.SliceType.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Uy1.SliceType.Normal = [0.0, 0.0, 1.0]
 
 # init the 'Plane' selected for 'HyperTreeGridSlicer'
-slice_Uy1.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Uy1.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
 
+
+# create a new 'Slice' : slice Y=(Ymin+Ymax)/2 added since 15/07/25
+sliceY_Uy1 = Slice(registrationName='SliceY_Uy1', Input=calculator_Uy)
+sliceY_Uy1.SliceType = 'Plane'
+sliceY_Uy1.HyperTreeGridSlicer = 'Plane'
+sliceY_Uy1.SliceOffsetValues = [0.0]
+
+# init the 'Plane' selected for 'SliceType'
+sliceY_Uy1.SliceType.Origin = [x0_dom, Yslice, z0_dom]
+sliceY_Uy1.SliceType.Normal = [0.0, 1.0, 0.0]
+
+# init the 'Plane' selected for 'HyperTreeGridSlicer'
+sliceY_Uy1.HyperTreeGridSlicer.Origin = [x0_dom, Yslice, z0_dom]
 
 ############################################
 ### Gaussian Interpolation on limited BOX ###
@@ -472,25 +520,38 @@ pointVolumeInterpolator_Uy.NullValue = 0.0
 
 
 # create a new 'Slice'
-slice_Uy2 = Slice(registrationName='Slice_Uy2', Input=pointVolumeInterpolator_Uy)
-slice_Uy2.SliceType = 'Plane'
-slice_Uy2.HyperTreeGridSlicer = 'Plane'
-slice_Uy2.SliceOffsetValues = [0.0]
+sliceZ_Uy2 = Slice(registrationName='SliceZ_Uy2', Input=pointVolumeInterpolator_Uy)
+sliceZ_Uy2.SliceType = 'Plane'
+sliceZ_Uy2.HyperTreeGridSlicer = 'Plane'
+sliceZ_Uy2.SliceOffsetValues = [0.0]
 
 # init the 'Plane' selected for 'SliceType'
-slice_Uy2.SliceType.Origin = [x0_dom, y0_dom, Zslice]
-slice_Uy2.SliceType.Normal = [0.0, 0.0, 1.0]
+sliceZ_Uy2.SliceType.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Uy2.SliceType.Normal = [0.0, 0.0, 1.0]
 
 # init the 'Plane' selected for 'HyperTreeGridSlicer'
-slice_Uy2.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Uy2.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
 
+
+# create a new 'Slice' : slice Y=(Ymin+Ymax)/2 added since 15/07/25
+sliceY_Uy2 = Slice(registrationName='SliceY_Uy2', Input=pointVolumeInterpolator_Uy)
+sliceY_Uy2.SliceType = 'Plane'
+sliceY_Uy2.HyperTreeGridSlicer = 'Plane'
+sliceY_Uy2.SliceOffsetValues = [0.0]
+
+# init the 'Plane' selected for 'SliceType'
+sliceY_Uy2.SliceType.Origin = [x0_dom, Yslice, z0_dom]
+sliceY_Uy2.SliceType.Normal = [0.0, 1.0, 0.0]
+
+# init the 'Plane' selected for 'HyperTreeGridSlicer'
+sliceY_Uy2.HyperTreeGridSlicer.Origin = [x0_dom, Yslice, z0_dom]
 
 
  
 ######## Uz ###########
  
 #if case_dir == "residualSpeed_2":
-if code_csv_slice_Uz2 == 1:
+if code_csv_sliceZ_Uz2 == 1:
 
   # create a new 'Calculator'
   calculator_Uz = Calculator(registrationName='Calculator_Uz', Input=base_Calcfoam)
@@ -498,17 +559,31 @@ if code_csv_slice_Uz2 == 1:
   calculator_Uz.Function = 'U_Z'
 
   # create a new 'Slice'
-  slice_Uz1 = Slice(registrationName='Slice_Uz1', Input=calculator_Uz)
-  slice_Uz1.SliceType = 'Plane'
-  slice_Uz1.HyperTreeGridSlicer = 'Plane'
-  slice_Uz1.SliceOffsetValues = [0.0]
+  sliceZ_Uz1 = Slice(registrationName='SliceZ_Uz1', Input=calculator_Uz)
+  sliceZ_Uz1.SliceType = 'Plane'
+  sliceZ_Uz1.HyperTreeGridSlicer = 'Plane'
+  sliceZ_Uz1.SliceOffsetValues = [0.0]
 
   # init the 'Plane' selected for 'SliceType'
-  slice_Uz1.SliceType.Origin = [x0_dom, y0_dom, Zslice]
-  slice_Uz1.SliceType.Normal = [0.0, 0.0, 1.0]
+  sliceZ_Uz1.SliceType.Origin = [x0_dom, y0_dom, Zslice]
+  sliceZ_Uz1.SliceType.Normal = [0.0, 0.0, 1.0]
 
   # init the 'Plane' selected for 'HyperTreeGridSlicer'
-  slice_Uz1.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+  sliceZ_Uz1.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+
+
+  # create a new 'Slice' : slice Y=(Ymin+Ymax)/2 added since 15/07/25
+  sliceY_Uz1 = Slice(registrationName='SliceY_Uz1', Input=calculator_Uz)
+  sliceY_Uz1.SliceType = 'Plane'
+  sliceY_Uz1.HyperTreeGridSlicer = 'Plane'
+  sliceY_Uz1.SliceOffsetValues = [0.0]
+
+  # init the 'Plane' selected for 'SliceType'
+  sliceY_Uz1.SliceType.Origin = [x0_dom, Yslice, z0_dom]
+  sliceY_Uz1.SliceType.Normal = [0.0, 1.0, 0.0]
+
+  # init the 'Plane' selected for 'HyperTreeGridSlicer'
+  sliceY_Uz1.HyperTreeGridSlicer.Origin = [x0_dom, Yslice, z0_dom]
 
 
   ############################################
@@ -546,18 +621,32 @@ if code_csv_slice_Uz2 == 1:
 
 
   # create a new 'Slice'
-  slice_Uz2 = Slice(registrationName='Slice_Uz2', Input=pointVolumeInterpolator_Uz)
-  slice_Uz2.SliceType = 'Plane'
-  slice_Uz2.HyperTreeGridSlicer = 'Plane'
-  slice_Uz2.SliceOffsetValues = [0.0]
+  sliceZ_Uz2 = Slice(registrationName='SliceZ_Uz2', Input=pointVolumeInterpolator_Uz)
+  sliceZ_Uz2.SliceType = 'Plane'
+  sliceZ_Uz2.HyperTreeGridSlicer = 'Plane'
+  sliceZ_Uz2.SliceOffsetValues = [0.0]
 
   # init the 'Plane' selected for 'SliceType'
-  slice_Uz2.SliceType.Origin = [x0_dom, y0_dom, Zslice]
-  slice_Uz2.SliceType.Normal = [0.0, 0.0, 1.0]
+  sliceZ_Uz2.SliceType.Origin = [x0_dom, y0_dom, Zslice]
+  sliceZ_Uz2.SliceType.Normal = [0.0, 0.0, 1.0]
 
   # init the 'Plane' selected for 'HyperTreeGridSlicer'
-  slice_Uz2.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
+  sliceZ_Uz2.HyperTreeGridSlicer.Origin = [x0_dom, y0_dom, Zslice]
   
+
+  # create a new 'Slice' : slice Y=(Ymin+Ymax)/2 added since 15/07/25
+  sliceY_Uz2 = Slice(registrationName='SliceY_Uz2', Input=pointVolumeInterpolator_Uz)
+  sliceY_Uz2.SliceType = 'Plane'
+  sliceY_Uz2.HyperTreeGridSlicer = 'Plane'
+  sliceY_Uz2.SliceOffsetValues = [0.0]
+
+  # init the 'Plane' selected for 'SliceType'
+  sliceY_Uz2.SliceType.Origin = [x0_dom, Yslice, z0_dom]
+  sliceY_Uz2.SliceType.Normal = [0.0, 1.0, 0.0]
+
+  # init the 'Plane' selected for 'HyperTreeGridSlicer'
+  sliceY_Uz2.HyperTreeGridSlicer.Origin = [x0_dom, Yslice, z0_dom]
+
 ############################################
 
 
@@ -635,8 +724,8 @@ Show(cylinder1, renderView1)
 # setup the visualization in view 'renderView1' : Ux
 # ----------------------------------------------------------------
 
-# show data from slice_Ux1
-slice_Ux1Display = Show(slice_Ux1, renderView1, 'UniformGridRepresentation')
+# show data from sliceZ_Ux1
+sliceZ_Ux1Display = Show(sliceZ_Ux1, renderView1, 'UniformGridRepresentation')
 
 # get color transfer function/color map for 'Ux'
 uxLUT = GetColorTransferFunction('Ux')
@@ -652,6 +741,8 @@ uxLUT.ScalarRangeInitialized = 1.0
 #uxLUT.RescaleTransferFunctionToDataRange(True)
 
 # this part (RescaleTransferFunction) must be defined before after a Render()
+if ( case_dir.find( "openfoam_data" ) != -1 ) :
+  uxLUT.RescaleTransferFunction(-0.9, 1.9)
 if ( case_dir.find( "mean" ) != -1 ) :
   uxLUT.RescaleTransferFunction(-0.9, 1.9)
 if ( case_dir.find( "spatialModes_" ) != -1 ) :
@@ -686,6 +777,8 @@ uxPWF.ScalarRangeInitialized = 1
 uxPWF.Points = [1, 0.0, 0.5, 0.0, 8, 1.0, 0.5, 0.0]
 
 # this part (RescaleTransferFunction) must be defined before after a Render()
+if ( case_dir.find( "openfoam_data" ) != -1 ) :
+  uxPWF.RescaleTransferFunction(-0.9, 1.9)
 if ( case_dir.find( "mean" ) != -1 ) :
   uxPWF.RescaleTransferFunction(-0.9, 1.9)
 if ( case_dir.find( "spatialModes_" ) != -1 ) :
@@ -694,44 +787,95 @@ if ( case_dir.find( "residualSpeed_" ) != -1 ) :
   uxPWF.RescaleTransferFunction(-0.7, 0.7)
 
 # trace defaults for the display properties.
-slice_Ux1Display.Representation = 'Surface With Edges'
-slice_Ux1Display.ColorArrayName = ['POINTS', 'Ux']
-slice_Ux1Display.LookupTable = uxLUT
-slice_Ux1Display.SelectTCoordArray = 'None'
-slice_Ux1Display.SelectNormalArray = 'None'
-slice_Ux1Display.SelectTangentArray = 'None'
-slice_Ux1Display.OSPRayScaleArray = 'Ux'
-slice_Ux1Display.OSPRayScaleFunction = 'PiecewiseFunction'
-slice_Ux1Display.SelectOrientationVectors = 'U'
-slice_Ux1Display.ScaleFactor = 2.0
-slice_Ux1Display.SelectScaleArray = 'Ux'
-slice_Ux1Display.GlyphType = 'Arrow'
-slice_Ux1Display.GlyphTableIndexArray = 'Ux'
-slice_Ux1Display.GaussianRadius = 0.1
-slice_Ux1Display.SetScaleArray = ['POINTS', 'Ux']
-slice_Ux1Display.ScaleTransferFunction = 'PiecewiseFunction'
-slice_Ux1Display.OpacityArray = ['POINTS', 'Ux']
-slice_Ux1Display.OpacityTransferFunction = 'PiecewiseFunction'
-slice_Ux1Display.DataAxesGrid = 'GridAxesRepresentation'
-slice_Ux1Display.PolarAxes = 'PolarAxesRepresentation'
-slice_Ux1Display.ScalarOpacityUnitDistance = 0.23534221904681663
-slice_Ux1Display.ScalarOpacityFunction = uxPWF
-slice_Ux1Display.OpacityArrayName = ['POINTS', 'Ux']
-slice_Ux1Display.IsosurfaceValues = [0.08748531341552734]
-slice_Ux1Display.SliceFunction = 'Plane'
-slice_Ux1Display.Slice = 4
+sliceZ_Ux1Display.Representation = 'Surface With Edges'
+sliceZ_Ux1Display.ColorArrayName = ['POINTS', 'Ux']
+sliceZ_Ux1Display.LookupTable = uxLUT
+sliceZ_Ux1Display.SelectTCoordArray = 'None'
+sliceZ_Ux1Display.SelectNormalArray = 'None'
+sliceZ_Ux1Display.SelectTangentArray = 'None'
+sliceZ_Ux1Display.OSPRayScaleArray = 'Ux'
+sliceZ_Ux1Display.OSPRayScaleFunction = 'PiecewiseFunction'
+sliceZ_Ux1Display.SelectOrientationVectors = 'U'
+sliceZ_Ux1Display.ScaleFactor = 2.0
+sliceZ_Ux1Display.SelectScaleArray = 'Ux'
+sliceZ_Ux1Display.GlyphType = 'Arrow'
+sliceZ_Ux1Display.GlyphTableIndexArray = 'Ux'
+sliceZ_Ux1Display.GaussianRadius = 0.1
+sliceZ_Ux1Display.SetScaleArray = ['POINTS', 'Ux']
+sliceZ_Ux1Display.ScaleTransferFunction = 'PiecewiseFunction'
+sliceZ_Ux1Display.OpacityArray = ['POINTS', 'Ux']
+sliceZ_Ux1Display.OpacityTransferFunction = 'PiecewiseFunction'
+sliceZ_Ux1Display.DataAxesGrid = 'GridAxesRepresentation'
+sliceZ_Ux1Display.PolarAxes = 'PolarAxesRepresentation'
+sliceZ_Ux1Display.ScalarOpacityUnitDistance = 0.23534221904681663
+sliceZ_Ux1Display.ScalarOpacityFunction = uxPWF
+sliceZ_Ux1Display.OpacityArrayName = ['POINTS', 'Ux']
+sliceZ_Ux1Display.IsosurfaceValues = [0.08748531341552734]
+sliceZ_Ux1Display.SliceFunction = 'Plane'
+sliceZ_Ux1Display.Slice = 4
 
 # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
-slice_Ux1Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+sliceZ_Ux1Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-slice_Ux1Display.ScaleTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
+sliceZ_Ux1Display.ScaleTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-slice_Ux1Display.OpacityTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
+sliceZ_Ux1Display.OpacityTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
 
 # init the 'Plane' selected for 'SliceFunction'
-slice_Ux1Display.SliceFunction.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Ux1Display.SliceFunction.Origin = [x0_dom, y0_dom, Zslice]
+
+
+# show data from sliceZ_Ux1
+sliceY_Ux1Display = Show(sliceY_Ux1, renderView1, 'UniformGridRepresentation')
+
+# trace defaults for the display properties.
+sliceY_Ux1Display.Representation = 'Surface With Edges'
+sliceY_Ux1Display.ColorArrayName = ['POINTS', 'Ux']
+sliceY_Ux1Display.LookupTable = uxLUT
+sliceY_Ux1Display.SelectTCoordArray = 'None'
+sliceY_Ux1Display.SelectNormalArray = 'None'
+sliceY_Ux1Display.SelectTangentArray = 'None'
+sliceY_Ux1Display.OSPRayScaleArray = 'Ux'
+sliceY_Ux1Display.OSPRayScaleFunction = 'PiecewiseFunction'
+sliceY_Ux1Display.SelectOrientationVectors = 'U'
+sliceY_Ux1Display.ScaleFactor = 2.0
+sliceY_Ux1Display.SelectScaleArray = 'Ux'
+sliceY_Ux1Display.GlyphType = 'Arrow'
+sliceY_Ux1Display.GlyphTableIndexArray = 'Ux'
+sliceY_Ux1Display.GaussianRadius = 0.1
+sliceY_Ux1Display.SetScaleArray = ['POINTS', 'Ux']
+sliceY_Ux1Display.ScaleTransferFunction = 'PiecewiseFunction'
+sliceY_Ux1Display.OpacityArray = ['POINTS', 'Ux']
+sliceY_Ux1Display.OpacityTransferFunction = 'PiecewiseFunction'
+sliceY_Ux1Display.DataAxesGrid = 'GridAxesRepresentation'
+sliceY_Ux1Display.PolarAxes = 'PolarAxesRepresentation'
+sliceY_Ux1Display.ScalarOpacityUnitDistance = 0.23534221904681663
+sliceY_Ux1Display.ScalarOpacityFunction = uxPWF
+sliceY_Ux1Display.OpacityArrayName = ['POINTS', 'Ux']
+sliceY_Ux1Display.IsosurfaceValues = [0.08748531341552734]
+sliceY_Ux1Display.SliceFunction = 'Plane'
+sliceY_Ux1Display.Slice = 4
+
+# init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+sliceY_Ux1Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+
+# init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+sliceY_Ux1Display.ScaleTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
+
+# init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
+sliceY_Ux1Display.OpacityTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
+
+# init the 'Plane' selected for 'SliceFunction'
+sliceY_Ux1Display.SliceFunction.Origin = [x0_dom, y0_dom, Zslice]
+
+# hide color legend
+sliceZ_Ux1Display.SetScalarBarVisibility(renderView1, False)
+
+# hide data in view
+#Hide(sliceZ_Ux1, renderView1)
+
 
 
 # show data from pointVolumeInterpolator_Ux
@@ -778,45 +922,84 @@ pointVolumeInterpolator_UxDisplay.OpacityTransferFunction.Points = [-0.216410910
 pointVolumeInterpolator_UxDisplay.SliceFunction.Origin = [x0_dom, y0_dom, Zslice]
 
 
-# show data from slice_Ux2
-slice_Ux2Display = Show(slice_Ux2, renderView1, 'GeometryRepresentation')
+# show data from sliceZ_Ux2
+sliceZ_Ux2Display = Show(sliceZ_Ux2, renderView1, 'GeometryRepresentation')
 
 # trace defaults for the display properties.
-slice_Ux2Display.Representation = 'Surface With Edges'
-slice_Ux2Display.ColorArrayName = ['POINTS', 'Ux']
-slice_Ux2Display.LookupTable = uxLUT
-slice_Ux2Display.SelectTCoordArray = 'None'
-slice_Ux2Display.SelectNormalArray = 'None'
-slice_Ux2Display.SelectTangentArray = 'None'
-slice_Ux2Display.OSPRayScaleArray = 'Ux'
-slice_Ux2Display.OSPRayScaleFunction = 'PiecewiseFunction'
-slice_Ux2Display.SelectOrientationVectors = 'U'
-slice_Ux2Display.ScaleFactor = 2.0033000472933056
-slice_Ux2Display.SelectScaleArray = 'Ux'
-slice_Ux2Display.GlyphType = 'Arrow'
-slice_Ux2Display.GlyphTableIndexArray = 'Ux'
-slice_Ux2Display.GaussianRadius = 0.10016500236466527
-slice_Ux2Display.SetScaleArray = ['POINTS', 'Ux']
-slice_Ux2Display.ScaleTransferFunction = 'PiecewiseFunction'
-slice_Ux2Display.OpacityArray = ['POINTS', 'Ux']
-slice_Ux2Display.OpacityTransferFunction = 'PiecewiseFunction'
-slice_Ux2Display.DataAxesGrid = 'GridAxesRepresentation'
-slice_Ux2Display.PolarAxes = 'PolarAxesRepresentation'
+sliceZ_Ux2Display.Representation = 'Surface With Edges'
+sliceZ_Ux2Display.ColorArrayName = ['POINTS', 'Ux']
+sliceZ_Ux2Display.LookupTable = uxLUT
+sliceZ_Ux2Display.SelectTCoordArray = 'None'
+sliceZ_Ux2Display.SelectNormalArray = 'None'
+sliceZ_Ux2Display.SelectTangentArray = 'None'
+sliceZ_Ux2Display.OSPRayScaleArray = 'Ux'
+sliceZ_Ux2Display.OSPRayScaleFunction = 'PiecewiseFunction'
+sliceZ_Ux2Display.SelectOrientationVectors = 'U'
+sliceZ_Ux2Display.ScaleFactor = 2.0033000472933056
+sliceZ_Ux2Display.SelectScaleArray = 'Ux'
+sliceZ_Ux2Display.GlyphType = 'Arrow'
+sliceZ_Ux2Display.GlyphTableIndexArray = 'Ux'
+sliceZ_Ux2Display.GaussianRadius = 0.10016500236466527
+sliceZ_Ux2Display.SetScaleArray = ['POINTS', 'Ux']
+sliceZ_Ux2Display.ScaleTransferFunction = 'PiecewiseFunction'
+sliceZ_Ux2Display.OpacityArray = ['POINTS', 'Ux']
+sliceZ_Ux2Display.OpacityTransferFunction = 'PiecewiseFunction'
+sliceZ_Ux2Display.DataAxesGrid = 'GridAxesRepresentation'
+sliceZ_Ux2Display.PolarAxes = 'PolarAxesRepresentation'
 
 # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
-slice_Ux2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+sliceZ_Ux2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-slice_Ux2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+sliceZ_Ux2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-slice_Ux2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+sliceZ_Ux2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
+
+
+# show data from sliceY_Ux2
+sliceY_Ux2Display = Show(sliceY_Ux2, renderView1, 'GeometryRepresentation')
+
+# trace defaults for the display properties.
+sliceY_Ux2Display.Representation = 'Surface With Edges'
+sliceY_Ux2Display.ColorArrayName = ['POINTS', 'Ux']
+sliceY_Ux2Display.LookupTable = uxLUT
+sliceY_Ux2Display.SelectTCoordArray = 'None'
+sliceY_Ux2Display.SelectNormalArray = 'None'
+sliceY_Ux2Display.SelectTangentArray = 'None'
+sliceY_Ux2Display.OSPRayScaleArray = 'Ux'
+sliceY_Ux2Display.OSPRayScaleFunction = 'PiecewiseFunction'
+sliceY_Ux2Display.SelectOrientationVectors = 'U'
+sliceY_Ux2Display.ScaleFactor = 2.0033000472933056
+sliceY_Ux2Display.SelectScaleArray = 'Ux'
+sliceY_Ux2Display.GlyphType = 'Arrow'
+sliceY_Ux2Display.GlyphTableIndexArray = 'Ux'
+sliceY_Ux2Display.GaussianRadius = 0.10016500236466527
+sliceY_Ux2Display.SetScaleArray = ['POINTS', 'Ux']
+sliceY_Ux2Display.ScaleTransferFunction = 'PiecewiseFunction'
+sliceY_Ux2Display.OpacityArray = ['POINTS', 'Ux']
+sliceY_Ux2Display.OpacityTransferFunction = 'PiecewiseFunction'
+sliceY_Ux2Display.DataAxesGrid = 'GridAxesRepresentation'
+sliceY_Ux2Display.PolarAxes = 'PolarAxesRepresentation'
+
+# init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+sliceY_Ux2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+
+# init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+sliceY_Ux2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
+# init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
+sliceY_Ux2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
 
 # hide color legend
-slice_Ux1Display.SetScalarBarVisibility(renderView1, False)
+sliceZ_Ux1Display.SetScalarBarVisibility(renderView1, False)
+sliceY_Ux1Display.SetScalarBarVisibility(renderView1, False)
+sliceZ_Ux2Display.SetScalarBarVisibility(renderView1, False)
 
 # hide data in view
-Hide(slice_Ux1, renderView1)
+Hide(sliceZ_Ux1, renderView1)
+Hide(sliceY_Ux1, renderView1)
 
 # hide color legend
 pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, False)
@@ -825,10 +1008,12 @@ pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, False)
 Hide(pointVolumeInterpolator_Ux, renderView1)
 
 # hide color legend
-slice_Ux2Display.SetScalarBarVisibility(renderView1, False)
+sliceZ_Ux2Display.SetScalarBarVisibility(renderView1, False)
+sliceY_Ux2Display.SetScalarBarVisibility(renderView1, False)
 
 # hide data in view
-Hide(slice_Ux2, renderView1)
+Hide(sliceZ_Ux2, renderView1)
+Hide(sliceY_Ux2, renderView1)
 
 # ----------------------------------------------------------------
 # setup color maps and opacity mapes used in the visualization
@@ -842,8 +1027,8 @@ Hide(slice_Ux2, renderView1)
 # setup the visualization in view 'renderView1' : Uy
 # ----------------------------------------------------------------
 
-# show data from slice_Uy1
-slice_Uy1Display = Show(slice_Uy1, renderView1, 'UniformGridRepresentation')
+# show data from sliceZ_Uy1
+sliceZ_Uy1Display = Show(sliceZ_Uy1, renderView1, 'UniformGridRepresentation')
 
 # get color transfer function/color map for 'Uy'
 uyLUT = GetColorTransferFunction('Uy')
@@ -865,7 +1050,7 @@ if case_dir == "mean":
 if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
   uyLUT.RescaleTransferFunction(-0.2, 0.2)
 #if case_dir == "residualSpeed_2":
-if code_csv_slice_Uz2 == 1:
+if code_csv_sliceZ_Uz2 == 1:
   uyLUT.RescaleTransferFunction(-0.7, 0.7)
 if case_dir == "sillageDNSRe300":
   uyLUT.RescaleTransferFunction(-0.9, 0.9)
@@ -905,52 +1090,95 @@ if case_dir == "mean":
 if ((case_dir == "spatialModes_2modes") or (case_dir == "spatialModes_4modes")  or (case_dir == "spatialModes_8modes")  or (case_dir == "spatialModes_16modes")):
   uyPWF.RescaleTransferFunction(-0.2, 0.2)
 #if case_dir == "residualSpeed_2":
-if code_csv_slice_Uz2 == 1:
+if code_csv_sliceZ_Uz2 == 1:
   uyPWF.RescaleTransferFunction(-0.7, 0.7)
 if case_dir == "sillageDNSRe300":
   uyPWF.RescaleTransferFunction(-0.9, 0.9)
 
 
 # trace defaults for the display properties.
-slice_Uy1Display.Representation = 'Surface With Edges'
-slice_Uy1Display.ColorArrayName = ['POINTS', 'Uy']
-slice_Uy1Display.LookupTable = uyLUT
-slice_Uy1Display.SelectTCoordArray = 'None'
-slice_Uy1Display.SelectNormalArray = 'None'
-slice_Uy1Display.SelectTangentArray = 'None'
-slice_Uy1Display.OSPRayScaleArray = 'Uy'
-slice_Uy1Display.OSPRayScaleFunction = 'PiecewiseFunction'
-slice_Uy1Display.SelectOrientationVectors = 'U'
-slice_Uy1Display.ScaleFactor = 2.0
-slice_Uy1Display.SelectScaleArray = 'Uy'
-slice_Uy1Display.GlyphType = 'Arrow'
-slice_Uy1Display.GlyphTableIndexArray = 'Uy'
-slice_Uy1Display.GaussianRadius = 0.1
-slice_Uy1Display.SetScaleArray = ['POINTS', 'Uy']
-slice_Uy1Display.ScaleTransferFunction = 'PiecewiseFunction'
-slice_Uy1Display.OpacityArray = ['POINTS', 'Uy']
-slice_Uy1Display.OpacityTransferFunction = 'PiecewiseFunction'
-slice_Uy1Display.DataAxesGrid = 'GridAxesRepresentation'
-slice_Uy1Display.PolarAxes = 'PolarAxesRepresentation'
-slice_Uy1Display.ScalarOpacityUnitDistance = 0.23534221904681663
-slice_Uy1Display.ScalarOpacityFunction = uxPWF
-slice_Uy1Display.OpacityArrayName = ['POINTS', 'Uy']
-slice_Uy1Display.IsosurfaceValues = [0.08748531341552734]
-slice_Uy1Display.SliceFunction = 'Plane'
-slice_Uy1Display.Slice = 4
+sliceZ_Uy1Display.Representation = 'Surface With Edges'
+sliceZ_Uy1Display.ColorArrayName = ['POINTS', 'Uy']
+sliceZ_Uy1Display.LookupTable = uyLUT
+sliceZ_Uy1Display.SelectTCoordArray = 'None'
+sliceZ_Uy1Display.SelectNormalArray = 'None'
+sliceZ_Uy1Display.SelectTangentArray = 'None'
+sliceZ_Uy1Display.OSPRayScaleArray = 'Uy'
+sliceZ_Uy1Display.OSPRayScaleFunction = 'PiecewiseFunction'
+sliceZ_Uy1Display.SelectOrientationVectors = 'U'
+sliceZ_Uy1Display.ScaleFactor = 2.0
+sliceZ_Uy1Display.SelectScaleArray = 'Uy'
+sliceZ_Uy1Display.GlyphType = 'Arrow'
+sliceZ_Uy1Display.GlyphTableIndexArray = 'Uy'
+sliceZ_Uy1Display.GaussianRadius = 0.1
+sliceZ_Uy1Display.SetScaleArray = ['POINTS', 'Uy']
+sliceZ_Uy1Display.ScaleTransferFunction = 'PiecewiseFunction'
+sliceZ_Uy1Display.OpacityArray = ['POINTS', 'Uy']
+sliceZ_Uy1Display.OpacityTransferFunction = 'PiecewiseFunction'
+sliceZ_Uy1Display.DataAxesGrid = 'GridAxesRepresentation'
+sliceZ_Uy1Display.PolarAxes = 'PolarAxesRepresentation'
+sliceZ_Uy1Display.ScalarOpacityUnitDistance = 0.23534221904681663
+sliceZ_Uy1Display.ScalarOpacityFunction = uxPWF
+sliceZ_Uy1Display.OpacityArrayName = ['POINTS', 'Uy']
+sliceZ_Uy1Display.IsosurfaceValues = [0.08748531341552734]
+sliceZ_Uy1Display.SliceFunction = 'Plane'
+sliceZ_Uy1Display.Slice = 4
 
 # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
-slice_Uy1Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+sliceZ_Uy1Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-slice_Uy1Display.ScaleTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
+sliceZ_Uy1Display.ScaleTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-slice_Uy1Display.OpacityTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
+sliceZ_Uy1Display.OpacityTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
 
 # init the 'Plane' selected for 'SliceFunction'
-slice_Uy1Display.SliceFunction.Origin = [x0_dom, y0_dom, Zslice]
+sliceZ_Uy1Display.SliceFunction.Origin = [x0_dom, y0_dom, Zslice]
 
+
+# show data from sliceY_Uy1
+sliceY_Uy1Display = Show(sliceY_Uy1, renderView1, 'UniformGridRepresentation')
+
+# trace defaults for the display properties.
+sliceY_Uy1Display.Representation = 'Surface With Edges'
+sliceY_Uy1Display.ColorArrayName = ['POINTS', 'Uy']
+sliceY_Uy1Display.LookupTable = uyLUT
+sliceY_Uy1Display.SelectTCoordArray = 'None'
+sliceY_Uy1Display.SelectNormalArray = 'None'
+sliceY_Uy1Display.SelectTangentArray = 'None'
+sliceY_Uy1Display.OSPRayScaleArray = 'Uy'
+sliceY_Uy1Display.OSPRayScaleFunction = 'PiecewiseFunction'
+sliceY_Uy1Display.SelectOrientationVectors = 'U'
+sliceY_Uy1Display.ScaleFactor = 2.0
+sliceY_Uy1Display.SelectScaleArray = 'Uy'
+sliceY_Uy1Display.GlyphType = 'Arrow'
+sliceY_Uy1Display.GlyphTableIndexArray = 'Uy'
+sliceY_Uy1Display.GaussianRadius = 0.1
+sliceY_Uy1Display.SetScaleArray = ['POINTS', 'Uy']
+sliceY_Uy1Display.ScaleTransferFunction = 'PiecewiseFunction'
+sliceY_Uy1Display.OpacityArray = ['POINTS', 'Uy']
+sliceY_Uy1Display.OpacityTransferFunction = 'PiecewiseFunction'
+sliceY_Uy1Display.DataAxesGrid = 'GridAxesRepresentation'
+sliceY_Uy1Display.PolarAxes = 'PolarAxesRepresentation'
+sliceY_Uy1Display.ScalarOpacityUnitDistance = 0.23534221904681663
+sliceY_Uy1Display.ScalarOpacityFunction = uxPWF
+sliceY_Uy1Display.OpacityArrayName = ['POINTS', 'Uy']
+sliceY_Uy1Display.IsosurfaceValues = [0.08748531341552734]
+sliceY_Uy1Display.SliceFunction = 'Plane'
+sliceY_Uy1Display.Slice = 4
+
+# init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+sliceY_Uy1Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+
+# init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+sliceY_Uy1Display.ScaleTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
+
+# init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
+sliceY_Uy1Display.OpacityTransferFunction.Points = [-0.49689775705337524, 0.0, 0.5, 0.0, 0.6718683838844299, 1.0, 0.5, 0.0]
+
+# init the 'Plane' selected for 'SliceFunction'
+sliceY_Uy1Display.SliceFunction.Origin = [x0_dom, y0_dom, Zslice]
 
 # show data from pointVolumeInterpolator_Uy
 pointVolumeInterpolator_UyDisplay = Show(pointVolumeInterpolator_Uy, renderView1, 'UniformGridRepresentation')
@@ -996,45 +1224,83 @@ pointVolumeInterpolator_UyDisplay.OpacityTransferFunction.Points = [-0.216410910
 pointVolumeInterpolator_UyDisplay.SliceFunction.Origin = [x0_dom, y0_dom, Zslice]
 
 
-# show data from slice_Uy2
-slice_Uy2Display = Show(slice_Uy2, renderView1, 'GeometryRepresentation')
+# show data from sliceZ_Uy2
+sliceZ_Uy2Display = Show(sliceZ_Uy2, renderView1, 'GeometryRepresentation')
 
 # trace defaults for the display properties.
-slice_Uy2Display.Representation = 'Surface With Edges'
-slice_Uy2Display.ColorArrayName = ['POINTS', 'Uy']
-slice_Uy2Display.LookupTable = uyLUT
-slice_Uy2Display.SelectTCoordArray = 'None'
-slice_Uy2Display.SelectNormalArray = 'None'
-slice_Uy2Display.SelectTangentArray = 'None'
-slice_Uy2Display.OSPRayScaleArray = 'Uy'
-slice_Uy2Display.OSPRayScaleFunction = 'PiecewiseFunction'
-slice_Uy2Display.SelectOrientationVectors = 'U'
-slice_Uy2Display.ScaleFactor = 2.0033000472933056
-slice_Uy2Display.SelectScaleArray = 'Uy'
-slice_Uy2Display.GlyphType = 'Arrow'
-slice_Uy2Display.GlyphTableIndexArray = 'Uy'
-slice_Uy2Display.GaussianRadius = 0.10016500236466527
-slice_Uy2Display.SetScaleArray = ['POINTS', 'Uy']
-slice_Uy2Display.ScaleTransferFunction = 'PiecewiseFunction'
-slice_Uy2Display.OpacityArray = ['POINTS', 'Uy']
-slice_Uy2Display.OpacityTransferFunction = 'PiecewiseFunction'
-slice_Uy2Display.DataAxesGrid = 'GridAxesRepresentation'
-slice_Uy2Display.PolarAxes = 'PolarAxesRepresentation'
+sliceZ_Uy2Display.Representation = 'Surface With Edges'
+sliceZ_Uy2Display.ColorArrayName = ['POINTS', 'Uy']
+sliceZ_Uy2Display.LookupTable = uyLUT
+sliceZ_Uy2Display.SelectTCoordArray = 'None'
+sliceZ_Uy2Display.SelectNormalArray = 'None'
+sliceZ_Uy2Display.SelectTangentArray = 'None'
+sliceZ_Uy2Display.OSPRayScaleArray = 'Uy'
+sliceZ_Uy2Display.OSPRayScaleFunction = 'PiecewiseFunction'
+sliceZ_Uy2Display.SelectOrientationVectors = 'U'
+sliceZ_Uy2Display.ScaleFactor = 2.0033000472933056
+sliceZ_Uy2Display.SelectScaleArray = 'Uy'
+sliceZ_Uy2Display.GlyphType = 'Arrow'
+sliceZ_Uy2Display.GlyphTableIndexArray = 'Uy'
+sliceZ_Uy2Display.GaussianRadius = 0.10016500236466527
+sliceZ_Uy2Display.SetScaleArray = ['POINTS', 'Uy']
+sliceZ_Uy2Display.ScaleTransferFunction = 'PiecewiseFunction'
+sliceZ_Uy2Display.OpacityArray = ['POINTS', 'Uy']
+sliceZ_Uy2Display.OpacityTransferFunction = 'PiecewiseFunction'
+sliceZ_Uy2Display.DataAxesGrid = 'GridAxesRepresentation'
+sliceZ_Uy2Display.PolarAxes = 'PolarAxesRepresentation'
 
 # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
-slice_Uy2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+sliceZ_Uy2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-slice_Uy2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+sliceZ_Uy2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-slice_Uy2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+sliceZ_Uy2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
+
+# show data from sliceY_Uy2
+sliceY_Uy2Display = Show(sliceY_Uy2, renderView1, 'GeometryRepresentation')
+
+# trace defaults for the display properties.
+sliceY_Uy2Display.Representation = 'Surface With Edges'
+sliceY_Uy2Display.ColorArrayName = ['POINTS', 'Uy']
+sliceY_Uy2Display.LookupTable = uyLUT
+sliceY_Uy2Display.SelectTCoordArray = 'None'
+sliceY_Uy2Display.SelectNormalArray = 'None'
+sliceY_Uy2Display.SelectTangentArray = 'None'
+sliceY_Uy2Display.OSPRayScaleArray = 'Uy'
+sliceY_Uy2Display.OSPRayScaleFunction = 'PiecewiseFunction'
+sliceY_Uy2Display.SelectOrientationVectors = 'U'
+sliceY_Uy2Display.ScaleFactor = 2.0033000472933056
+sliceY_Uy2Display.SelectScaleArray = 'Uy'
+sliceY_Uy2Display.GlyphType = 'Arrow'
+sliceY_Uy2Display.GlyphTableIndexArray = 'Uy'
+sliceY_Uy2Display.GaussianRadius = 0.10016500236466527
+sliceY_Uy2Display.SetScaleArray = ['POINTS', 'Uy']
+sliceY_Uy2Display.ScaleTransferFunction = 'PiecewiseFunction'
+sliceY_Uy2Display.OpacityArray = ['POINTS', 'Uy']
+sliceY_Uy2Display.OpacityTransferFunction = 'PiecewiseFunction'
+sliceY_Uy2Display.DataAxesGrid = 'GridAxesRepresentation'
+sliceY_Uy2Display.PolarAxes = 'PolarAxesRepresentation'
+
+# init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+sliceY_Uy2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+
+# init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+sliceY_Uy2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
+# init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
+sliceY_Uy2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
 
 # hide color legend
-slice_Uy1Display.SetScalarBarVisibility(renderView1, False)
+sliceZ_Uy1Display.SetScalarBarVisibility(renderView1, False)
+sliceY_Uy1Display.SetScalarBarVisibility(renderView1, False)
 
 # hide data in view
-Hide(slice_Uy1, renderView1)
+Hide(sliceZ_Uy1, renderView1)
+Hide(sliceY_Uy1, renderView1)
 
 # hide color legend
 pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, False)
@@ -1043,92 +1309,136 @@ pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, False)
 Hide(pointVolumeInterpolator_Uy, renderView1)
 
 # hide color legend
-slice_Uy1Display.SetScalarBarVisibility(renderView1, False)
+sliceZ_Uy1Display.SetScalarBarVisibility(renderView1, False)
+sliceY_Uy1Display.SetScalarBarVisibility(renderView1, False)
+sliceY_Uy2Display.SetScalarBarVisibility(renderView1, False)
 
 # hide data in view
-Hide(slice_Uy2, renderView1)
+Hide(sliceZ_Uy2, renderView1)
+Hide(sliceY_Uy2, renderView1)
 
 #if case_dir == "residualSpeed_":
-if code_csv_slice_Uz2 == 1:
+if code_csv_sliceZ_Uz2 == 1:
 
   uzLUT = GetColorTransferFunction('Uz')
   
-  # show data from slice_Uz2
-  slice_Uz2Display = Show(slice_Uz2, renderView1, 'GeometryRepresentation')
+  # show data from sliceZ_Uz2
+  sliceZ_Uz2Display = Show(sliceZ_Uz2, renderView1, 'GeometryRepresentation')
 
   # trace defaults for the display properties.
-  slice_Uz2Display.Representation = 'Surface With Edges'
-  slice_Uz2Display.ColorArrayName = ['POINTS', 'Uz']
-  slice_Uz2Display.LookupTable = uzLUT
-  slice_Uz2Display.SelectTCoordArray = 'None'
-  slice_Uz2Display.SelectNormalArray = 'None'
-  slice_Uz2Display.SelectTangentArray = 'None'
-  slice_Uz2Display.OSPRayScaleArray = 'Uz'
-  slice_Uz2Display.OSPRayScaleFunction = 'PiecewiseFunction'
-  slice_Uz2Display.SelectOrientationVectors = 'U'
-  slice_Uz2Display.ScaleFactor = 2.0033000472933056
-  slice_Uz2Display.SelectScaleArray = 'Uz'
-  slice_Uz2Display.GlyphType = 'Arrow'
-  slice_Uz2Display.GlyphTableIndexArray = 'Uz'
-  slice_Uz2Display.GaussianRadius = 0.10016500236466527
-  slice_Uz2Display.SetScaleArray = ['POINTS', 'Uz']
-  slice_Uz2Display.ScaleTransferFunction = 'PiecewiseFunction'
-  slice_Uz2Display.OpacityArray = ['POINTS', 'Uz']
-  slice_Uz2Display.OpacityTransferFunction = 'PiecewiseFunction'
-  slice_Uz2Display.DataAxesGrid = 'GridAxesRepresentation'
-  slice_Uz2Display.PolarAxes = 'PolarAxesRepresentation'
+  sliceZ_Uz2Display.Representation = 'Surface With Edges'
+  sliceZ_Uz2Display.ColorArrayName = ['POINTS', 'Uz']
+  sliceZ_Uz2Display.LookupTable = uzLUT
+  sliceZ_Uz2Display.SelectTCoordArray = 'None'
+  sliceZ_Uz2Display.SelectNormalArray = 'None'
+  sliceZ_Uz2Display.SelectTangentArray = 'None'
+  sliceZ_Uz2Display.OSPRayScaleArray = 'Uz'
+  sliceZ_Uz2Display.OSPRayScaleFunction = 'PiecewiseFunction'
+  sliceZ_Uz2Display.SelectOrientationVectors = 'U'
+  sliceZ_Uz2Display.ScaleFactor = 2.0033000472933056
+  sliceZ_Uz2Display.SelectScaleArray = 'Uz'
+  sliceZ_Uz2Display.GlyphType = 'Arrow'
+  sliceZ_Uz2Display.GlyphTableIndexArray = 'Uz'
+  sliceZ_Uz2Display.GaussianRadius = 0.10016500236466527
+  sliceZ_Uz2Display.SetScaleArray = ['POINTS', 'Uz']
+  sliceZ_Uz2Display.ScaleTransferFunction = 'PiecewiseFunction'
+  sliceZ_Uz2Display.OpacityArray = ['POINTS', 'Uz']
+  sliceZ_Uz2Display.OpacityTransferFunction = 'PiecewiseFunction'
+  sliceZ_Uz2Display.DataAxesGrid = 'GridAxesRepresentation'
+  sliceZ_Uz2Display.PolarAxes = 'PolarAxesRepresentation'
 
   # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
-  slice_Uz2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+  sliceZ_Uz2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
 
   # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-  slice_Uz2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+  sliceZ_Uz2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
 
   # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-  slice_Uz2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+  sliceZ_Uz2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
+
+  # show data from sliceY_Uz2
+  sliceY_Uz2Display = Show(sliceY_Uz2, renderView1, 'GeometryRepresentation')
+
+  # trace defaults for the display properties.
+  sliceY_Uz2Display.Representation = 'Surface With Edges'
+  sliceY_Uz2Display.ColorArrayName = ['POINTS', 'Uz']
+  sliceY_Uz2Display.LookupTable = uzLUT
+  sliceY_Uz2Display.SelectTCoordArray = 'None'
+  sliceY_Uz2Display.SelectNormalArray = 'None'
+  sliceY_Uz2Display.SelectTangentArray = 'None'
+  sliceY_Uz2Display.OSPRayScaleArray = 'Uz'
+  sliceY_Uz2Display.OSPRayScaleFunction = 'PiecewiseFunction'
+  sliceY_Uz2Display.SelectOrientationVectors = 'U'
+  sliceY_Uz2Display.ScaleFactor = 2.0033000472933056
+  sliceY_Uz2Display.SelectScaleArray = 'Uz'
+  sliceY_Uz2Display.GlyphType = 'Arrow'
+  sliceY_Uz2Display.GlyphTableIndexArray = 'Uz'
+  sliceY_Uz2Display.GaussianRadius = 0.10016500236466527
+  sliceY_Uz2Display.SetScaleArray = ['POINTS', 'Uz']
+  sliceY_Uz2Display.ScaleTransferFunction = 'PiecewiseFunction'
+  sliceY_Uz2Display.OpacityArray = ['POINTS', 'Uz']
+  sliceY_Uz2Display.OpacityTransferFunction = 'PiecewiseFunction'
+  sliceY_Uz2Display.DataAxesGrid = 'GridAxesRepresentation'
+  sliceY_Uz2Display.PolarAxes = 'PolarAxesRepresentation'
+
+  # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+  sliceY_Uz2Display.OSPRayScaleFunction.Points = [1.0486473911441863e-09, 0.0, 0.5, 0.0, 2.847604226310929, 1.0, 0.5, 0.0]
+
+  # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+  sliceY_Uz2Display.ScaleTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
+  # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
+  sliceY_Uz2Display.OpacityTransferFunction.Points = [-0.40389879742484885, 0.0, 0.5, 0.0, 0.546821789159444, 1.0, 0.5, 0.0]
+
 
   # hide color legend
-  slice_Uz2Display.SetScalarBarVisibility(renderView1, False)
+  sliceZ_Uz2Display.SetScalarBarVisibility(renderView1, False)
+  sliceY_Uz2Display.SetScalarBarVisibility(renderView1, False)
 
   # hide data in view
-  Hide(slice_Uz2, renderView1)
+  Hide(sliceZ_Uz2, renderView1)
+  Hide(sliceY_Uz2, renderView1)
 
 # ----------------------------------------------------------------
 # setup color maps and opacity mapes used in the visualization
 # note: the Get..() functions create a new object, if needed
 # ----------------------------------------------------------------
 
-########## first view  =slice_Ux1 
-if code_view_slice_Ux1 == 1:
+########## first view  =sliceZ_Ux1
+if code_view_sliceZ_Ux1 == 1:
   
   # hide data in view : Uy
-  Hide(slice_Uy1, renderView1)
-  slice_Uy1Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Uy1, renderView1)
+  sliceZ_Uy1Display.SetScalarBarVisibility(renderView1, False)
   Hide(pointVolumeInterpolator_Uy, renderView1)
   pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, False)
-  Hide(slice_Uy2, renderView1)
-  slice_Uy2Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Uy2, renderView1)
+  sliceZ_Uy2Display.SetScalarBarVisibility(renderView1, False)
   
   uyLUTColorBar.Visibility = 0
 
   # hide data in view : Ux
   Hide(pointVolumeInterpolator_Ux, renderView1)
   pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, False)
-  Hide(slice_Ux2, renderView1)
-  slice_Ux2Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Ux2, renderView1)
+  sliceZ_Ux2Display.SetScalarBarVisibility(renderView1, False)
 
-  Show(slice_Ux1, renderView1)
-  slice_Ux1Display.SetScalarBarVisibility(renderView1, True)
+  Show(sliceZ_Ux1, renderView1)
+  sliceZ_Ux1Display.SetScalarBarVisibility(renderView1, True)
   
   uxLUTColorBar.Visibility = 1
   #pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, True)
   
-  SetActiveSource(slice_Ux1)
+  SetActiveSource(sliceZ_Ux1)
   Render()
   view = GetActiveView()
   view.ViewSize = [ viewSize_length, viewSize_height ]
  
   # this part (RescaleTransferFunction) must be defined before after a Render()
+  if ( case_dir.find( "openfoam_data" ) != -1 ) :
+    uxLUT.RescaleTransferFunction(-0.9, 1.9)
+    uxPWF.RescaleTransferFunction(-0.9, 1.9)
   if ( case_dir.find( "mean" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.9, 1.9)
     uxPWF.RescaleTransferFunction(-0.9, 1.9)
@@ -1140,40 +1450,40 @@ if code_view_slice_Ux1 == 1:
     uxPWF.RescaleTransferFunction(-0.7, 0.7)
  
   if code_view_withGrid == 1:
-    slice_Ux1Display.Representation = 'Surface With Edges'
-    slice_Ux1Display.PointSize = 1.0
+    sliceZ_Ux1Display.Representation = 'Surface With Edges'
+    sliceZ_Ux1Display.PointSize = 1.0
     SaveScreenshot('Ux_calculator_withGrid.png',view)
 
-  slice_Ux1Display.Representation = 'Surface'
-  slice_Ux1Display.PointSize = 1.0
+  sliceZ_Ux1Display.Representation = 'Surface'
+  sliceZ_Ux1Display.PointSize = 1.0
   SaveScreenshot('Ux_calculator_withoutGrid.png',view)
   
-########## first view  =slice_Uy1 
-if code_view_slice_Uy1 == 1:
+########## first view  =sliceZ_Uy1
+if code_view_sliceZ_Uy1 == 1:
   
   # hide data in view : Ux
-  Hide(slice_Ux1, renderView1)
-  slice_Ux1Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Ux1, renderView1)
+  sliceZ_Ux1Display.SetScalarBarVisibility(renderView1, False)
   Hide(pointVolumeInterpolator_Ux, renderView1)
   pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, False)
-  Hide(slice_Ux2, renderView1)
-  slice_Ux2Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Ux2, renderView1)
+  sliceZ_Ux2Display.SetScalarBarVisibility(renderView1, False)
   
   uxLUTColorBar.Visibility = 0
 
   # hide data in view : Uy
   Hide(pointVolumeInterpolator_Uy, renderView1)
   pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, False)
-  Hide(slice_Uy2, renderView1)
-  slice_Uy2Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Uy2, renderView1)
+  sliceZ_Uy2Display.SetScalarBarVisibility(renderView1, False)
 
-  Show(slice_Uy1, renderView1)
-  slice_Uy1Display.SetScalarBarVisibility(renderView1, True)
+  Show(sliceZ_Uy1, renderView1)
+  sliceZ_Uy1Display.SetScalarBarVisibility(renderView1, True)
   
   uyLUTColorBar.Visibility = 1
   uyLUTColorBar.Position = [0.6, 0.02]
   
-  SetActiveSource(slice_Uy1)
+  SetActiveSource(sliceZ_Uy1)
   Render()
   view = GetActiveView()
   view.ViewSize = [ viewSize_length, viewSize_height ]
@@ -1189,7 +1499,7 @@ if code_view_slice_Uy1 == 1:
     uyLUT.RescaleTransferFunction(-0.2, 0.2)
     uyPWF.RescaleTransferFunction(-0.2, 0.2)
   #if case_dir == "residualSpeed_2":
-  if code_csv_slice_Uz2 == 1:
+  if code_csv_sliceZ_Uz2 == 1:
     uyLUT.RescaleTransferFunction(-0.7, 0.7)
     uyPWF.RescaleTransferFunction(-0.7, 0.7)
   if case_dir == "sillageDNSRe300":
@@ -1197,12 +1507,12 @@ if code_view_slice_Uy1 == 1:
     uyPWF.RescaleTransferFunction(-0.9, 0.9)
   
   if code_view_withGrid == 1:
-    slice_Uy1Display.Representation = 'Surface With Edges'
-    slice_Uy1Display.PointSize = 1.0
+    sliceZ_Uy1Display.Representation = 'Surface With Edges'
+    sliceZ_Uy1Display.PointSize = 1.0
     SaveScreenshot('Uy_calculator_withGrid.png',view)
 
-  slice_Uy1Display.Representation = 'Surface'
-  slice_Uy1Display.PointSize = 1.0
+  sliceZ_Uy1Display.Representation = 'Surface'
+  sliceZ_Uy1Display.PointSize = 1.0
   SaveScreenshot('Uy_calculator_withoutGrid.png',view)
 # ----------------------------------------------------------------
 
@@ -1210,21 +1520,21 @@ if code_view_slice_Uy1 == 1:
 if code_view_pointVolumeInterpolator_Ux == 1:
   
   # hide data in view : Uy
-  Hide(slice_Uy1, renderView1)
-  slice_Uy1Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Uy1, renderView1)
+  sliceZ_Uy1Display.SetScalarBarVisibility(renderView1, False)
   Hide(pointVolumeInterpolator_Uy, renderView1)
   pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, False)
-  Hide(slice_Uy2, renderView1)
-  slice_Uy2Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Uy2, renderView1)
+  sliceZ_Uy2Display.SetScalarBarVisibility(renderView1, False)
   
   uyLUTColorBar.Visibility = 0
 
   # hide data in view : Ux
-  slice_Ux1Display.Opacity = 0.3
-  Show(slice_Ux1, renderView1)
-  slice_Ux1Display.SetScalarBarVisibility(renderView1, True)
-  Hide(slice_Ux2, renderView1)
-  slice_Ux2Display.SetScalarBarVisibility(renderView1, False)
+  sliceZ_Ux1Display.Opacity = 0.3
+  Show(sliceZ_Ux1, renderView1)
+  sliceZ_Ux1Display.SetScalarBarVisibility(renderView1, True)
+  Hide(sliceZ_Ux2, renderView1)
+  sliceZ_Ux2Display.SetScalarBarVisibility(renderView1, False)
 
   Show(pointVolumeInterpolator_Ux, renderView1)
   pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, True)
@@ -1237,6 +1547,9 @@ if code_view_pointVolumeInterpolator_Ux == 1:
   view.ViewSize = [ viewSize_length, viewSize_height ]
     
   # this part (RescaleTransferFunction) must be defined before after a Render()
+  if ( case_dir.find( "openfoam_data" ) != -1 ) :
+    uxLUT.RescaleTransferFunction(-0.9, 1.9)
+    uxPWF.RescaleTransferFunction(-0.9, 1.9)
   if ( case_dir.find( "mean" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.9, 1.9)
     uxPWF.RescaleTransferFunction(-0.9, 1.9)
@@ -1266,22 +1579,22 @@ if code_view_pointVolumeInterpolator_Ux == 1:
 if code_view_pointVolumeInterpolator_Uy == 1:
   
   # hide data in view : Ux
-  Hide(slice_Ux1, renderView1)
-  slice_Ux1Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Ux1, renderView1)
+  sliceZ_Ux1Display.SetScalarBarVisibility(renderView1, False)
   Hide(pointVolumeInterpolator_Ux, renderView1)
   pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, False)
-  Hide(slice_Ux2, renderView1)
-  slice_Ux2Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Ux2, renderView1)
+  sliceZ_Ux2Display.SetScalarBarVisibility(renderView1, False)
   
   uxLUTColorBar.Visibility = 0
 
   # hide data in view : Uy
-  slice_Uy1Display.Opacity = 0.3
-  slice_Uy1Display.Representation = 'Surface'
-  Show(slice_Uy1, renderView1)
-  slice_Uy1Display.SetScalarBarVisibility(renderView1, True)
-  Hide(slice_Uy2, renderView1)
-  slice_Uy2Display.SetScalarBarVisibility(renderView1, False)
+  sliceZ_Uy1Display.Opacity = 0.3
+  sliceZ_Uy1Display.Representation = 'Surface'
+  Show(sliceZ_Uy1, renderView1)
+  sliceZ_Uy1Display.SetScalarBarVisibility(renderView1, True)
+  Hide(sliceZ_Uy2, renderView1)
+  sliceZ_Uy2Display.SetScalarBarVisibility(renderView1, False)
 
   Show(pointVolumeInterpolator_Uy, renderView1)
   pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, True)
@@ -1304,7 +1617,7 @@ if code_view_pointVolumeInterpolator_Uy == 1:
     uyLUT.RescaleTransferFunction(-0.2, 0.2)
     uyPWF.RescaleTransferFunction(-0.2, 0.2)
   #if case_dir == "residualSpeed_2":
-  if code_csv_slice_Uz2 == 1:
+  if code_csv_sliceZ_Uz2 == 1:
     uyLUT.RescaleTransferFunction(-0.7, 0.7)
     uyPWF.RescaleTransferFunction(-0.7, 0.7)
   if case_dir == "sillageDNSRe300":
@@ -1326,38 +1639,41 @@ if code_view_pointVolumeInterpolator_Uy == 1:
   
   SaveScreenshot('Uy_calculator_pointVolumeInterpolator_withoutGrid.png',view)
 
-########## third view  =slice_Ux2
-if code_view_slice_Ux2 == 1:
+########## third view  =sliceZ_Ux2
+if code_view_sliceZ_Ux2 == 1:
   
   # hide data in view : Uy
-  Hide(slice_Uy1, renderView1)
-  slice_Uy1Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Uy1, renderView1)
+  sliceZ_Uy1Display.SetScalarBarVisibility(renderView1, False)
   Hide(pointVolumeInterpolator_Uy, renderView1)
   pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, False)
-  Hide(slice_Uy2, renderView1)
-  slice_Uy2Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Uy2, renderView1)
+  sliceZ_Uy2Display.SetScalarBarVisibility(renderView1, False)
   
   uyLUTColorBar.Visibility = 0
 
   # hide data in view : Ux
-  slice_Ux1Display.Opacity = 0.3
-  slice_Ux1Display.Representation = 'Surface'
-  Show(slice_Ux1, renderView1)
-  slice_Ux1Display.SetScalarBarVisibility(renderView1, True)
+  sliceZ_Ux1Display.Opacity = 0.3
+  sliceZ_Ux1Display.Representation = 'Surface'
+  Show(sliceZ_Ux1, renderView1)
+  sliceZ_Ux1Display.SetScalarBarVisibility(renderView1, True)
   Hide(pointVolumeInterpolator_Ux, renderView1)
   pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, False)
 
-  Show(slice_Ux2, renderView1)
-  slice_Ux2Display.SetScalarBarVisibility(renderView1, True)
+  Show(sliceZ_Ux2, renderView1)
+  sliceZ_Ux2Display.SetScalarBarVisibility(renderView1, True)
   
   uxLUTColorBar.Visibility = 1
   
-  SetActiveSource(slice_Ux2)
+  SetActiveSource(sliceZ_Ux2)
   Render()
   view = GetActiveView()
   view.ViewSize = [ viewSize_length, viewSize_height ]
 
   # this part (RescaleTransferFunction) must be defined before after a Render()
+  if ( case_dir.find( "openfoam_data" ) != -1 ) :
+    uxLUT.RescaleTransferFunction(-0.9, 1.9)
+    uxPWF.RescaleTransferFunction(-0.9, 1.9)
   if ( case_dir.find( "mean" ) != -1 ) :
     uxLUT.RescaleTransferFunction(-0.9, 1.9)
     uxPWF.RescaleTransferFunction(-0.9, 1.9)
@@ -1369,47 +1685,47 @@ if code_view_slice_Ux2 == 1:
     uxPWF.RescaleTransferFunction(-0.7, 0.7)
 
   if code_view_withGrid == 1:
-    slice_Ux2Display.Representation = 'Surface With Edges'
-    slice_Ux2Display.PointSize = pointSize_for_SurfaceDisplay
+    sliceZ_Ux2Display.Representation = 'Surface With Edges'
+    sliceZ_Ux2Display.PointSize = pointSize_for_SurfaceDisplay
     SaveScreenshot('Ux_calculator_pointVolumeInterpolator_slicepointSize_for_PointsDisplay_withGrid.png',view)
 
   if mode_view_NoGrid == "SURFACE":
-    slice_Ux2Display.Representation = 'Surface'
-    slice_Ux2Display.PointSize = pointSize_for_SurfaceDisplay
+    sliceZ_Ux2Display.Representation = 'Surface'
+    sliceZ_Ux2Display.PointSize = pointSize_for_SurfaceDisplay
 
   if mode_view_NoGrid == "POINTS":
-    slice_Ux2Display.Representation = 'Points'
-    slice_Ux2Display.PointSize = pointSize_for_PointsDisplay
+    sliceZ_Ux2Display.Representation = 'Points'
+    sliceZ_Ux2Display.PointSize = pointSize_for_PointsDisplay
   
-  SaveScreenshot('Ux_calculator_pointVolumeInterpolator_slice_withoutGrid.png',view)
+  SaveScreenshot('Ux_calculator_pointVolumeInterpolator_sliceZ_withoutGrid.png',view)
   
-########## third view  =slice_Uy2
-if code_view_slice_Uy2 == 1:
+########## third view  =sliceZ_Uy2
+if code_view_sliceZ_Uy2 == 1:
   
   # hide data in view : Ux
-  Hide(slice_Ux1, renderView1)
-  slice_Ux1Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Ux1, renderView1)
+  sliceZ_Ux1Display.SetScalarBarVisibility(renderView1, False)
   Hide(pointVolumeInterpolator_Ux, renderView1)
   pointVolumeInterpolator_UxDisplay.SetScalarBarVisibility(renderView1, False)
-  Hide(slice_Ux2, renderView1)
-  slice_Ux2Display.SetScalarBarVisibility(renderView1, False)
+  Hide(sliceZ_Ux2, renderView1)
+  sliceZ_Ux2Display.SetScalarBarVisibility(renderView1, False)
   
   uxLUTColorBar.Visibility = 0
 
   # hide data in view : Uy
-  slice_Uy1Display.Opacity = 0.3
-  slice_Uy1Display.Representation = 'Surface'
-  Show(slice_Uy1, renderView1)
-  slice_Uy1Display.SetScalarBarVisibility(renderView1, True)
+  sliceZ_Uy1Display.Opacity = 0.3
+  sliceZ_Uy1Display.Representation = 'Surface'
+  Show(sliceZ_Uy1, renderView1)
+  sliceZ_Uy1Display.SetScalarBarVisibility(renderView1, True)
   Hide(pointVolumeInterpolator_Uy, renderView1)
   pointVolumeInterpolator_UyDisplay.SetScalarBarVisibility(renderView1, False)
 
-  Show(slice_Uy2, renderView1)
-  slice_Uy2Display.SetScalarBarVisibility(renderView1, True)
+  Show(sliceZ_Uy2, renderView1)
+  sliceZ_Uy2Display.SetScalarBarVisibility(renderView1, True)
   
   uyLUTColorBar.Visibility = 1
   
-  SetActiveSource(slice_Uy2)
+  SetActiveSource(sliceZ_Uy2)
   Render()
   view = GetActiveView()
   view.ViewSize = [ viewSize_length, viewSize_height ]
@@ -1425,7 +1741,7 @@ if code_view_slice_Uy2 == 1:
     uyLUT.RescaleTransferFunction(-0.2, 0.2)
     uyPWF.RescaleTransferFunction(-0.2, 0.2)
   #if case_dir == "residualSpeed_2":
-  if code_csv_slice_Uz2 == 1:
+  if code_csv_sliceZ_Uz2 == 1:
     uyLUT.RescaleTransferFunction(-0.7, 0.7)
     uyPWF.RescaleTransferFunction(-0.7, 0.7)
   if case_dir == "sillageDNSRe300":
@@ -1433,19 +1749,19 @@ if code_view_slice_Uy2 == 1:
     uyPWF.RescaleTransferFunction(-0.9, 0.9)
 
   if code_view_withGrid == 1:
-    slice_Uy2Display.Representation = 'Surface With Edges'
-    slice_Uy2Display.PointSize = pointSize_for_SurfaceDisplay
-    SaveScreenshot('Uy_calculator_pointVolumeInterpolator_slice_withGrid.png',view)
+    sliceZ_Uy2Display.Representation = 'Surface With Edges'
+    sliceZ_Uy2Display.PointSize = pointSize_for_SurfaceDisplay
+    SaveScreenshot('Uy_calculator_pointVolumeInterpolator_sliceZ_withGrid.png',view)
 
   if mode_view_NoGrid == "SURFACE":
-    slice_Uy2Display.Representation = 'Surface'
-    slice_Uy2Display.PointSize = pointSize_for_SurfaceDisplay
+    sliceZ_Uy2Display.Representation = 'Surface'
+    sliceZ_Uy2Display.PointSize = pointSize_for_SurfaceDisplay
 
   if mode_view_NoGrid == "POINTS":
-    slice_Uy2Display.Representation = 'Points'
-    slice_Uy2Display.PointSize = pointSize_for_PointsDisplay
+    sliceZ_Uy2Display.Representation = 'Points'
+    sliceZ_Uy2Display.PointSize = pointSize_for_PointsDisplay
   
-  SaveScreenshot('Uy_calculator_pointVolumeInterpolator_slice_withoutGrid.png',view)
+  SaveScreenshot('Uy_calculator_pointVolumeInterpolator_sliceZ_withoutGrid.png',view)
 
 # ----------------------------------------------------------------
 
@@ -1457,12 +1773,12 @@ if code_view_slice_Uy2 == 1:
 # files Ux : x,y,z,Ux -> AddMetaData=1
 # files Uy : Uy -> AddMetaData=0
 
-if code_csv_slice_Ux1 == 1:
+if code_csv_sliceZ_Ux1 == 1:
  
-  # SaveData('slice_Ux1.csv',proxy=slice_Ux1)
+  # SaveData('sliceZ_Ux1.csv',proxy=sliceZ_Ux1)
   
-  SaveData('slice_Ux1.csv',
-  proxy=slice_Ux1,
+  SaveData('sliceZ_Ux1.csv',
+  proxy=sliceZ_Ux1,
   ChooseArraysToWrite=1,
   PointDataArrays=['Ux'],
   CellDataArrays=[],
@@ -1478,12 +1794,31 @@ if code_csv_slice_Ux1 == 1:
   AddMetaData=1, 
   AddTime=0)
  
-if code_csv_slice_Uy1 == 1:
+  # SaveData('sliceY_Ux1.csv',proxy=sliceY_Ux1)
+
+  SaveData('sliceY_Ux1.csv',
+  proxy=sliceY_Ux1,
+  ChooseArraysToWrite=1,
+  PointDataArrays=['Ux'],
+  CellDataArrays=[],
+  FieldDataArrays=[],
+  VertexDataArrays=[],
+  EdgeDataArrays=[],
+  RowDataArrays=[],
+  Precision=6,
+  WriteTimeSteps=10,
+  Filenamesuffix='%d',
+  UseScientificNotation=0,
+  FieldAssociation='Point Data',
+  AddMetaData=1,
+  AddTime=0)
+
+if code_csv_sliceZ_Uy1 == 1:
  
-  # SaveData('slice_Uy1.csv',proxy=slice_Uy1)
+  # SaveData('sliceZ_Uy1.csv',proxy=sliceZ_Uy1)
   
-  SaveData('slice_Uy1.csv',
-  proxy=slice_Uy1,
+  SaveData('sliceZ_Uy1.csv',
+  proxy=sliceZ_Uy1,
   ChooseArraysToWrite=1,
   PointDataArrays=['Uy'],
   CellDataArrays=[],
@@ -1499,12 +1834,31 @@ if code_csv_slice_Uy1 == 1:
   AddMetaData=0, 
   AddTime=0)
 
-if code_csv_slice_Ux2 == 1:
+  # SaveData('sliceY_Uy1.csv',proxy=sliceY_Uy1)
+
+  SaveData('sliceY_Uy1.csv',
+  proxy=sliceY_Uy1,
+  ChooseArraysToWrite=1,
+  PointDataArrays=['Uy'],
+  CellDataArrays=[],
+  FieldDataArrays=[],
+  VertexDataArrays=[],
+  EdgeDataArrays=[],
+  RowDataArrays=[],
+  Precision=6,
+  WriteTimeSteps=10,
+  Filenamesuffix='%d',
+  UseScientificNotation=0,
+  FieldAssociation='Point Data',
+  AddMetaData=0,
+  AddTime=0)
+
+if code_csv_sliceZ_Ux2 == 1:
   
-  # SaveData('slice_Ux2.csv',proxy=slice_Ux2)
+  # SaveData('sliceZ_Ux2.csv',proxy=sliceZ_Ux2)
   
-  SaveData('slice_Ux2.csv',
-  proxy=slice_Ux2,
+  SaveData('sliceZ_Ux2.csv',
+  proxy=sliceZ_Ux2,
   ChooseArraysToWrite=1,
   PointDataArrays=['Ux'],
   CellDataArrays=[],
@@ -1520,12 +1874,31 @@ if code_csv_slice_Ux2 == 1:
   AddMetaData=1, 
   AddTime=0)
 
-if code_csv_slice_Uy2 == 1:
+  # SaveData('sliceY_Ux2.csv',proxy=sliceY_Ux2)
+
+  SaveData('sliceY_Ux2.csv',
+  proxy=sliceY_Ux2,
+  ChooseArraysToWrite=1,
+  PointDataArrays=['Ux'],
+  CellDataArrays=[],
+  FieldDataArrays=[],
+  VertexDataArrays=[],
+  EdgeDataArrays=[],
+  RowDataArrays=[],
+  Precision=6,
+  WriteTimeSteps=10,
+  Filenamesuffix='%d',
+  UseScientificNotation=0,
+  FieldAssociation='Point Data',
+  AddMetaData=1,
+  AddTime=0)
+
+if code_csv_sliceZ_Uy2 == 1:
   
-  # SaveData('slice_Uy2.csv',proxy=slice_Uy2)
+  # SaveData('sliceZ_Uy2.csv',proxy=sliceZ_Uy2)
   
-  SaveData('slice_Uy2.csv',
-  proxy=slice_Uy2,
+  SaveData('sliceZ_Uy2.csv',
+  proxy=sliceZ_Uy2,
   ChooseArraysToWrite=1,
   PointDataArrays=['Uy'],
   CellDataArrays=[],
@@ -1541,12 +1914,31 @@ if code_csv_slice_Uy2 == 1:
   AddMetaData=0, 
   AddTime=0)
 
-if code_csv_slice_Uz2 == 1:
+  # SaveData('sliceY_Uy2.csv',proxy=sliceY_Uy2)
 
-  # SaveData('slice_Uz2.csv',proxy=slice_Uz2)
+  SaveData('sliceY_Uy2.csv',
+  proxy=sliceY_Uy2,
+  ChooseArraysToWrite=1,
+  PointDataArrays=['Uy'],
+  CellDataArrays=[],
+  FieldDataArrays=[],
+  VertexDataArrays=[],
+  EdgeDataArrays=[],
+  RowDataArrays=[],
+  Precision=6,
+  WriteTimeSteps=10,
+  Filenamesuffix='%d',
+  UseScientificNotation=0,
+  FieldAssociation='Point Data',
+  AddMetaData=0,
+  AddTime=0)
+
+if code_csv_sliceZ_Uz2 == 1:
+
+  # SaveData('sliceZ_Uz2.csv',proxy=sliceZ_Uz2)
   
-  SaveData('slice_Uz2.csv',
-  proxy=slice_Uz2,
+  SaveData('sliceZ_Uz2.csv',
+  proxy=sliceZ_Uz2,
   ChooseArraysToWrite=1,
   PointDataArrays=['Uz'],
   CellDataArrays=[],
@@ -1560,6 +1952,25 @@ if code_csv_slice_Uz2 == 1:
   UseScientificNotation=0,
   FieldAssociation='Point Data',
   AddMetaData=0, 
+  AddTime=0)
+
+  # SaveData('sliceY_Uz2.csv',proxy=sliceY_Uz2)
+
+  SaveData('sliceY_Uz2.csv',
+  proxy=sliceY_Uz2,
+  ChooseArraysToWrite=1,
+  PointDataArrays=['Uz'],
+  CellDataArrays=[],
+  FieldDataArrays=[],
+  VertexDataArrays=[],
+  EdgeDataArrays=[],
+  RowDataArrays=[],
+  Precision=6,
+  WriteTimeSteps=10,
+  Filenamesuffix='%d',
+  UseScientificNotation=0,
+  FieldAssociation='Point Data',
+  AddMetaData=0,
   AddTime=0)
 
 

@@ -5,18 +5,18 @@
 //
 // Files read are defined in [file_XYUxyz]
 //
-//    for example : the file [list_fic_time.txt] created by the script [openfoamDNS_to_pseudoPIV_all.csh]
+//    for example : the file [list_sliceZ_fic_time.txt] created by the script [openfoamDNS_to_pseudoPIV_all.csh]
 //    this file is like this :
 //       first line : file with  (x,y) coordinates (ex: XYcrop.txt) corresponding to the following U*.txt file name
 //       second line and other : file with U value for each time (U5000000.txt U5012500.txt ...)
 //
 // Example : 
 //
-//    [list_fic_time.txt]
+//    [list_sliceZ_fic_time.txt]
 //       XYcrop.txt
-//       U5000000.txt
-//       U5012500.txt
-//       U5025000.txt
+//       U_sliceZ5000000.txt
+//       U_sliceZ5012500.txt
+//       U_sliceZ5025000.txt
 //       ...
 //
 //    [XYcrop.txt]
@@ -24,7 +24,7 @@
 //       4.08815 -4.22067
 //       ...
 //
-//    [U5000000.txt]
+//    [U_sliceZ5000000.txt]
 //       "Ux" "Uy" "Uz"
 //       -2.72815e-05 -5.03747e-05 -7.77155e-06
 //       ...
@@ -113,7 +113,7 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
 {
   std::string line1("aaa bbb"), line2("aaa bbb");
   std::string word_read1("bbb"),  word_read2("bbb");
-  std::string word_comment("#"), word_XY("XYcrop.txt");
+  std::string word_comment("#"), word_XY("XYcrop.txt"), word_XZ("XZcrop.txt");
   std::string file_XYUxyz;
   std::ifstream  pt_file_in1, pt_file_in2;
   double read_value=0.;
@@ -135,11 +135,11 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
       std::getline ( pt_file_in1, line1 );
       std::stringstream split_line1( line1 );
       j1 = 0, k1=0;
-      int code_XY = 0;
+      int code_crop = 0;
      while ( std::getline ( split_line1, word_read1, ' ' ) )
       {
         if ( ( j1 == 0 ) && ( word_read1.compare( word_comment ) == 0 )) k1=k1+1;
-        if ( ( j1 == 0 ) && ( word_read1.compare( word_XY ) == 0 )) code_XY=1; // i1=0
+        if ( ( j1 == 0 ) && (( word_read1.compare( word_XY ) == 0 ) || ( word_read1.compare( word_XZ ) == 0 )) ) code_crop=1; // i1=0
         if   ( k1 <= 0 )
         {
           file_XYUxyz = word_read1;
@@ -163,7 +163,7 @@ void stat_from_file( std::string file_list_XYUxyz, int Nrow, int Ntime,  Eigen::
                   
                   read_value = std::strtof( cstr, &pEnd );
                   
-                  if ( code_XY == 1 ) 
+                  if ( code_crop == 1 )
                   {
                     XY(i2,j2) = (float)read_value;
                   }

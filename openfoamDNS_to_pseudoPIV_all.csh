@@ -1,7 +1,8 @@
 #!/bin/tcsh
 #
 # Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Juin 2022 : Février 2023]
-#                                                                                  [Janvier 2024 : correction (cov_after_gaussSmoothing)]
+#                                                 [Janvier 2024 : correction (cov_after_gaussSmoothing)]
+#                                                 [Juillet 2025 : plan Z=(Zmin+Zmax)/2 et ajout du plan Y=(Ymin+Ymax)/2]
 #
 # MORAANE project : Scalian - INRAE
 #
@@ -57,6 +58,15 @@
 #    2.a) arg1 = Zslice value (ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 2.45)
 #    2.b) arg2 = Case type ( ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 DNS)
 #    2.c) arg3 = ROM type ( ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 ROM mean)
+#
+#  from 15/07/25, the number of arguments is reduced to 2 :
+#
+#    since Zslice is always defined for mid Z plane Z=(Zmin+Zmax)/2.
+#    A second plane Yslice is defined with Y=(Ymin+Ymax)/2.
+#    so, 2 parameters only are used :
+#       2.a) arg1 = Case type ( ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 DNS)
+#       2.b) arg2 = ROM type ( ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 ROM mean)
+#
 #  
 #  ------------------------------------------------------------------------------
 # 
@@ -220,18 +230,21 @@ set dir_ROMDNS = ` cat ${fic_run_info} | sed s/"^ #"/"#"/g | grep -v "^#" | \
 #------------------------------------------------------------------------------
 # default values for first INPUT parameter
 
-# Z position of the slice for pseudoPIV, in CFD unities
+# part commented since 15/07/25 : Zslice always chosen as Zslice=(Zmin+Zmax)/2
+# # Z position of the slice for pseudoPIV, in CFD unities
+# set code_Zslice = 0 # no more used
+# set Zslice = 1.
+# set warning = "Default Slice position is Z=${Zslice}"
+# WRITE_LINE; WRITE_WARNING "${warning}"; WRITE_LINE
+#
+# # if first input arg !=0 -> other choice
+# if ( $1 != "" ) then
+#   set Zslice = $1
+#   set info = "arg1=$1 -> Chosen Slice position is Z=${Zslice}"
+#   WRITE_INFO "${info}"
+# endif
+#
 
-set Zslice = 1.
-set warning = "Default Slice position is Z=${Zslice}"
-WRITE_LINE; WRITE_WARNING "${warning}"; WRITE_LINE
-
-# if first input arg !=0 -> other choice
-if ( $1 != "" ) then
-  set Zslice = $1
-  set info = "arg1=$1 -> Chosen Slice position is Z=${Zslice}"
-  WRITE_INFO "${info}" 
-endif
 
 # other parameters depending of [case_OpenFoam]
 #  - code_adim : code related to final ASCII file cooresponding to the slice : 
@@ -268,16 +281,27 @@ set warning = "Default CASES = ( ${All_CASE} )"
 WRITE_LINE; WRITE_WARNING "${warning}"; WRITE_LINE
 
 # if second input arg !=0 -> other choice
-if ( $2 != "" ) then
+# if ( $2 != "" ) then
+#
+#   set All_CASE =  ( )
+#   set code_DNS = ` echo $2 | grep DNS | wc -l `
+#   if ( ${code_DNS} != 0 ) set All_CASE =  ( ${All_CASE} "DNS" )
+#   set code_ROM = ` echo $2 | grep ROM | wc -l `
+#   if ( ${code_ROM} != 0 ) set All_CASE =  ( ${All_CASE} "ROM" )
+#   set info = "arg2=$2 -> Chosen CASES = ( ${All_CASE} )"
+#   WRITE_INFO "${info}"
+#
+# endif
+if ( $1 != "" ) then
 
   set All_CASE =  ( )
-  set code_DNS = ` echo $2 | grep DNS | wc -l `
+  set code_DNS = ` echo $1 | grep DNS | wc -l `
   if ( ${code_DNS} != 0 ) set All_CASE =  ( ${All_CASE} "DNS" )
-  set code_ROM = ` echo $2 | grep ROM | wc -l `
+  set code_ROM = ` echo $1 | grep ROM | wc -l `
   if ( ${code_ROM} != 0 ) set All_CASE =  ( ${All_CASE} "ROM" )
-  set info = "arg2=$2 -> Chosen CASES = ( ${All_CASE} )"
-  WRITE_INFO "${info}" 
-  
+  set info = "arg2=$1 -> Chosen CASES = ( ${All_CASE} )"
+  WRITE_INFO "${info}"
+
 endif
 
 foreach CASE ( ${All_CASE} )
@@ -390,12 +414,17 @@ foreach CASE ( ${All_CASE} )
     set All_D = ( ${mean_D_U} ${spatialModes_D_U} ${residualSpeed_D_U} )
     
     # if third input arg !=0 -> other choice : directories among [mean], [spatialModes_*modes] and [residualSpeed_*]
-    if ( $3 != "" ) then
-      set All_D = ( $3 )
-      set info = "arg3=$3 -> Chosen directory is All_D = ( ${All_D} )"
-      WRITE_INFO "${info}" 
+#     if ( $3 != "" ) then
+#       set All_D = ( $3 )
+#       set info = "arg3=$3 -> Chosen directory is All_D = ( ${All_D} )"
+#       WRITE_INFO "${info}"
+#     endif
+    if ( $2 != "" ) then
+      set All_D = ( $2 )
+      set info = "arg3=$2 -> Chosen directory is All_D = ( ${All_D} )"
+      WRITE_INFO "${info}"
     endif
- 
+
     # noise applied to create Fake PIV
     set noise_MAX = 0
     
@@ -622,18 +651,22 @@ foreach CASE ( ${All_CASE} )
         
       endif
 
-      # is Zslice OK ?
-      
-      set code_z = ` echo ${Zslice} ${DNS_zmin} ${DNS_zmax} | awk '{ if (($1-$2)*($1-$3) <= 0 ) print 0; else print 1 }' `
-      if ( ${code_z} == 0 ) then
-        set info = "Zslice OK : ${DNS_zmin}<Zslice=${Zslice}<${DNS_zmax}"
-        WRITE_LINE; WRITE_INFO "${info}" ; WRITE_LINE
-      else
-        set error = "Zslice = ${Zslice} OUT of domain Z=(${DNS_zmin}:${DNS_zmax})"
-        WRITE_LINE; WRITE_ERROR "${error}"; WRITE_LINE
-        exit()
-      endif      
-      
+# part commented since 15/07/25 : Zslice always chosen as Zslice=(Zmin+Zmax)/2
+#       # is Zslice OK ?
+#
+#       set code_z = ` echo ${Zslice} ${DNS_zmin} ${DNS_zmax} | awk '{ if (($1-$2)*($1-$3) <= 0 ) print 0; else print 1 }' `
+#       if ( ${code_z} == 0 ) then
+#         set info = "Zslice OK : ${DNS_zmin}<Zslice=${Zslice}<${DNS_zmax}"
+#         WRITE_LINE; WRITE_INFO "${info}" ; WRITE_LINE
+#       else
+#         set error = "Zslice = ${Zslice} OUT of domain Z=(${DNS_zmin}:${DNS_zmax})"
+#         WRITE_LINE; WRITE_ERROR "${error}"; WRITE_LINE
+#         exit()
+#       endif
+      set Zslice = ` echo ${DNS_zmin} ${DNS_zmax} | awk '{ print ($2+$3)/2. }' `
+# part added since 15/07/25 :
+      set Yslice = ` echo ${DNS_ymin} ${DNS_ymax} | awk '{ print ($2+$3)/2. }' `
+
       ## temporary folder : dir 0 and 1
       
       if (!(-d tmp_dir/0)) mkdir tmp_dir/0
@@ -745,12 +778,18 @@ foreach CASE ( ${All_CASE} )
             # INFO value : specific case
             
             if ( ${CASE} == "DNS" ) then
-              set DNS_info = `echo ${D} ${Zslice} ${t} ${noise_MAX} | awk '{ printf("%s : Z=%.3f t=%06.2f noise <%s\%",$1,$2,$3,$4) }' `
+#               set DNS_info = `echo ${D} ${Zslice} ${t} ${noise_MAX} | awk '{ printf("%s : Z=%.3f t=%06.2f noise <%s\%",$1,$2,$3,$4) }' `
+              # since 15/07/25 : 2 planes Z=cte and Y=cte
+              set DNS_info = `echo ${D} ${Zslice} ${Yslice} ${t} ${noise_MAX} | awk '{ printf("%s : Z=%.3f Y=%.3f t=%06.2f noise <%s\%",$1,$2,$3,$4,$5) }' `
             endif
             if ( ${CASE} == "ROM" ) then
-              if ( ${code_mean} != 0 ) set DNS_info = `echo ${D} ${Zslice} | awk '{ printf("%s : Z=%.3f mode 0",$1,$2) }' `
-              if ( ${code_spatialModes} != 0 ) set DNS_info = `echo ${D} ${Zslice} ${t} | awk '{ printf("%s : Z=%.3f mode %2d",$1,$2,$3) }' `
-              if ( ${code_residualSpeed} != 0 ) set DNS_info = `echo ${D} ${Zslice} ${t} | awk '{ printf("%s : Z=%.3f t=%06.2f",$1,$2,$3) }' `
+#               if ( ${code_mean} != 0 ) set DNS_info = `echo ${D} ${Zslice} | awk '{ printf("%s : Z=%.3f mode 0",$1,$2) }' `
+#               if ( ${code_spatialModes} != 0 ) set DNS_info = `echo ${D} ${Zslice} ${t} | awk '{ printf("%s : Z=%.3f mode %2d",$1,$2,$3) }' `
+#               if ( ${code_residualSpeed} != 0 ) set DNS_info = `echo ${D} ${Zslice} ${t} | awk '{ printf("%s : Z=%.3f t=%06.2f",$1,$2,$3) }' `
+              # since 15/07/25 : 2 planes Z=cte and Y=cte
+              if ( ${code_mean} != 0 ) set DNS_info = `echo ${D} ${Zslice} ${Yslice} | awk '{ printf("%s : Z=%.3f Y=%.3f  mode 0",$1,$2,$3) }' `
+              if ( ${code_spatialModes} != 0 ) set DNS_info = `echo ${D} ${Zslice} ${Yslice} ${t} | awk '{ printf("%s : Z=%.3f Y=%.3f mode %2d",$1,$2,$3,$4) }' `
+              if ( ${code_residualSpeed} != 0 ) set DNS_info = `echo ${D} ${Zslice} ${Yslice} ${t} | awk '{ printf("%s : Z=%.3f Y=%.3f t=%06.2f",$1,$2,$3,$4) }' `
             endif
           
             ## PIV model
@@ -773,43 +812,58 @@ foreach CASE ( ${All_CASE} )
         
             ## CSV and PNG files created according to time t
             
-            # CSV  and PNG files created according to time t : 
-            #    saving [slice_Ux1] and [slice_Uy1] (original openfoam mesh) only for first time 
+            # CSV and PNG files created according to time t :
+            #    saving [sliceZ_Ux1] and [sliceZ_Uy1] (original openfoam mesh) only for first time
             
             if ( ${t} == ${t_first} ) set code = 1
             if ( ${t} != ${t_first} ) set code = 0
             
             \mv ${fic_param} tmp.txt
-            set N = ` cat -n tmp.txt | grep code_csv_slice_Ux1 | awk '{ print $1 }' `
+            set N = ` cat -n tmp.txt | grep code_csv_sliceZ_Ux1 | awk '{ print $1 }' `
             awk -v N=${N} '{ if (NR<N) print $0 }' tmp.txt > ${fic_param}
-            echo "${code} # code_csv_slice_Ux1" >> ${fic_param}
+            echo "${code} # code_csv_sliceZ_Ux1" >> ${fic_param}
             awk -v N=${N} '{ if (NR>N) print $0 }' tmp.txt >> ${fic_param}
               
             \mv ${fic_param} tmp.txt
-            set N = ` cat -n tmp.txt | grep code_csv_slice_Uy1 | awk '{ print $1 }' `
+            set N = ` cat -n tmp.txt | grep code_csv_sliceZ_Uy1 | awk '{ print $1 }' `
             awk -v N=${N} '{ if (NR<N) print $0 }' tmp.txt > ${fic_param}
-            echo "${code} # code_csv_slice_Uy1" >> ${fic_param}
+            echo "${code} # code_csv_sliceZ_Uy1" >> ${fic_param}
             awk -v N=${N} '{ if (NR>N) print $0 }' tmp.txt >> ${fic_param}
             
-            # CSV  and PNG files created according to code_residualSpeed : 
-            #    saving [slice_Uz2] only for case of residualSpeed
+            # CSV and PNG files created according to code_residualSpeed :
+            #    saving [sliceZ_Uz2] only for case of residualSpeed
             
             set code = 0
             if ( ${code_residualSpeed} != 0 ) set code = 1
             \mv ${fic_param} tmp.txt
-            set N = ` cat -n tmp.txt | grep code_csv_slice_Uz2 | awk '{ print $1 }' `
+            set N = ` cat -n tmp.txt | grep code_csv_sliceZ_Uz2 | awk '{ print $1 }' `
             if ( ${N} != "" ) then
               awk -v N=${N} '{ if (NR<N) print $0 }' tmp.txt > ${fic_param}
-              echo "${code} # code_csv_slice_Uz2" >> ${fic_param}
+              echo "${code} # code_csv_sliceZ_Uz2" >> ${fic_param}
               awk -v N=${N} '{ if (NR>N) print $0 }' tmp.txt >> ${fic_param}
             else
-              set N = ` cat -n tmp.txt | grep code_csv_slice_Uy2 | awk '{ print $1+1 }' `
+              set N = ` cat -n tmp.txt | grep code_csv_sliceZ_Uy2 | awk '{ print $1+1 }' `
               awk -v N=${N} '{ if (NR<N) print $0 }' tmp.txt > ${fic_param}
-              echo "${code} # code_csv_slice_Uz2" >> ${fic_param}
+              echo "${code} # code_csv_sliceZ_Uz2" >> ${fic_param}
               awk -v N=${N} '{ if (NR>=N) print $0 }' tmp.txt >> ${fic_param}
             endif
             
-            # CSV  and PNG files created according to time t : 
+            # modification when using 2 planes Z=cte and Y=cte
+            set code = 1
+            \mv ${fic_param} tmp.txt
+            set N = ` cat -n tmp.txt | grep code_csv_sliceZ_Uz2 | awk '{ print $1 }' `
+            if ( ${N} != "" ) then
+              awk -v N=${N} '{ if (NR<N) print $0 }' tmp.txt > ${fic_param}
+              echo "${code} # code_csv_sliceZ_Uz2" >> ${fic_param}
+              awk -v N=${N} '{ if (NR>N) print $0 }' tmp.txt >> ${fic_param}
+            else
+              set N = ` cat -n tmp.txt | grep code_csv_sliceZ_Uy2 | awk '{ print $1+1 }' `
+              awk -v N=${N} '{ if (NR<N) print $0 }' tmp.txt > ${fic_param}
+              echo "${code} # code_csv_sliceZ_Uz2" >> ${fic_param}
+              awk -v N=${N} '{ if (NR>=N) print $0 }' tmp.txt >> ${fic_param}
+            endif
+
+            # CSV and PNG files created according to time t :
             #    saving view with grid only for first time 
             
             if ( ${t} == ${t_first} ) set code = 1
@@ -865,7 +919,18 @@ foreach CASE ( ${All_CASE} )
 
             ## running [openfoamDNS_to_pseudoPIV.csh] script
             #tcsh openfoamDNS_to_pseudoPIV.csh ${fic_param} ${D} ${noise_MAX} ${code_adim} ${Zslice} ${DNS_info} ${PIV_file_model} ${IsValid_ON}
-            tcsh openfoamDNS_to_pseudoPIV.csh ${fic_param} ${D} ${noise_MAX} ${code_adim} ${Zslice}
+            #tcsh openfoamDNS_to_pseudoPIV.csh ${fic_param} ${D} ${noise_MAX} ${code_adim} ${Zslice} ${Yslice} ${DNS_info} ${PIV_file_model} ${IsValid_ON}
+            tcsh openfoamDNS_to_pseudoPIV.csh ${fic_param} ${D} ${noise_MAX} ${code_adim} ${Zslice} ${Yslice}
+
+            # configuration file updated
+
+            set code_diff = ` diff ${dir_work}/tmp_dir/DNS_to_FakePIV_info.txt ${dir_work_up}/util/DNS_to_FakePIV_info.txt | wc -l `
+            if ( ${code_diff} != 0 ) then
+              echo "NOTE : DNS_to_FakePIV_info.txt has been modified by script [openfoamDNS_to_pseudoPIV.csh] :"
+              diff ${dir_work}/tmp_dir/DNS_to_FakePIV_info.txt ${DIR0}/../util/DNS_to_FakePIV_info.txt
+            else
+              echo "NOTE : DNS_to_FakePIV_info.txt unchanged by script [openfoamDNS_to_pseudoPIV.csh]"
+            endif
 
             ## copying (or moving) tempory directory results in UP directory
             
@@ -881,21 +946,21 @@ foreach CASE ( ${All_CASE} )
             else
               \cp slice_param.info ..
             endif
-            
+
             # copying (or moving) tempory directory results in UP directory : moving CSV and PNG file in UP directory
                   
             if ( ${t} == ${t_first} ) then
             
               set All_fic_to_move = ( )
-              foreach mot ( "PIV_grid_" "slice_grid" "PIV_model" )
+              foreach mot ( "PIV_grid_" "sliceZ_grid" "sliceY_grid" "PIV_model" )
                 set list = ` ls | grep "^${mot}" | grep "\.png" `
                 set All_fic_to_move = ( ${All_fic_to_move} ${list} )
               end
-              set list = ` ls | grep "^slice_Uxy1\." `
+              set list = ` ls | grep "^sliceZ_Uxy1\." `
               set All_fic_to_move = ( ${All_fic_to_move} ${list} )
               set list = ` ls | grep "_withGrid\.png" `
               set All_fic_to_move = ( ${All_fic_to_move} ${list} )
-              set list = ` ls | grep "^PIV_new_IsValid\.png" `
+              set list = ` ls | grep "^PIV_new" | grep "_IsValid\.png" `
               set All_fic_to_move = ( ${All_fic_to_move} ${list} )
               set list = ` ls | grep "^PIV_xIsValid\.txt" `
               set All_fic_to_move = ( ${All_fic_to_move} ${list} )
@@ -915,13 +980,13 @@ foreach CASE ( ${All_CASE} )
             else
             
               set All_fic_to_delete = ( )
-              foreach mot ( "PIV_grid_" "slice_grid" "PIV_model" )
+              foreach mot ( "PIV_grid_" "sliceZ_grid" "sliceY_grid" "PIV_model" )
                 set list = ` ls | grep "^${mot}" | grep "\.png" `
                 set All_fic_to_delete = ( ${All_fic_to_delete} ${list} )
               end
               set list = ` ls | grep "_withGrid\.png" `
               set All_fic_to_delete = ( ${All_fic_to_delete} ${list} )
-              set list = ` ls | grep "^PIV_new_IsValid\.png" `
+              set list = ` ls | grep "^PIV_new" | grep "_IsValid\.png" `
               set All_fic_to_delete = ( ${All_fic_to_delete} ${list} )
               set list = ` ls | grep "^PIV_xIsValid\.txt" `
               set All_fic_to_delete = ( ${All_fic_to_delete} ${list} )
@@ -966,19 +1031,36 @@ foreach CASE ( ${All_CASE} )
             
             # case residualSpeed_ => smooth/crop plane datas extract for future covariance estimation
             
-            if ( -e slice_Uxyz2.csv ) then
+            if ( -e sliceZ_Uxyz2.csv ) then
+
               if (!(-e ${dir_work}/cov_after_gaussSmoothing)) mkdir ${dir_work}/cov_after_gaussSmoothing
               if ( ${t} == ${t_first} ) then
-                if -e ${dir_work}/cov_after_gaussSmoothing/list_fic_time.txt \rm ${dir_work}/cov_after_gaussSmoothing/list_fic_time.txt
-                echo "XYcrop.txt" > ${dir_work}/cov_after_gaussSmoothing/list_fic_time.txt
+                if -e ${dir_work}/cov_after_gaussSmoothing/list_sliceZ_fic_time.txt \rm ${dir_work}/cov_after_gaussSmoothing/list_sliceZ_fic_time.txt
+                echo "XYcrop.txt" > ${dir_work}/cov_after_gaussSmoothing/list_sliceZ_fic_time.txt
               endif
               if -e XYcrop.txt \cp XYcrop.txt ${dir_work}/cov_after_gaussSmoothing
               set tname = ` echo ${t} | awk '{ printf("%.0f",10000*$1) }' `
-              if -e ${dir_work}/cov_after_gaussSmoothing/U${tname}.txt \rm ${dir_work}/cov_after_gaussSmoothing/U${tname}.txt
-              cat slice_Uxyz2.csv | grep -v "U" | awk -F',' '{ print $4, $5, $6 }' > ${dir_work}/cov_after_gaussSmoothing/U${tname}.txt
-              echo "U${tname}.txt" >> ${dir_work}/cov_after_gaussSmoothing/list_fic_time.txt
+              if -e ${dir_work}/cov_after_gaussSmoothing/U_sliceZ${tname}.txt \rm ${dir_work}/cov_after_gaussSmoothing/U_sliceZ${tname}.txt
+              cat sliceZ_Uxyz2.csv | grep -v "U" | awk -F',' '{ print $4, $5, $6 }' > ${dir_work}/cov_after_gaussSmoothing/U_sliceZ${tname}.txt
+              echo "U_sliceZ${tname}.txt" >> ${dir_work}/cov_after_gaussSmoothing/list_sliceZ_fic_time.txt
+
             endif
-         
+
+            if ( -e sliceY_Uxyz2.csv ) then
+
+              if (!(-e ${dir_work}/cov_after_gaussSmoothing)) mkdir ${dir_work}/cov_after_gaussSmoothing
+              if ( ${t} == ${t_first} ) then
+                if -e ${dir_work}/cov_after_gaussSmoothing/list_sliceY_fic_time.txt \rm ${dir_work}/cov_after_gaussSmoothing/list_sliceY_fic_time.txt
+                echo "XZcrop.txt" > ${dir_work}/cov_after_gaussSmoothing/list_sliceY_fic_time.txt
+              endif
+              if -e XZcrop.txt \cp XZcrop.txt ${dir_work}/cov_after_gaussSmoothing
+              set tname = ` echo ${t} | awk '{ printf("%.0f",10000*$1) }' `
+              if -e ${dir_work}/cov_after_gaussSmoothing/U_sliceY${tname}.txt \rm ${dir_work}/cov_after_gaussSmoothing/U_sliceY${tname}.txt
+              cat sliceY_Uxyz2.csv | grep -v "U" | awk -F',' '{ print $4, $5, $6 }' > ${dir_work}/cov_after_gaussSmoothing/U_sliceY${tname}.txt
+              echo "U_sliceY${tname}.txt" >> ${dir_work}/cov_after_gaussSmoothing/list_sliceY_fic_time.txt
+
+            endif
+
             ## deleting results in tempory directory 
             
             \rm *.png *.csv
@@ -1028,8 +1110,8 @@ foreach CASE ( ${All_CASE} )
           if (!(-e ${dir_work_up}/tmp_movie)) mkdir ${dir_work_up}/tmp_movie
 
           set All_png = ( \
-            Ux_calculator_pointVolumeInterpolator_slice_withoutGrid.png \
-            Uy_calculator_pointVolumeInterpolator_slice_withoutGrid.png \
+            Ux_calculator_pointVolumeInterpolator_sliceZ_withoutGrid.png \
+            Uy_calculator_pointVolumeInterpolator_sliceZ_withoutGrid.png \
             PIV_new_Ux.png \
             PIV_new_Uy.png \
           )
@@ -1053,14 +1135,17 @@ foreach CASE ( ${All_CASE} )
             
             if ( ${movie_type} == "mp4" ) then
             
-              set code_ppt = 0 # if =1, readable in powerpoint and by VLC when Preference/Codec/Hardware-accelerated desactivated
-              if ( ${code_ppt} == 1 ) then
-                #ffmpeg -r 18 -i ${dir_work_up}/tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p ${dir_work}/${mp4_file}
-                cat ${dir_work_up}/tmp_movie/*.png | ffmpeg -f image2pipe -i - -crf 18 -vcodec libx264 -pix_fmt yuv420p ${dir_work}/${mp4_file}
-              else
-                #ffmpeg -r 10 -i ${dir_work_up}/tmp_movie/%04d.png ${dir_work}/${mp4_file}
-                cat ${dir_work_up}/tmp_movie/*.png | ffmpeg -r 10 -f image2pipe -i - ${dir_work}/${mp4_file}
-              endif
+#               set code_ppt = 0 # if =1, readable in powerpoint and by VLC when Preference/Codec/Hardware-accelerated desactivated
+#               if ( ${code_ppt} == 1 ) then
+#                 #ffmpeg -r 18 -i ${dir_work_up}/tmp_movie/%04d.png -crf 18 -vcodec libx264 -pix_fmt yuv420p ${dir_work}/${mp4_file}
+#                 cat ${dir_work_up}/tmp_movie/*.png | ffmpeg -f image2pipe -i - -crf 18 -vcodec libx264 -pix_fmt yuv420p ${dir_work}/${mp4_file}
+#               else
+#                 #ffmpeg -r 10 -i ${dir_work_up}/tmp_movie/%04d.png ${dir_work}/${mp4_file}
+#                 cat ${dir_work_up}/tmp_movie/*.png | ffmpeg -r 10 -f image2pipe -i - ${dir_work}/${mp4_file}
+#               endif
+
+              ffmpeg -r 10 -i ${dir_work_up}/tmp_movie/%04d.png ${dir_work}/${mp4_file}
+
               set info = "Cf. file ${dir_work}/${mp4_file}\n (mplayer -speed 0.5 ${dir_work}/${mp4_file}) "
            
             else
@@ -1225,7 +1310,11 @@ end
 #   2.a) arg1 = Zslice value (ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 2.45)
 #   2.b) arg2 = Case type ( ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 DNS)
 #   2.c) arg3 = ROM type ( ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 ROM mean)
-# 
+#
+#   since 15/07/25 : only 2 input arguments
+#     2.a) arg1 = Case type ( ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 DNS)
+#     2.b) arg2 = ROM type ( ex : tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 ROM mean)
+#
 # ------------------------------------------------------------------------------
 # 
 # WHAT CAN be MODIFIED by the USER in (*) [openfoamDNS_to_pseudoPIV_all.csh] :
@@ -1257,7 +1346,9 @@ end
 #          for example :
 #          
 #           [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means 
-#             - Zlice=2.3
+#             - Zslice=2.3
+#
+#        since 15/07/25 : this argument is suppressed (Zslice=(Zmin+Zmax)/2)
 # 
 # 3) parameters that define case types : FakePIV or ROM_PIV and ROM folders :
 # 
@@ -1570,16 +1661,16 @@ end
 #                	#
 #                	
 #                	0	#    code_view_withGrid : =1 if PNG file view with grid 
-#                	1	#    code_view_slice_Ux1 : =1 if PNG file showing Ux(Z=Lz/2) openfoam result
-#                	1	#    code_view_slice_Uy1 : =1 if PNG file showing Uy(Z=Lz/2) openfoam result
+#                	1	#    code_view_sliceZ_Ux1 : =1 if PNG file showing Ux(Z=Lz/2) openfoam result
+#                	1	#    code_view_sliceZ_Uy1 : =1 if PNG file showing Uy(Z=Lz/2) openfoam result
 #                	0	#    code_view_pointVolumeInterpolator_Ux : =1 if PNG file showing Ux openfoam after smoothing
 #                	0	#    code_view_pointVolumeInterpolator_Uy : =1 if PNG file showing Uy openfoam after smoothing
-#                	1	#    code_view_slice_Ux2 : =1 if PNG file showing Ux(Z=Lz/2) openfoam after smoothing
-#                	1	#    code_view_slice_Uy2 : =1 if PNG file showing Uy(Z=Lz/2) openfoam after smoothing
-#                	0	#    code_csv_slice_Ux1 : =1 if CSV file showing Ux(Z=Lz/2) openfoam result
-#                	0	#    code_csv_slice_Uy1 : =1 if CSV file showing Uy(Z=Lz/2) openfoam result
-#                	1	#    code_csv_slice_Ux2 : =1 if CSV file showing Ux(Z=Lz/2) openfoam after smoothing
-#                	1	#    code_csv_slice_Uy2 : =1 if CSV file showing Uy(Z=Lz/2) openfoam after smoothing
+#                	1	#    code_view_sliceZ_Ux2 : =1 if PNG file showing Ux(Z=Lz/2) openfoam after smoothing
+#                	1	#    code_view_sliceZ_Uy2 : =1 if PNG file showing Uy(Z=Lz/2) openfoam after smoothing
+#                	0	#    code_csv_sliceZ_Ux1 : =1 if CSV file showing Ux(Z=Lz/2) openfoam result
+#                	0	#    code_csv_sliceZ_Uy1 : =1 if CSV file showing Uy(Z=Lz/2) openfoam result
+#                	1	#    code_csv_sliceZ_Ux2 : =1 if CSV file showing Ux(Z=Lz/2) openfoam after smoothing
+#                	1	#    code_csv_sliceZ_Uy2 : =1 if CSV file showing Uy(Z=Lz/2) openfoam after smoothing
 #                	
 #
 #      B.5) optional PIV model files : useful to compare with FakePIV when PIV_info.txt=f(PIV model files)
@@ -1593,7 +1684,7 @@ end
 #   D) Files created :
 #
 #      D.1) CSV file created in current DNS directory :
-#         D.1.a) if PIV model file est present : slice_Uxy1.csv
+#         D.1.a) if PIV model file est present : sliceZ_Uxy1.csv
 #
 #      D.2) FakePIV file created in current DNS directory :
 #         D.2.a) for the case of [residualSpeed_*] only : Inv_COVxy.dat

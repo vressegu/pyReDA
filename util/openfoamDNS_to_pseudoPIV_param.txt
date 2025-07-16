@@ -23,14 +23,14 @@ DNS_to_FakePIV_info.txt # crop and smoothing conditions for creating FakePIV for
 #
 
 0	#    code_view_withGrid : =1 if PNG file view with grid 
-1	#    code_view_slice_Ux1 : =1 if PNG file showing Ux(Z=Lz/2) openfoam result
-1	#    code_view_slice_Uy1 : =1 if PNG file showing Uy(Z=Lz/2) openfoam result
+1	#    code_view_sliceZ_Ux1 : =1 if PNG file showing Ux(Z=Lz/2) openfoam result
+1	#    code_view_sliceZ_Uy1 : =1 if PNG file showing Uy(Z=Lz/2) openfoam result
 0	#    code_view_pointVolumeInterpolator_Ux : =1 if PNG file showing Ux openfoam after smoothing
 0	#    code_view_pointVolumeInterpolator_Uy : =1 if PNG file showing Uy openfoam after smoothing
-1	#    code_view_slice_Ux2 : =1 if PNG file showing Ux(Z=Lz/2) openfoam after smoothing
-1	#    code_view_slice_Uy2 : =1 if PNG file showing Uy(Z=Lz/2) openfoam after smoothing
-0	#    code_csv_slice_Ux1 : =1 if CSV file showing Ux(Z=Lz/2) openfoam result
-0	#    code_csv_slice_Uy1 : =1 if CSV file showing Uy(Z=Lz/2) openfoam result
-1	#    code_csv_slice_Ux2 : =1 if CSV file showing Ux(Z=Lz/2) openfoam after smoothing
-1	#    code_csv_slice_Uy2 : =1 if CSV file showing Uy(Z=Lz/2) openfoam after smoothing
+1	#    code_view_sliceZ_Ux2 : =1 if PNG file showing Ux(Z=Lz/2) openfoam after smoothing
+1	#    code_view_sliceZ_Uy2 : =1 if PNG file showing Uy(Z=Lz/2) openfoam after smoothing
+0	#    code_csv_sliceZ_Ux1 : =1 if CSV file showing Ux(Z=Lz/2) openfoam result
+0	#    code_csv_sliceZ_Uy1 : =1 if CSV file showing Uy(Z=Lz/2) openfoam result
+1	#    code_csv_sliceZ_Ux2 : =1 if CSV file showing Ux(Z=Lz/2) openfoam after smoothing
+1	#    code_csv_sliceZ_Uy2 : =1 if CSV file showing Uy(Z=Lz/2) openfoam after smoothing
 
