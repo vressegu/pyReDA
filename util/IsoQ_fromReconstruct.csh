@@ -17,7 +17,7 @@
 #------------------------------------------------------------------------------
 #
 # NOTE : U files have been obtained with option 
-#                  onLineReconstruct=0
+#                  onLineReconstruct=1
 #              in system/ITHACAdict file
 #              - directory from ROM result = U_reconstructSim
 #              - directory from Assimilation = U_reconstruct 
@@ -28,6 +28,9 @@
 # 
 #  Input parameters :
 #    - arg1 : subdirectory of ITHACAoutput where are U_reconstructSim and U_reconstruct
+#    optional raguments when arg1/../../../util/DNS_info.txt not found
+#    - arg2 : x0_cyl = cylinder center abscissa in DNS
+#    - arg3 : y0_cyl = cylinder center ordinate in DNS
 #
 #------------------------------------------------------------------------------
 #
@@ -48,10 +51,33 @@ set DIR1 = `pwd `
 if ( $1 != "" ) set DIR1 = $1
 
 # cylinder center
-set X0_cyl = 2.5
-if ( $2 != "" ) set X0_cyl = $2
-set Y0_cyl = 6.0
-if ( $3 != "" ) set Y0_cyl = $3
+set X0_cyl = 1.5
+set Y0_cyl = 3.0
+if ( !( -e ${DIR1}/../../../util/DNS_info.txt ) )  then
+
+  echo "\n\!\!\! ${DIR1}/../../../util/DNS_info.txt not found \!\!\!\n"
+
+  if ( ( $2 == "" ) || ( $3 == "" )) then
+
+    echo "add arguments arg2=X0_cyl and arg3=Y0_cyl to line command :"
+    echo "  for example tcsh IsoQ_fromReconstruct.csh ${DIR1} 2.3 7.8\n"
+    exit()
+
+  else
+
+    set X0_cyl = $2
+    set Y0_cyl = $3
+
+  endif
+
+else
+
+  set X0_cyl = ` cat ${DIR1}/../../../util/DNS_info.txt | grep "DNS_xcyl" | awk '{ print $1 }' `
+  set Y0_cyl = ` cat ${DIR1}/../../../util/DNS_info.txt | grep "DNS_ycyl" | awk '{ print $1 }' `
+
+endif
+
+echo "\nNOTE : DNS cylinder center is (X0_cyl,Y0_cyl)=(${X0_cyl},${Y0_cyl})\n"
 
 # are U_reconstructSim and U_reconstruct present in DIR1 ?
 if ( (!(-e ${DIR1}/U_reconstructSim)) || (!(-e ${DIR1}/U_reconstruct)) ) then
