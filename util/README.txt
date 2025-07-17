@@ -1,6 +1,8 @@
 Laurence Wallian - ACTA - OPAALE - INRAE Rennes [Juin 2022 : Février 2023]
 
-MORAANE project : Scalian - INRAE
+  dernière modification : Juillet 2025
+
+initial project : MORAANE (Scalian - INRAE)
 
 ------------------------------------------------------------------------------
 
@@ -57,8 +59,8 @@ main shell script [openfoamDNS_to_pseudoPIV_all.csh] :
              ├── run_info.txt
              └── util
                    ├── calculator_PointVolumeInterpolation_model.py
-                   ├── cov_before_gaussSmoothing.csh
-                   ├── cov_before_gaussSmoothing_model.py
+                   ├── cov_after_gaussSmoothing.csh
+                   ├── cov_after_gaussSmoothing_stat.C
                    ├── dim_DNS_cyl.csh
                    ├── openfoamDNS_to_pseudoPIV_param.txt
                    └── openfoamDNS_to_pseudoPIV.csh
@@ -83,11 +85,20 @@ HOW to have the script RUNNING
            ├── run_info.txt
            └── util
   
-2) It can also have three optional arguments (Cf. below [WHAT CAN be MODIFIED by the USER]) :
+2) It can also have several optional arguments (Cf. below [WHAT CAN be MODIFIED by the USER]) :
 
-  2.a) arg1 = Zslice value (ex : tcsh tcsh openfoamDNS_to_pseudoPIV_all.csh 2.45)
-  2.b) arg2 = Case type ( ex : tcsh tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 DNS)
-  2.c) arg3 = ROM type ( ex : tcsh tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 ROM mean)
+  - last version : for plane Z=cte, Z is always fixed to Zslice=(Zmin+Zmax)/2
+                   and another plane Y=cte is also created with Yslice=(Ymin+Ymax)/2
+
+    2.a) arg2 = Case type ( ex : tcsh tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 DNS)
+    2.b) arg3 = ROM type ( ex : tcsh tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 ROM mean)
+
+  - previous version : Zslice can be chosen
+
+    2.a) arg1 = Zslice value (ex : tcsh tcsh openfoamDNS_to_pseudoPIV_all.csh 2.45)
+    2.b) arg2 = Case type ( ex : tcsh tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 DNS)
+    2.c) arg3 = ROM type ( ex : tcsh tcsh openfoamDNS_to_pseudoPIV_all.csh 1.6 ROM mean)
+
 
 ------------------------------------------------------------------------------
 
@@ -112,60 +123,46 @@ WHAT CAN be MODIFIED by the USER in (*) [openfoamDNS_to_pseudoPIV_all.csh] :
            ├── run_info.txt
            └── util
 
-2) parameters that define the synthetic PIV from DNS :
+2) parameters that define case types : FakePIV or ROM_PIV and ROM folders :
 
-  2.a) Z position of the slice for pseudoPIV 
-         by default Zslice=1 : this parameter is the first command line argument
-         
-         for example :
-         
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3] means 
-            - Zlice=2.3
-
-3) parameters that define case types : FakePIV or ROM_PIV and ROM folders :
-
-  3.a) parameters that define case types : FakePIV or ROM_PIV 
+  2.a) parameters that define case types : FakePIV or ROM_PIV
          by default, All_CASE=("DNS" "ROM") : it can be modified by the second command line argument
          
          for example :
          
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROMppp] means
-            - Zlice=2.3
+          [tcsh openfoamDNS_to_pseudoPIV_all.csh ROMppp] means
             - only ROM_PIV is concerned
             
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROM---DNS] means
-            - Zlice=2.3
+          [tcsh openfoamDNS_to_pseudoPIV_all.csh ROM---DNS] means
             - FakePIV and ROM_PIV are concerned
 
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 aaDNS] means
-            - Zlice=2.3
+          [tcsh openfoamDNS_to_pseudoPIV_all.csh aaDNS] means
             - only FakePIV is concerned
           
           WARNING : the second argument musn't have BLANK characters : 
               the following expressions don't work :
-              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 DNS ROM]
-              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 "DNS ROM"]
+              - [tcsh openfoamDNS_to_pseudoPIV_all.csh DNS ROM]
+              - [tcsh openfoamDNS_to_pseudoPIV_all.csh "DNS ROM"]
           
-  3.b) the subdirectories in the case of ROM_PIV
+  2.b) the subdirectories in the case of ROM_PIV
           by default, all subdirectories [mean], [spatialModes_...] and [residualSpeed_...] are used :
           it can be modified by the third command line argument
          
          for example :
          
-          [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROMppp mean] means
-            - Zlice=2.3
+          [tcsh openfoamDNS_to_pseudoPIV_all.csh ROMppp mean] means
             - only ROM_PIV is concerned
             - only mean is concerned
   
           WARNING : the third argument musn't have BLANK characters and must correspond to an existant directory : 
               the following expressions don't work :
-              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROM mean_ppp] means
-              - [tcsh openfoamDNS_to_pseudoPIV_all.csh 2.3 ROM spatialModes_567] means
+              - [tcsh openfoamDNS_to_pseudoPIV_all.csh ROM mean_ppp] means
+              - [tcsh openfoamDNS_to_pseudoPIV_all.csh ROM spatialModes_567] means
                  
-4) for preleminary tests, it can also be useful to modify time [t_first] and [t_last] 
+3) for preleminary tests, it can also be useful to modify time [t_first] and [t_last]
 
-  4.a) when the subdirectory=[residualSpeed_...] in case of ROM datas
-  4.b) when the input datas is raw DNS simulation (directory [.../openfoam_data...])        
+  3.a) when the subdirectory=[residualSpeed_...] in case of ROM datas
+  3.b) when the input datas is raw DNS simulation (directory [.../openfoam_data...])
 
 ------------------------------------------------------------------------------
 
@@ -240,7 +237,7 @@ WHAT ERRORS may occur
      - [util/calculator_PointVolumeInterpolation_model.py] : 
        python script model used by the script [openfoamDNS_to_pseudoPIV.csh]
        
-     - [util/cov_before_gaussSmoothing.csh] :
+     - [util/cov_after_gaussSmoothing.csh] :
        shell script used to calculated (1/cov) in case of [residualSpeed_...]
        
        NOTE : Eigen library must be installed, for example in [/usr/local] directory as does the script [install\_eigen.csh] :
@@ -256,8 +253,9 @@ WHAT ERRORS may occur
               sudo make install
               cd ..
               sudo chmod ugo+rX -R /usr/local/include/eigen3
-     - [util/cov_before_gaussSmoothing_model.py]
-       python script model used by the script [cov_before_gaussSmoothing.csh]
+
+     - [util/cov_after_gaussSmoothing_stat.C]
+       C file model used by the script [cov_after_gaussSmoothing.csh]
         
         tree example :
         ├── data_red_lum_cpp
@@ -266,8 +264,8 @@ WHAT ERRORS may occur
              ├── run_info.txt
              └── util
                    ├── calculator_PointVolumeInterpolation_model.py
-                   ├── cov_before_gaussSmoothing.csh
-                   ├── cov_before_gaussSmoothing_model.py
+                   ├── cov_after_gaussSmoothing.csh
+                   ├── cov_after_gaussSmoothing_stat.C
                    ├── dim_DNS_cyl.csh
                    ├── openfoamDNS_to_pseudoPIV_param.txt
                    └── openfoamDNS_to_pseudoPIV.csh
@@ -297,7 +295,7 @@ WHAT ERRORS may occur
         NOTES concerning [util/DNS_info.txt] 
         
             NOTE 1 : this file must at least contain values for DNS_xcyl, DNS_ycyl and DNS_Dcyl; other
-                           parameters will be redefined by the script [openfoamDNS_to_pseudoPIV_all_CR.csh] 
+                           parameters will be redefined by the script [openfoamDNS_to_pseudoPIV_all.csh]
                            from openfoam_data files [constant/polyMesh/points], [constant/transportProperties] 
                            and [system/controlDict] 
 
@@ -314,9 +312,11 @@ SUMMARY of the method used :
 
  step1 = calculator -> Ux(y) scalar
  step2 = Ux(y) gaussian interpolation on bounded box
- step3 = slice Z=1 (or Lz/2) of the Ux(y) gaussian interpolation
+ step3 = slice Z=Lz/2 of the Ux(y) gaussian interpolation
  
            => CSV file
+
+    idem for other variables (Uy and Uz) and slice Y=Ly/2
 
 2) Next operation (tcsh [shell script]) generates synthetic PIV file from CSV file
 
