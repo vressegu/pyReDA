@@ -605,7 +605,7 @@ foreach CASE ( ${All_CASE} )
 
       set fic_src = tmp_dir/constant/transportProperties
       set mot = "DNS_Re"
-      set DNS_Re = ` cat ${fic_src} | grep nu | grep "\]" | grep "\[" | awk '{ printf("%.1f\n", 1./($12+0.)) }' | sort -n | uniq | head -1 `
+      set DNS_Re = ` cat ${fic_src} | grep nu | grep "\]" | grep "\[" | sed s/"\]"//g | sed s/"\["//g | sed s/";"//g | awk '{ printf("%.1f\n", 1./($9+0.)) }' | sort -n | uniq | head -1 `
       set N = ` cat -n tmp_dir/util/${fic_info} | grep ${mot} | awk '{ print $1 }' `
       if ( ${N} != "" ) then
         \mv tmp_dir/util/${fic_info} tmp.txt
