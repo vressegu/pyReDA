@@ -2,6 +2,7 @@ import numpy as np
 from pyredlum import pyRedLUM
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import math
 
 # import mplcyberpunk
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["#000000", "#E69F00", "#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","CC79A7"])
@@ -48,12 +49,14 @@ def plot_all_modes_separated(case, num_mode, name_out=False):
             meanModes = case.load_meanModes()
             modesRef = case.load_modesRef()
             ICs = case.load_ICs()
+            eigen = case.load_lambda()
         elif dtype == "p":
             print("here")
             nmodes = case.get_nmodes_p()
             meanModes = case.load_meanModes_p()
             modesRef = case.load_modesRef_p()
             ICs = case.load_ICs_p()
+            eigen = case.load_lambda_p()
         else:
             raise ValueError("Wrong type of dtype")
 
@@ -221,6 +224,17 @@ def plot_all_modes_separated(case, num_mode, name_out=False):
                     np.max(meanModes[:, N]) * (1 + margin)
                 )
 
+                ### other range from lambda value ###
+                #margin = 1.5
+                #AXS_N.set_ylim(
+                    #-np.max(math.sqrt(eigen[N])) * (1 + margin),
+                    #np.max(math.sqrt(eigen[N])) * (1 + margin)
+                #)
+                margin = 0.8
+                AXS_N.set_ylim(
+                    -np.max(eigen[N]) * (1 + margin),
+                    np.max(eigen[N]) * (1 + margin)
+                )
                 # Removing unnecessary spines
                 AXS_N.spines["top"].set_visible(False)
                 AXS_N.spines["right"].set_visible(False)
@@ -403,6 +417,18 @@ def compare_SOTA_modes(case,sota):
             )
 
             # Removing unnecessary spines
+        ### other range from lambda value ###
+        #margin = 1.5
+        #axs[n].set_ylim(
+            #-np.max(math.sqrt(eigen[n])) * (1 + margin),
+            #np.max(math.sqrt(eigen[n])) * (1 + margin)
+        #)
+        margin = 0.8
+        axs[n].set_ylim(
+            -np.max(eigen[n]) * (1 + margin),
+            np.max(eigen[n]) * (1 + margin)
+        )
+
         axs[n].spines["top"].set_visible(False)
         axs[n].spines["right"].set_visible(False)
         axs[n].set_xlim(0,50)
